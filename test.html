@@ -1,0 +1,922 @@
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>APS 智慧先進排程系統 - Modern SaaS</title>
+
+    <!-- 引入字體 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- 引入 FontAwesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- 引入 ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'Noto Sans TC', 'sans-serif']
+            },
+            colors: {
+              brand: {
+                50: '#eff6ff',
+                100: '#dbeafe',
+                500: '#3b82f6',
+                600: '#2563eb',
+                700: '#1d4ed8',
+                900: '#1e3a8a'
+              },
+              surface: '#F8FAFC'
+            },
+            boxShadow: {
+              soft: '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+              glow: '0 0 20px rgba(59, 130, 246, 0.15)'
+            }
+          }
+        }
+      }
+    </script>
+
+    <style>
+      /* 基礎設定與自訂捲軸 */
+      body {
+        background-color: #f8fafc;
+        -webkit-font-smoothing: antialiased;
+      }
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+
+      /* 微互動：進場動畫 */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .animate-fade-in {
+        animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+      }
+      .delay-100 {
+        animation-delay: 100ms;
+      }
+      .delay-200 {
+        animation-delay: 200ms;
+      }
+      .delay-300 {
+        animation-delay: 300ms;
+      }
+      .delay-400 {
+        animation-delay: 400ms;
+      }
+
+      /* 英雄區：浮動幾何與漸層動畫 */
+      .hero-bg {
+        background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+        position: relative;
+        overflow: hidden;
+      }
+      .shape {
+        position: absolute;
+        filter: blur(40px);
+        opacity: 0.6;
+        animation: float 15s infinite ease-in-out alternate;
+      }
+      .shape-1 {
+        width: 300px;
+        height: 300px;
+        background: #60a5fa;
+        border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+        top: -100px;
+        left: -50px;
+      }
+      .shape-2 {
+        width: 400px;
+        height: 400px;
+        background: #818cf8;
+        border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+        bottom: -150px;
+        right: -100px;
+        animation-delay: -5s;
+      }
+      .shape-3 {
+        width: 200px;
+        height: 200px;
+        background: #38bdf8;
+        border-radius: 50%;
+        top: 50%;
+        left: 40%;
+        animation-duration: 20s;
+      }
+      @keyframes float {
+        0% {
+          transform: translate(0, 0) rotate(0deg) scale(1);
+        }
+        50% {
+          transform: translate(30px, 20px) rotate(10deg) scale(1.05);
+        }
+        100% {
+          transform: translate(-20px, 40px) rotate(-10deg) scale(0.95);
+        }
+      }
+
+      /* 3D 卡片傾斜效果容器 */
+      .tilt-card-wrapper {
+        perspective: 1000px;
+      }
+      .tilt-card {
+        transform-style: preserve-3d;
+        transition:
+          transform 0.1s ease,
+          box-shadow 0.3s ease;
+      }
+      .tilt-card:hover {
+        box-shadow: 0 20px 40px -5px rgba(37, 99, 235, 0.15);
+      }
+      /* 卡片內部元素立體感 */
+      .tilt-card-content {
+        transform: translateZ(30px);
+      }
+
+      /* 側邊欄子選單動畫 */
+      .submenu {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-in-out;
+      }
+      .submenu.open {
+        max-height: 300px;
+      }
+      .menu-arrow {
+        transition: transform 0.3s ease;
+      }
+      .menu-btn.active .menu-arrow {
+        transform: rotate(90deg);
+      }
+    </style>
+  </head>
+  <body class="flex h-screen overflow-hidden text-slate-700">
+    <!-- 側邊欄 (Sidebar) -->
+    <aside
+      class="w-64 bg-white border-r border-slate-100 flex flex-col z-20 shadow-sm hidden md:flex"
+    >
+      <!-- Logo 區塊 -->
+      <div class="h-16 flex items-center px-6 border-b border-slate-100">
+        <div class="flex items-center gap-3 text-brand-600">
+          <div
+            class="w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center"
+          >
+            <i class="fa-solid fa-chart-line text-lg"></i>
+          </div>
+          <span class="font-bold text-xl tracking-wide"
+            >APS<span class="text-slate-800">-DEMO</span></span
+          >
+        </div>
+      </div>
+
+      <!-- 導覽選單 -->
+      <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+        <!-- 基本維護 -->
+        <div>
+          <button
+            onclick="toggleMenu('menu-basic', this)"
+            class="menu-btn active w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-brand-600 transition-colors"
+          >
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-shield-halved w-5 text-center"></i>
+              <span class="font-medium">基本維護</span>
+            </div>
+            <i
+              class="fa-solid fa-chevron-right text-xs menu-arrow transform rotate-90"
+            ></i>
+          </button>
+          <div id="menu-basic" class="submenu open pl-11 pr-3 space-y-1 mt-1">
+            <a
+              href="#"
+              class="block py-2 text-sm text-slate-500 hover:text-brand-600 transition-colors"
+              >產品資訊維護</a
+            >
+            <a
+              href="#"
+              class="block py-2 text-sm text-slate-500 hover:text-brand-600 transition-colors"
+              >製程資訊維護</a
+            >
+            <a
+              href="#"
+              class="block py-2 text-sm text-slate-500 hover:text-brand-600 transition-colors"
+              >區域資訊維護</a
+            >
+            <a
+              href="#"
+              class="block py-2 text-sm text-slate-500 hover:text-brand-600 transition-colors"
+              >機台資訊維護</a
+            >
+          </div>
+        </div>
+
+        <!-- 進階維護 -->
+        <div>
+          <button
+            onclick="toggleMenu('menu-adv', this)"
+            class="menu-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-brand-600 transition-colors mt-2"
+          >
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-layer-group w-5 text-center"></i>
+              <span class="font-medium">進階維護</span>
+            </div>
+            <i class="fa-solid fa-chevron-right text-xs menu-arrow"></i>
+          </button>
+          <div id="menu-adv" class="submenu pl-11 pr-3 space-y-1 mt-1">
+            <a
+              href="#"
+              class="block py-2 text-sm text-slate-500 hover:text-brand-600 transition-colors"
+              >工時管理</a
+            >
+            <a
+              href="#"
+              class="block py-2 text-sm text-slate-500 hover:text-brand-600 transition-colors"
+              >規則管理</a
+            >
+            <a
+              href="#"
+              class="block py-2 text-sm text-slate-500 hover:text-brand-600 transition-colors"
+              >機台管理</a
+            >
+            <a
+              href="#"
+              class="block py-2 text-sm text-slate-500 hover:text-brand-600 transition-colors"
+              >資料預覽</a
+            >
+            <a
+              href="#"
+              class="block py-2 text-sm text-slate-500 hover:text-brand-600 transition-colors"
+              >主機管理</a
+            >
+          </div>
+        </div>
+      </nav>
+
+      <!-- 底部版本資訊 -->
+      <div class="p-4 border-t border-slate-100">
+        <div
+          class="flex items-center gap-2 text-xs text-slate-400 justify-center"
+        >
+          <i class="fa-regular fa-copyright"></i>
+          <span>Copyright ©2026</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 主內容區 -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+      <!-- 頂部導覽列 (Header) -->
+      <header
+        class="h-16 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-6 z-10 sticky top-0"
+      >
+        <div class="flex items-center gap-4 text-slate-500">
+          <button class="md:hidden hover:text-brand-600 transition-colors">
+            <i class="fa-solid fa-bars text-lg"></i>
+          </button>
+          <div class="flex items-center gap-3">
+            <a href="#" class="hover:text-brand-600 transition-colors"
+              ><i class="fa-solid fa-house"></i
+            ></a>
+            <span class="text-slate-300">/</span>
+            <span class="text-sm font-medium text-slate-700">首頁儀表板</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-5">
+          <button
+            class="text-slate-400 hover:text-brand-600 transition-colors relative"
+          >
+            <i class="fa-regular fa-bell text-lg"></i>
+            <span
+              class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"
+            ></span>
+          </button>
+          <div
+            class="flex items-center gap-2 cursor-pointer hover:bg-slate-50 py-1 px-2 rounded-lg transition-colors"
+          >
+            <div
+              class="w-8 h-8 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center font-bold"
+            >
+              A
+            </div>
+            <span class="text-sm font-medium text-slate-700 hidden sm:block"
+              >admin</span
+            >
+            <i class="fa-solid fa-chevron-down text-xs text-slate-400 ml-1"></i>
+          </div>
+        </div>
+      </header>
+
+      <!-- 內容滾動區 -->
+      <div class="flex-1 overflow-y-auto p-6 md:p-8 scroll-smooth">
+        <div class="max-w-7xl mx-auto space-y-6">
+          <!-- 英雄歡迎區 (Hero Section) -->
+          <div
+            class="hero-bg rounded-2xl p-8 md:p-10 text-white shadow-soft animate-fade-in"
+          >
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+
+            <div
+              class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6"
+            >
+              <div>
+                <div class="flex items-center gap-3 mb-2 opacity-90">
+                  <span
+                    class="bg-white/20 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm"
+                    >System Ready</span
+                  >
+                  <span class="text-sm"
+                    ><i class="fa-solid fa-location-dot mr-1"></i>
+                    智慧製造中心</span
+                  >
+                </div>
+                <h1 class="text-3xl md:text-4xl font-bold mb-3 tracking-tight">
+                  歡迎使用 APS 先進排程系統
+                </h1>
+                <p
+                  class="text-blue-100 max-w-xl text-sm md:text-base leading-relaxed"
+                >
+                  整合生產資訊、優化排程邏輯。透過數據驅動的決策，協助您達成最佳化機台稼動率與準時交貨目標。
+                </p>
+              </div>
+
+              <div
+                class="hidden md:flex bg-white/10 backdrop-blur-md p-5 rounded-2xl border border-white/20 shadow-xl items-center gap-4"
+              >
+                <div
+                  class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-brand-600 shadow-inner"
+                >
+                  <i class="fa-brands fa-elementor text-3xl"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-lg tracking-wider">
+                    ELEMENT<span class="text-blue-300">+</span>
+                  </h3>
+                  <p class="text-xs text-blue-200">Powered UI Core</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- KPI 指標區塊 (新增) -->
+          <div
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in delay-100"
+          >
+            <!-- KPI 1 -->
+            <div
+              class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow"
+            >
+              <div>
+                <p class="text-sm text-slate-500 mb-1">平均稼動率 (OEE)</p>
+                <div class="flex items-baseline gap-2">
+                  <h4 class="text-2xl font-bold text-slate-800">87.5%</h4>
+                  <span class="text-xs font-medium text-emerald-500"
+                    >+2.1%</span
+                  >
+                </div>
+              </div>
+              <div
+                class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center text-xl"
+              >
+                <i class="fa-solid fa-bolt"></i>
+              </div>
+            </div>
+            <!-- KPI 2 -->
+            <div
+              class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow"
+            >
+              <div>
+                <p class="text-sm text-slate-500 mb-1">準時交貨率 (OTD)</p>
+                <div class="flex items-baseline gap-2">
+                  <h4 class="text-2xl font-bold text-slate-800">94.2%</h4>
+                  <span class="text-xs font-medium text-emerald-500"
+                    >+0.8%</span
+                  >
+                </div>
+              </div>
+              <div
+                class="w-12 h-12 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center text-xl"
+              >
+                <i class="fa-solid fa-truck-fast"></i>
+              </div>
+            </div>
+            <!-- KPI 3 -->
+            <div
+              class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow"
+            >
+              <div>
+                <p class="text-sm text-slate-500 mb-1">執行中工單</p>
+                <div class="flex items-baseline gap-2">
+                  <h4 class="text-2xl font-bold text-slate-800">1,284</h4>
+                  <span class="text-xs font-medium text-slate-400">張</span>
+                </div>
+              </div>
+              <div
+                class="w-12 h-12 rounded-full bg-purple-50 text-purple-500 flex items-center justify-center text-xl"
+              >
+                <i class="fa-solid fa-file-invoice"></i>
+              </div>
+            </div>
+            <!-- KPI 4 -->
+            <div
+              class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow"
+            >
+              <div>
+                <p class="text-sm text-slate-500 mb-1">設備異常警報</p>
+                <div class="flex items-baseline gap-2">
+                  <h4 class="text-2xl font-bold text-red-600">3</h4>
+                  <span class="text-xs font-medium text-red-400"
+                    >需立即處理</span
+                  >
+                </div>
+              </div>
+              <div
+                class="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center text-xl relative"
+              >
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span class="absolute top-0 right-0 flex h-3 w-3">
+                  <span
+                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"
+                  ></span>
+                  <span
+                    class="relative inline-flex rounded-full h-3 w-3 bg-red-500"
+                  ></span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 核心功能快捷卡片 -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="tilt-card-wrapper animate-fade-in delay-200">
+              <div
+                class="tilt-card bg-white rounded-2xl p-6 border border-slate-100 h-full cursor-pointer group flex flex-col justify-between"
+              >
+                <div class="tilt-card-content">
+                  <div
+                    class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300"
+                  >
+                    <i class="fa-solid fa-shield-halved text-xl"></i>
+                  </div>
+                  <h2 class="text-xl font-bold text-slate-800 mb-2">
+                    系統功能維護
+                  </h2>
+                  <p class="text-slate-500 text-sm leading-relaxed">
+                    管理產品、製程、區域與機台的基本與進階參數，建立精準的排程基礎模型。
+                  </p>
+                </div>
+                <div
+                  class="mt-6 flex items-center text-brand-600 text-sm font-medium tilt-card-content"
+                >
+                  進入模組
+                  <i
+                    class="fa-solid fa-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform"
+                  ></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="tilt-card-wrapper animate-fade-in delay-200">
+              <div
+                class="tilt-card bg-white rounded-2xl p-6 border border-slate-100 h-full cursor-pointer group flex flex-col justify-between"
+              >
+                <div class="tilt-card-content">
+                  <div
+                    class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300"
+                  >
+                    <i class="fa-solid fa-chart-column text-xl"></i>
+                  </div>
+                  <h2 class="text-xl font-bold text-slate-800 mb-2">
+                    排程圖表分析
+                  </h2>
+                  <p class="text-slate-500 text-sm leading-relaxed">
+                    即時視覺化機台負荷、甘特圖排程結果與 KPI
+                    指標，掌握廠區即時動態。
+                  </p>
+                </div>
+                <div
+                  class="mt-6 flex items-center text-emerald-600 text-sm font-medium tilt-card-content"
+                >
+                  查看報表
+                  <i
+                    class="fa-solid fa-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform"
+                  ></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="tilt-card-wrapper animate-fade-in delay-200">
+              <div
+                class="tilt-card bg-white rounded-2xl p-6 border border-slate-100 h-full cursor-pointer group flex flex-col justify-between"
+              >
+                <div class="tilt-card-content">
+                  <div
+                    class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-4 group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300"
+                  >
+                    <i class="fa-solid fa-flask text-xl"></i>
+                  </div>
+                  <h2 class="text-xl font-bold text-slate-800 mb-2">
+                    排程邏輯測試
+                  </h2>
+                  <p class="text-slate-500 text-sm leading-relaxed">
+                    沙盒環境下的排程運算模擬。調整派工規則與權重，預覽並優化排程結果。
+                  </p>
+                </div>
+                <div
+                  class="mt-6 flex items-center text-purple-600 text-sm font-medium tilt-card-content"
+                >
+                  開始模擬
+                  <i
+                    class="fa-solid fa-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform"
+                  ></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 業務圖表與異常通知 (修改) -->
+          <div
+            class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in delay-300"
+          >
+            <!-- 左側：圖表區塊 -->
+            <div
+              class="lg:col-span-2 bg-white rounded-2xl p-6 border border-slate-100 shadow-soft"
+            >
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="text-lg font-bold text-slate-800">
+                    近七日機台整體設備效率 (OEE)
+                  </h3>
+                  <p class="text-xs text-slate-500">廠區 A - 核心製程機群</p>
+                </div>
+                <button class="text-slate-400 hover:text-brand-600">
+                  <i class="fa-solid fa-ellipsis-vertical"></i>
+                </button>
+              </div>
+              <div id="oeeChart" class="w-full h-64"></div>
+            </div>
+
+            <!-- 右側：異常通知區塊 (修改) -->
+            <div
+              class="bg-white rounded-2xl p-6 border border-slate-100 shadow-soft flex flex-col border-t-4 border-t-red-500"
+            >
+              <div class="flex items-center justify-between mb-4">
+                <h3
+                  class="text-lg font-bold text-slate-800 flex items-center gap-2"
+                >
+                  <i class="fa-solid fa-bell text-red-500"></i> 異常警報通知
+                </h3>
+                <span
+                  class="bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded-md"
+                  >3 筆未讀</span
+                >
+              </div>
+              <div class="flex-1 space-y-4 overflow-y-auto pr-1">
+                <!-- 警報 1 -->
+                <div
+                  class="p-3 bg-red-50 border border-red-100 rounded-lg flex items-start gap-3"
+                >
+                  <div class="mt-0.5 text-red-500">
+                    <i class="fa-solid fa-temperature-arrow-up"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm font-bold text-slate-800">
+                      機台 EQ-004 溫度異常
+                    </p>
+                    <p class="text-xs text-slate-500 mt-1">
+                      超出安全閾值，可能影響後續派工排程，請立即派員檢查。
+                    </p>
+                    <p class="text-[10px] text-red-400 mt-1">
+                      發生時間: 10:23 AM
+                    </p>
+                  </div>
+                </div>
+                <!-- 警報 2 -->
+                <div
+                  class="p-3 bg-amber-50 border border-amber-100 rounded-lg flex items-start gap-3"
+                >
+                  <div class="mt-0.5 text-amber-500">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm font-bold text-slate-800">
+                      物料 M-109 短缺預警
+                    </p>
+                    <p class="text-xs text-slate-500 mt-1">
+                      庫存量低於安全水位，預計 4 小時後產線將中斷。
+                    </p>
+                    <p class="text-[10px] text-amber-500 mt-1">
+                      發生時間: 09:45 AM
+                    </p>
+                  </div>
+                </div>
+                <!-- 警報 3 -->
+                <div
+                  class="p-3 bg-slate-50 border border-slate-200 rounded-lg flex items-start gap-3"
+                >
+                  <div class="mt-0.5 text-slate-400">
+                    <i class="fa-solid fa-plug-circle-xmark"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm font-bold text-slate-800">
+                      ERP 資料介接延遲
+                    </p>
+                    <p class="text-xs text-slate-500 mt-1">
+                      無法同步最新銷售訂單，系統正自動重試中。
+                    </p>
+                    <p class="text-[10px] text-slate-400 mt-1">
+                      發生時間: 08:30 AM
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <button
+                class="mt-4 w-full py-2 text-sm text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors font-medium"
+              >
+                前往警報中心處理
+              </button>
+            </div>
+          </div>
+
+          <!-- 生產進度追蹤 (新增) -->
+          <div
+            class="bg-white rounded-2xl p-6 border border-slate-100 shadow-soft animate-fade-in delay-400"
+          >
+            <div class="flex items-center justify-between mb-6">
+              <div>
+                <h3 class="text-lg font-bold text-slate-800">
+                  重點工單生產進度
+                </h3>
+                <p class="text-xs text-slate-500 mt-1">
+                  監控急單與大批量訂單即時排程執行狀況
+                </p>
+              </div>
+              <button
+                class="text-sm text-brand-600 font-medium hover:underline"
+              >
+                查看所有工單
+              </button>
+            </div>
+
+            <div class="space-y-6">
+              <!-- 工單 1 -->
+              <div>
+                <div
+                  class="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-2"
+                >
+                  <div class="flex items-center gap-3">
+                    <span
+                      class="bg-red-100 text-red-600 px-2 py-0.5 rounded text-xs font-bold"
+                      >特急單</span
+                    >
+                    <span class="font-bold text-slate-700 text-sm"
+                      >WO-20260401-001</span
+                    >
+                    <span class="text-slate-500 text-sm hidden sm:inline"
+                      >| 高階伺服器主機板組裝</span
+                    >
+                  </div>
+                  <div class="text-right">
+                    <span class="text-2xl font-bold text-brand-600">85%</span>
+                  </div>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-3">
+                  <div
+                    class="bg-gradient-to-r from-brand-400 to-brand-600 h-3 rounded-full relative"
+                    style="width: 85%"
+                  >
+                    <div
+                      class="absolute right-0 top-0 bottom-0 w-4 bg-white/30 animate-pulse rounded-r-full"
+                    ></div>
+                  </div>
+                </div>
+                <div class="flex justify-between text-xs text-slate-400 mt-2">
+                  <span>當前工序: SMT 表面接合 (完成 1,700 / 2,000)</span>
+                  <span>預計完工: 今日 18:00</span>
+                </div>
+              </div>
+
+              <!-- 工單 2 -->
+              <div>
+                <div
+                  class="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-2"
+                >
+                  <div class="flex items-center gap-3">
+                    <span
+                      class="bg-blue-100 text-blue-600 px-2 py-0.5 rounded text-xs font-bold"
+                      >一般單</span
+                    >
+                    <span class="font-bold text-slate-700 text-sm"
+                      >WO-20260402-045</span
+                    >
+                    <span class="text-slate-500 text-sm hidden sm:inline"
+                      >| 工控模組外殼加工</span
+                    >
+                  </div>
+                  <div class="text-right">
+                    <span class="text-2xl font-bold text-emerald-500">42%</span>
+                  </div>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-3">
+                  <div
+                    class="bg-gradient-to-r from-emerald-400 to-emerald-500 h-3 rounded-full"
+                    style="width: 42%"
+                  ></div>
+                </div>
+                <div class="flex justify-between text-xs text-slate-400 mt-2">
+                  <span>當前工序: CNC 切削 (完成 420 / 1,000)</span>
+                  <span>預計完工: 明日 12:00</span>
+                </div>
+              </div>
+
+              <!-- 工單 3 -->
+              <div>
+                <div
+                  class="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-2"
+                >
+                  <div class="flex items-center gap-3">
+                    <span
+                      class="bg-amber-100 text-amber-600 px-2 py-0.5 rounded text-xs font-bold"
+                      >預產單</span
+                    >
+                    <span class="font-bold text-slate-700 text-sm"
+                      >WO-20260405-012</span
+                    >
+                    <span class="text-slate-500 text-sm hidden sm:inline"
+                      >| 基礎感測器備料</span
+                    >
+                  </div>
+                  <div class="text-right">
+                    <span class="text-2xl font-bold text-amber-500">15%</span>
+                  </div>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-3">
+                  <div
+                    class="bg-gradient-to-r from-amber-400 to-amber-500 h-3 rounded-full"
+                    style="width: 15%"
+                  ></div>
+                </div>
+                <div class="flex justify-between text-xs text-slate-400 mt-2">
+                  <span>當前工序: 原物料檢驗 (完成 750 / 5,000)</span>
+                  <span>預計完工: 04/08 17:00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- 互動腳本 -->
+    <script>
+      // --- 側邊欄折疊選單邏輯 ---
+      function toggleMenu(menuId, btnElement) {
+        const menu = document.getElementById(menuId)
+
+        if (menu.classList.contains('open')) {
+          menu.classList.remove('open')
+          btnElement.classList.remove('active')
+        } else {
+          menu.classList.add('open')
+          btnElement.classList.add('active')
+        }
+      }
+
+      // --- 3D 卡片傾斜效果 (Hover Tilt) ---
+      const tiltCards = document.querySelectorAll('.tilt-card')
+
+      tiltCards.forEach(card => {
+        card.addEventListener('mousemove', e => {
+          const rect = card.getBoundingClientRect()
+          const x = e.clientX - rect.left
+          const y = e.clientY - rect.top
+
+          const centerX = rect.width / 2
+          const centerY = rect.height / 2
+
+          const rotateX = ((y - centerY) / centerY) * -8
+          const rotateY = ((x - centerX) / centerX) * 8
+
+          card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`
+        })
+
+        card.addEventListener('mouseleave', () => {
+          card.style.transform = `rotateX(0deg) rotateY(0deg)`
+          card.style.transition = `transform 0.5s ease, box-shadow 0.3s ease`
+        })
+
+        card.addEventListener('mouseenter', () => {
+          card.style.transition = `box-shadow 0.3s ease`
+        })
+      })
+
+      // --- ECharts 初始化 (模擬機台 OEE 數據) ---
+      document.addEventListener('DOMContentLoaded', () => {
+        const chartDom = document.getElementById('oeeChart')
+        const myChart = echarts.init(chartDom)
+
+        const option = {
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' },
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            borderColor: '#e2e8f0',
+            textStyle: { color: '#1e293b' }
+          },
+          grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            top: '15%',
+            containLabel: true
+          },
+          xAxis: [
+            {
+              type: 'category',
+              data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+              axisLine: { lineStyle: { color: '#cbd5e1' } },
+              axisLabel: { color: '#64748b' }
+            }
+          ],
+          yAxis: [
+            {
+              type: 'value',
+              name: 'OEE (%)',
+              min: 60,
+              max: 100,
+              nameTextStyle: { color: '#64748b', padding: [0, 0, 0, 20] },
+              axisLabel: { color: '#64748b' },
+              splitLine: { lineStyle: { color: '#f1f5f9', type: 'dashed' } }
+            }
+          ],
+          series: [
+            {
+              name: '目標稼動率',
+              type: 'line',
+              data: [85, 85, 85, 85, 85, 85, 85],
+              itemStyle: { color: '#f59e0b' },
+              lineStyle: { width: 2, type: 'dashed' },
+              symbol: 'none'
+            },
+            {
+              name: '實際 OEE',
+              type: 'bar',
+              barWidth: '40%',
+              itemStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                  { offset: 0, color: '#3b82f6' },
+                  { offset: 1, color: '#1d4ed8' }
+                ]),
+                borderRadius: [4, 4, 0, 0]
+              },
+              data: [78, 82, 88, 91, 86, 75, 80]
+            }
+          ]
+        }
+
+        myChart.setOption(option)
+
+        window.addEventListener('resize', () => {
+          myChart.resize()
+        })
+      })
+    </script>
+  </body>
+</html>
