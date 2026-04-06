@@ -11,17 +11,20 @@ import {
   AlertTriangle,
   Settings,
   Bell,
+  BellRing,
+  EllipsisVertical,
   Zap,
   Truck,
   ClipboardList,
-  AlertCircle,
   ChevronDown,
   ChevronRight,
   Menu,
   X
 } from 'lucide-react'
 import AntDesignLogo from './assets/ant-design.svg'
-import './App.css'
+import { clsx } from 'clsx'
+import { Button } from 'antd'
+import './App.scss'
 
 // --- 🧭 1. 系統選單資料結構 (三層式) ---
 const menuData = [
@@ -388,7 +391,8 @@ const DashboardContent = () => {
             icon: Zap,
             color: 'text-emerald-600',
             bg: 'bg-emerald-50',
-            iconColor: 'text-emerald-500'
+            iconColor: 'text-emerald-500',
+            isAlert: false
           },
           {
             title: '準時交貨率 (OTD)',
@@ -397,7 +401,8 @@ const DashboardContent = () => {
             icon: Truck,
             color: 'text-blue-600',
             bg: 'bg-blue-50',
-            iconColor: 'text-blue-500'
+            iconColor: 'text-blue-500',
+            isAlert: false
           },
           {
             title: '執行中工單',
@@ -406,13 +411,14 @@ const DashboardContent = () => {
             icon: ClipboardList,
             color: 'text-indigo-600',
             bg: 'bg-indigo-50',
-            iconColor: 'text-indigo-500'
+            iconColor: 'text-indigo-500',
+            isAlert: false
           },
           {
             title: '設備異常警報',
             value: '3',
             unit: '需立即處置',
-            icon: AlertCircle,
+            icon: AlertTriangle,
             color: 'text-rose-600',
             bg: 'bg-rose-50',
             iconColor: 'text-rose-500',
@@ -448,12 +454,11 @@ const DashboardContent = () => {
             <div className={`p-2.5 rounded-4xl ${kpi.bg} shadow-inner`}>
               <kpi.icon size={24} className={kpi.iconColor} />
             </div>
-            {kpi.isAlert && (
-              <div className='absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-rose-500 to-red-600'></div>
-            )}
           </div>
         ))}
       </div>
+
+      {/* 核心功能快捷卡片 */}
 
       {/* 數據圖表與異常面板 */}
       <div className='grid grid-cols-1 xl:grid-cols-3 gap-6'>
@@ -468,9 +473,9 @@ const DashboardContent = () => {
                 廠區 A - 核心製程機群
               </p>
             </div>
-            <button className='px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 text-sm font-semibold rounded-lg transition-colors border border-slate-200'>
-              查看詳細報表
-            </button>
+            <Button shape='circle' variant='text' color='default'>
+              <EllipsisVertical />
+            </Button>
           </div>
           {/* Chart Container */}
           <div className='flex-1 min-h-[280px] w-full relative'>
@@ -483,15 +488,18 @@ const DashboardContent = () => {
 
         {/* 右側 異常警報 */}
         <div className='flex flex-col gap-6'>
-          <div className='bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex-1'>
+          <div className='relative bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex-1 overflow-hidden'>
+            <div className='absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-rose-500 to-red-600'></div>
+
             <div className='flex justify-between items-center mb-5 border-b border-slate-100 pb-4'>
               <h3 className='text-lg font-bold text-slate-800 flex items-center gap-2'>
-                <AlertTriangle className='text-rose-500' size={20} /> 異常警報
+                <BellRing className='text-rose-500' size={20} /> 異常警報
               </h3>
               <span className='bg-rose-100 text-rose-700 px-2.5 py-1 rounded-md text-xs font-bold animate-pulse'>
                 3 筆未讀
               </span>
             </div>
+
             <div className='space-y-3'>
               {[
                 {
@@ -537,12 +545,21 @@ const DashboardContent = () => {
                 </div>
               ))}
             </div>
+
+            <Button
+              color='default'
+              variant='filled'
+              size='large'
+              className='mt-4 w-full'
+            >
+              前往警報中心處理
+            </Button>
           </div>
         </div>
       </div>
     </div>
   )
-} // ← 修復處：補齊遺失的 DashboardContent 元件關閉括號
+}
 
 // --- 🏢 3. 系統主佈局與側邊欄元件 ---
 export default function App() {
@@ -586,11 +603,16 @@ export default function App() {
           {/* 第一層 */}
           <button
             onClick={() => toggleMenu(level1.id)}
-            className={`w-full flex items-center justify-between p-3 rounded-xl transition-all duration-200 ${
-              isLevel1Active && !isLevel1Expanded
-                ? 'bg-blue-50 text-blue-700 font-bold'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-semibold'
-            }`}
+            className={clsx(
+              'w-full p-3 rounded-xl',
+              'flex items-center justify-between',
+              'transition-all duration-200',
+              `${
+                isLevel1Active && !isLevel1Expanded
+                  ? 'bg-blue-50 text-blue-700 font-bold'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-semibold'
+              }`
+            )}
           >
             <div className='flex items-center gap-3'>
               <level1.icon
@@ -680,10 +702,14 @@ export default function App() {
 
       {/* 側邊導航欄 (Sidebar) */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 h-screen bg-white border-r border-slate-200 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-50 transition-all duration-300 ease-in-out flex flex-col
-          ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-          ${sidebarOpen ? 'w-64' : 'w-20'}
-        `}
+        className={clsx(
+          'fixed lg:sticky top-0 left-0 h-screen bg-white border-r border-slate-200 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-50 flex flex-col',
+          'transition-all duration-300 ease-in-out',
+          mobileMenuOpen
+            ? 'translate-x-0'
+            : '-translate-x-full lg:translate-x-0',
+          sidebarOpen ? 'w-64' : 'w-20'
+        )}
       >
         {/* LOGO 區塊 */}
         <div className='h-16 flex items-center justify-between px-4 border-b border-slate-100 shrink-0'>
