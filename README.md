@@ -1,6 +1,6 @@
 # 🏭 APS 先進排程系統 (Advanced Planning & Scheduling)
 
-一套基於 Nuxt + Tailwind CSS 開發的製造業排程系統，用於提升生產效率、優化資源配置與準時交付率（OTD）。
+一套基於 React 開發的製造業排程系統，用於提升生產效率、優化資源配置與準時交付率（OTD）。
 
 ---
 
