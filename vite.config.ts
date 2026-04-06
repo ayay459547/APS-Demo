@@ -42,15 +42,15 @@ const userConfigFnObject: UserConfigFnObject = ({ command, mode }) => {
   )
 
   return {
-    base: './', // 路徑
+    base: './',
     build: {
-      outDir: 'dist' // 匯出資料夾名稱
+      outDir: 'dist'
     },
     plugins: [react(), tailwindcss()],
     server: {
-      port: 6060, // 服務器 port號
+      port: 6060,
       host: '0.0.0.0',
-      open: true // 是否啟動服務時 打開瀏覽器
+      open: false
     },
     resolve: {
       // extensions: ['.tsx', '.json', '.js', '.ts'],
