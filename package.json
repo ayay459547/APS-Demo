@@ -1,33 +1,34 @@
 {
   "name": "aps-demo",
   "private": true,
+  "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "build": "nuxt build",
-    "dev": "nuxt dev",
-    "generate": "nuxt generate",
-    "generate-production": "nuxi generate --dotenv .env.production",
-    "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
+    "dev": "vite",
+    "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "typecheck": "nuxt typecheck",
-    "deploy": "gh-pages -d .output/public",
-    "deploy-page": "gh-pages -d .output/public -t"
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@iconify-json/lucide": "^1.2.100",
-    "@iconify-json/simple-icons": "^1.2.75",
-    "@nuxt/ui": "^4.6.0",
-    "nuxt": "^4.4.2",
+    "@tailwindcss/vite": "^4.2.2",
+    "antd": "^6.3.5",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-icons": "^5.6.0",
     "tailwindcss": "^4.2.2"
   },
   "devDependencies": {
-    "@nuxt/eslint": "^1.15.2",
-    "eslint": "^10.1.0",
-    "typescript": "^6.0.2",
-    "vue-tsc": "^3.2.6",
-    "gh-pages": "^6.3.0",
-    "sass": "^1.98.0"
-  },
-  "packageManager": "pnpm@10.33.0"
+    "@eslint/js": "^9.39.4",
+    "@types/node": "^24.12.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.4.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.57.0",
+    "vite": "^8.0.1"
+  }
 }
