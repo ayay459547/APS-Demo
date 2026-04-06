@@ -16,22 +16,11 @@ APS（Advanced Planning and Scheduling）系統主要用於：
 
 ---
 
-## 🚀 技術架構
+## 🚀 技術
 
-### Frontend
-
-- Nuxt 3 / Nuxt 4
-- Vue 3 (Composition API)
+- Vite
+- React
 - Tailwind CSS
-- Pinia（狀態管理）
-
-### Backend（可選）
-
-- Node.js / NestJS
-- RESTful API
-
-### Database（建議）
-
-- MySQL / PostgreSQL
+- Ant Design
 
 ---
