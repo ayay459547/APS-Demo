@@ -8,30 +8,15 @@ import {
   AreaChart,
   AlertTriangle,
   Settings,
-  ChevronDown,
   X
 } from 'lucide-react'
 import { clsx } from 'clsx'
 import { useNavigate } from 'react-router-dom'
+import { Menu, ConfigProvider } from 'antd'
+import type { MenuProps } from 'antd'
 
 // --- 系統選單資料結構 ---
 const menuData = [
-  // {
-  //   id: 'dashboard',
-  //   label: '總覽',
-  //   icon: LayoutDashboard,
-  //   children: [
-  //     {
-  //       id: 'overview',
-  //       label: '系統總覽',
-  //       children: [
-  //         { id: 'kpi', label: 'KPI 指標' },
-  //         { id: 'progress', label: '生產進度' },
-  //         { id: 'alerts', label: '異常通知' }
-  //       ]
-  //     }
-  //   ]
-  // },
   {
     id: 'orders',
     label: '訂單與工單',
@@ -246,6 +231,8 @@ const menuData = [
   }
 ]
 
+type MenuItem = Required<MenuProps>['items'][number]
+
 interface Props {
   sidebarOpen: boolean
   setSidebarOpen: (isOpen: boolean) => void
@@ -265,131 +252,72 @@ export default function Sidebar({
   activeMenu,
   setActiveMenu
 }: Props) {
-  const [expandedMenus, setExpandedMenus] = useState([
-    'dashboard',
-    'dashboard-overview'
-  ])
-
-  // 切換選單展開/收合狀態
-  const toggleMenu = (menuId: string) => {
-    setExpandedMenus(prev =>
-      prev.includes(menuId)
-        ? prev.filter(id => id !== menuId)
-        : [...prev, menuId]
-    )
-  }
-
   const navigate = useNavigate()
 
+  // 控制 Ant Design Menu 的展開項目
+  const [openKeys, setOpenKeys] = useState<string[]>(['dashboard'])
+  const [prevActiveMenu, setPrevActiveMenu] = useState(activeMenu)
+
+  // 當從外部變更 activeMenu 時，自動展開對應的父選單
+  // 透過 Render 階段更新 State，取代 useEffect 避免 linter 警告與二次渲染
+  if (activeMenu !== prevActiveMenu) {
+    setPrevActiveMenu(activeMenu)
+    if (activeMenu && sidebarOpen) {
+      const keys = activeMenu.split('+')
+      if (keys.length >= 2) {
+        const level1Key = keys[0]
+        const level2Key = `${keys[0]}+${keys[1]}`
+        const newKeys = new Set([...openKeys, level1Key, level2Key])
+        setOpenKeys(Array.from(newKeys))
+      }
+    }
+  }
+
+  // 動態生成 Ant Design 需要的 items 陣列結構
+  const items: MenuItem[] = [
+    {
+      key: 'dashboard',
+      icon: <LayoutDashboard size={20} />,
+      label: '總覽'
+    },
+    // 將我們自己定義的 menuData 轉換成 Ant Design 格式
+    ...menuData.map(level1 => ({
+      key: level1.id,
+      icon: <level1.icon size={20} />,
+      label: level1.label,
+      children: level1.children.map(level2 => ({
+        key: `${level1.id}+${level2.id}`,
+        label: level2.label,
+        children: level2.children.map(level3 => ({
+          key: `${level1.id}+${level2.id}+${level3.id}`,
+          label: level3.label
+        }))
+      }))
+    }))
+  ]
+
   // 處理選單點擊
-  const handleMenuClick = (
-    level1Id: string,
-    level2Id: string,
-    level3Id: string
-  ) => {
-    setActiveMenu(`${level1Id}-${level2Id}-${level3Id}`)
-    navigate(`${level3Id}`)
+  const handleMenuClick: MenuProps['onClick'] = e => {
+    setActiveMenu(e.key)
+
+    if (e.key === 'dashboard') {
+      navigate('')
+    } else {
+      // 由於我們的 key 是 "level1+level2+level3"
+      const parts = e.key.split('+')
+      // 我們只需要取最後一段當作 route 導向路徑
+      const route = parts[parts.length - 1]
+      navigate(route)
+    }
+
+    // 手機版點擊後自動收起
     if (window.innerWidth < 1024) {
       setMobileMenuOpen(false)
     }
   }
 
-  // 遞迴渲染選單
-  const renderMenu = () => {
-    return menuData.map(level1 => {
-      const isLevel1Expanded = expandedMenus.includes(level1.id)
-      const isLevel1Active = activeMenu.startsWith(level1.id)
-
-      return (
-        <div key={level1.id} className='mb-1 px-3'>
-          {/* 第一層 */}
-          <button
-            onClick={() => toggleMenu(level1.id)}
-            className={clsx(
-              'w-full p-3 rounded-xl',
-              'flex items-center justify-between',
-              'transition-all duration-200',
-              `${
-                isLevel1Active && !isLevel1Expanded
-                  ? 'bg-blue-50 text-blue-700 font-bold'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-semibold'
-              }`
-            )}
-          >
-            <div className='flex items-center gap-3'>
-              <level1.icon
-                size={20}
-                className={isLevel1Active ? 'text-blue-600' : 'text-slate-400'}
-              />
-              {sidebarOpen && (
-                <span className='text-sm tracking-wide'>{level1.label}</span>
-              )}
-            </div>
-            {sidebarOpen && (
-              <ChevronDown
-                size={16}
-                className={`transition-transform duration-300 text-slate-400 ${isLevel1Expanded ? 'rotate-180' : ''}`}
-              />
-            )}
-          </button>
-
-          {/* 第二層與第三層 */}
-          {sidebarOpen && isLevel1Expanded && (
-            <div className='mt-1 ml-4 pl-4 border-l-2 border-slate-100 space-y-1'>
-              {level1.children.map(level2 => {
-                const level2Id = `${level1.id}-${level2.id}`
-                const isLevel2Expanded = expandedMenus.includes(level2Id)
-
-                return (
-                  <div key={level2.id}>
-                    {/* 第二層 */}
-                    <button
-                      onClick={() => toggleMenu(level2Id)}
-                      className='w-full flex items-center justify-between py-2 px-3 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-blue-600 font-medium transition-colors'
-                    >
-                      <span className='text-sm'>{level2.label}</span>
-                      <ChevronDown
-                        size={14}
-                        className={`transition-transform duration-300 ${isLevel2Expanded ? 'rotate-180 text-blue-500' : 'text-slate-300'}`}
-                      />
-                    </button>
-
-                    {/* 第三層 */}
-                    {isLevel2Expanded && (
-                      <div className='mt-1 mb-2 ml-2 space-y-1'>
-                        {level2.children.map(level3 => {
-                          const level3Id = `${level1.id}-${level2.id}-${level3.id}`
-                          const isLevel3Active = activeMenu === level3Id
-
-                          return (
-                            <button
-                              key={level3.id}
-                              onClick={() =>
-                                handleMenuClick(level1.id, level2.id, level3.id)
-                              }
-                              className={`w-full text-left py-2 px-4 rounded-lg text-sm transition-all duration-200 relative ${
-                                isLevel3Active
-                                  ? 'bg-blue-50 text-blue-700 font-bold'
-                                  : 'text-slate-500 hover:bg-slate-50 hover:text-blue-600 font-medium'
-                              }`}
-                            >
-                              {isLevel3Active && (
-                                <span className='absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-blue-600 rounded-r-md'></span>
-                              )}
-                              {level3.label}
-                            </button>
-                          )
-                        })}
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
-      )
-    })
+  const onOpenChange: MenuProps['onOpenChange'] = keys => {
+    setOpenKeys(keys)
   }
 
   return (
@@ -398,7 +326,7 @@ export default function Sidebar({
         'fixed lg:sticky top-0 left-0 h-screen bg-white border-r border-slate-200 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-50 flex flex-col',
         'transition-all duration-300 ease-in-out',
         mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
-        sidebarOpen ? 'w-64' : 'w-20'
+        sidebarOpen ? 'w-64' : 'w-20' // w-20 等於 80px，這正是 Ant Design Menu 收合狀態的預設寬度
       )}
     >
       {/* LOGO 區塊 */}
@@ -406,15 +334,15 @@ export default function Sidebar({
         <div
           className='flex items-center gap-3 overflow-hidden cursor-pointer'
           onClick={() => {
-            toggleMenu('dashboard')
+            setActiveMenu('dashboard')
             navigate('')
           }}
         >
-          <div className='w-8 h-8 rounded-lg text-brand-600 bg-brand-50 flex items-center justify-center'>
+          <div className='w-8 h-8 rounded-lg text-blue-600 bg-blue-50 flex items-center justify-center shrink-0'>
             <ChartLine />
           </div>
           {sidebarOpen && (
-            <span className='font-bold text-xl text-blue-700'>
+            <span className='font-bold text-xl text-blue-700 whitespace-nowrap'>
               APS
               <span className='text-slate-800'>-DEMO</span>
             </span>
@@ -430,30 +358,35 @@ export default function Sidebar({
 
       {/* 選單列表 */}
       <div className='flex-1 overflow-y-auto py-4 scrollbar-hide'>
-        {/* 儀錶板 */}
-        <div className='mb-1 px-3'>
-          <button
-            onClick={() => {
-              toggleMenu('dashboard')
-              navigate('')
-            }}
-            className={clsx(
-              'w-full p-3 rounded-xl',
-              'flex items-center justify-between',
-              'transition-all duration-200',
-              'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-semibold'
-            )}
-          >
-            <div className='flex items-center gap-3'>
-              <LayoutDashboard size={20} className={'text-slate-400'} />
-              {sidebarOpen && (
-                <span className='text-sm tracking-wide'>總覽</span>
-              )}
-            </div>
-          </button>
-        </div>
-        {/* 選單 */}
-        {renderMenu()}
+        {/* 使用 ConfigProvider 客製化 Ant Design 主題，
+          讓它的顏色與圓角貼近原先自定義的 Tailwind Style 
+        */}
+        <ConfigProvider
+          theme={{
+            components: {
+              Menu: {
+                itemSelectedBg: '#eff6ff', // Tailwind blue-50
+                itemSelectedColor: '#1d4ed8', // Tailwind blue-700
+                itemHoverBg: '#f8fafc', // Tailwind slate-50
+                itemColor: '#475569', // Tailwind slate-600
+                itemBorderRadius: 8,
+                subMenuItemBg: '#ffffff',
+                itemMarginInline: 12
+              }
+            }
+          }}
+        >
+          <Menu
+            mode='inline'
+            inlineCollapsed={!sidebarOpen}
+            selectedKeys={[activeMenu]}
+            openKeys={sidebarOpen ? openKeys : undefined} // 收合時交由 Ant Design 原生自動處理懸浮視窗的 Open
+            onOpenChange={onOpenChange}
+            onClick={handleMenuClick}
+            items={items}
+            style={{ borderRight: 'none' }} // 移除 Antd 預設的右邊框，改由外層 aside 控制
+          />
+        </ConfigProvider>
       </div>
 
       {/* 底部使用者簡介 */}
