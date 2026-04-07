@@ -7,6 +7,7 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 const userConfigFnObject: UserConfigFnObject = ({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
+  const VITE_API_BASE_URL = env.VITE_API_BASE_URL
   const VITE_API_BUILD_VERSION = env.VITE_API_BUILD_VERSION
   const VITE_API_VERSION = env.VITE_API_VERSION
 
@@ -31,6 +32,7 @@ const userConfigFnObject: UserConfigFnObject = ({ command, mode }) => {
     `(執行時間: ${year}-${month}-${day} ${hour}:${min}:${second})`
   )
   console.table({
+    URL: VITE_API_BASE_URL,
     是否是開發模式: isDevelopment,
     系統版本: VITE_API_VERSION,
     指令: command,
@@ -42,7 +44,7 @@ const userConfigFnObject: UserConfigFnObject = ({ command, mode }) => {
   )
 
   return {
-    base: './',
+    base: VITE_API_BASE_URL,
     build: {
       outDir: 'dist'
     },
