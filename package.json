@@ -4,16 +4,25 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "npx vite --force --mode development",
+    "build:dev": "run-p type-check build-only:dev",
+    "build-only:dev": "vite build --mode development",
+    "pro": "npx vite --mode production",
+    "build:pro": "run-p type-check build-only:pro",
+    "build-only:pro": "vite build --mode production",
+    "build-only": "run-p vite-build",
+    "vite-build": "vite build",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy-page": "gh-pages -d dist"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.2",
     "antd": "^6.3.5",
     "clsx": "^2.1.1",
     "echarts": "^6.0.0",
+    "gh-pages": "^6.3.0",
     "lucide-react": "^1.7.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
