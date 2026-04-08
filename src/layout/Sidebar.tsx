@@ -27,8 +27,7 @@ const menuData = [
         label: '訂單管理',
         children: [
           { id: 'o_list', label: '訂單列表' },
-          { id: 'o_create', label: '建立訂單' },
-          { id: 'o_detail', label: '訂單明細' }
+          { id: 'o_rush', label: '插單管理' }
         ]
       },
       {
@@ -36,31 +35,15 @@ const menuData = [
         label: '工單管理',
         children: [
           { id: 'wo_list', label: '工單列表' },
-          { id: 'wo_create', label: '建立工單' },
-          { id: 'wo_detail', label: '工單明細' }
-        ]
-      },
-      {
-        id: 'control',
-        label: '訂單控制',
-        children: [
-          { id: 'priority', label: '優先級設定' },
-          { id: 'rush', label: '插單管理' }
-        ]
-      },
-      {
-        id: 'adjustment',
-        label: '工單調整',
-        children: [
-          { id: 'split', label: '工單拆分' },
-          { id: 'merge', label: '工單合併' }
+          { id: 'wo_split', label: '工單拆分' },
+          { id: 'wo_merge', label: '工單合併' }
         ]
       },
       {
         id: 'tracking',
         label: '進度追蹤',
         children: [
-          { id: 'status', label: '工單狀態' },
+          { id: 'wo_status', label: '工單狀態' },
           { id: 'wo_progress', label: '生產進度' }
         ]
       }
@@ -150,17 +133,20 @@ const menuData = [
     icon: AreaChart,
     children: [
       {
-        id: 'viz',
+        id: 'visualization',
         label: '視覺化',
         children: [
-          { id: 'gantt-chart', label: '甘特圖' },
-          { id: 'load-chart', label: '負載圖' }
+          { id: 'gantt_chart', label: '甘特圖' },
+          { id: 'load_chart', label: '負載圖' }
         ]
       },
       {
         id: 'analysis',
         label: '分析',
-        children: [{ id: 'bottleneck', label: '瓶頸分析' }]
+        children: [
+          { id: 'machine_bottleneck', label: '機台瓶頸分析' },
+          { id: 'material_bottleneck', label: '物料瓶頸分析' }
+        ]
       },
       {
         id: 'simulation',
@@ -359,7 +345,7 @@ export default function Sidebar({
       {/* 選單列表 */}
       <div className='flex-1 overflow-y-auto py-4 scrollbar-hide'>
         {/* 使用 ConfigProvider 客製化 Ant Design 主題，
-          讓它的顏色與圓角貼近原先自定義的 Tailwind Style 
+          讓它的顏色與圓角貼近原先自定義的 Tailwind Style
         */}
         <ConfigProvider
           theme={{
