@@ -13,6 +13,7 @@ import VisualOrderRush from '@/pages/orders/visualOrderRush/VisualOrderRush'
 // 訂單與工單 - 工單管理
 import WorkOrderList from '@/pages/workOrders/workOrderList/WorkOrderList'
 import WorkOrderSplit from '@/pages/workOrders/workOrderSplit/WorkOrderSplit.tsx'
+import WorkOrderMerge from '@/pages/workOrders/workOrderMerge/WorkOrderMerge'
 
 // 排程分析 - 視覺化
 import GanttChart from '@/pages/visualization/ganttChart/GanttChart'
@@ -38,6 +39,7 @@ const routes: RouteObject[] = [
 
       { path: 'wo_list', element: <WorkOrderList /> },
       { path: 'wo_split', element: <WorkOrderSplit /> },
+      { path: 'wo_merge', element: <WorkOrderMerge /> },
 
       { path: 'gantt_chart', element: <GanttChart /> },
       { path: 'load_chart', element: <LoadChart /> },

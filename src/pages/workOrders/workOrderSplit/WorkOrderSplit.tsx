@@ -216,7 +216,7 @@ const WorkOrderSplit: React.FC = () => {
                 <Scissors size={18} />
               </div>
               <span className='font-black text-slate-800 text-sm tracking-tight'>
-                工單視覺化拆分工作台
+                工單拆分工作台
               </span>
             </div>
             <Badge
