@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import {
   Calendar,
   Settings,
@@ -6,11 +6,80 @@ import {
   Clock,
   CheckCircle2,
   Map as MapIcon,
-  Route
+  Route,
+  Download
 } from 'lucide-react'
 
+// --- 型別定義 (Type Definitions) ---
+type MachineType =
+  | 'CNC'
+  | '5-AXIS'
+  | 'LASER'
+  | 'WELDING'
+  | 'HEAT'
+  | 'GRIND'
+  | 'COATING'
+  | 'ASM'
+  | 'QC'
+  | 'PACK'
+
+type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED'
+
+interface BaseMachine {
+  type: MachineType
+  name: string
+}
+
+interface Machine extends BaseMachine {
+  id: string
+}
+
+interface Process {
+  name: string
+  color: string
+}
+
+interface Routing {
+  id: string
+  name: string
+  steps: string[]
+}
+
+interface Task {
+  id: string
+  workOrderId: string
+  subOrderId: string
+  machineId: string
+  process: string
+  colorClass: string
+  startTime: Date
+  endTime: Date
+  status: TaskStatus
+  duration: number
+  routingName: string
+  routingSteps: string[]
+  stepIndex: number
+  left: number
+  width: number
+}
+
+interface TooltipState {
+  visible: boolean
+  x: number
+  y: number
+  data: Task | null
+  isTop?: boolean
+}
+
+interface Viewport {
+  top: number
+  left: number
+  width: number
+  height: number
+}
+
 // --- 設定與常數 ---
-const BASE_MACHINES = [
+const BASE_MACHINES: BaseMachine[] = [
   { type: 'CNC', name: 'CNC 銑床' },
   { type: 'CNC', name: 'CNC 車床' },
   { type: '5-AXIS', name: '五軸加工機' },
@@ -24,8 +93,7 @@ const BASE_MACHINES = [
   { type: 'PACK', name: '出貨包裝站' }
 ]
 
-// 動態擴增至 100 台機台以展示虛擬渲染效能
-const MACHINES = Array.from({ length: 100 }, (_, i) => {
+const MACHINES: Machine[] = Array.from({ length: 100 }, (_, i) => {
   const base = BASE_MACHINES[i % BASE_MACHINES.length]
   return {
     id: `MCH-${String(i + 1).padStart(3, '0')}`,
@@ -34,7 +102,7 @@ const MACHINES = Array.from({ length: 100 }, (_, i) => {
   }
 })
 
-const PROCESSES = [
+const PROCESSES: Process[] = [
   { name: '下料', color: 'bg-slate-500 border-slate-600 text-slate-100' },
   { name: 'CNC加工', color: 'bg-blue-500 border-blue-600 text-blue-50' },
   { name: '熱處理', color: 'bg-red-500 border-red-600 text-red-50' },
@@ -44,7 +112,7 @@ const PROCESSES = [
   { name: '檢驗', color: 'bg-teal-500 border-teal-600 text-teal-50' }
 ]
 
-const PROCESS_MACHINE_MAP: Record<string, string[]> = {
+const PROCESS_MACHINE_MAP: Record<string, MachineType[]> = {
   下料: ['LASER'],
   CNC加工: ['CNC', '5-AXIS'],
   熱處理: ['HEAT'],
@@ -54,7 +122,7 @@ const PROCESS_MACHINE_MAP: Record<string, string[]> = {
   檢驗: ['QC', 'PACK']
 }
 
-const ROUTINGS = [
+const ROUTINGS: Routing[] = [
   {
     id: 'R-A',
     name: '標準金屬件途程',
@@ -72,27 +140,25 @@ const ROUTINGS = [
   }
 ]
 
-// 擴展至 30 天，涵蓋因防碰撞演算法而往後遞延的工單，解決超出 14 天會跑版的問題
 const DAYS_TO_SHOW = 30
-const PIXELS_PER_HOUR = 30 // 縮放比例：1小時 = 30px
+const PIXELS_PER_HOUR = 30
 const DAY_WIDTH = 24 * PIXELS_PER_HOUR
-const ROW_HEIGHT = 48 // 每列高度 48px
-const SIDEBAR_WIDTH = 256 // 側邊欄寬度 256px
+const ROW_HEIGHT = 48
 
-const getBaseDate = () => {
+const getBaseDate = (): Date => {
   const d = new Date()
   d.setHours(0, 0, 0, 0)
   return d
 }
-const BASE_DATE: any = getBaseDate()
+const BASE_DATE: Date = getBaseDate()
 
-// --- 資料生成引擎 (4000筆，含防碰撞與預先計算座標) ---
-const generateMockData = () => {
-  const tasks: any[] = []
-  const TOTAL_WORK_ORDERS = 1000 // 1000主工單 * 4途程 = 4000子工單
+// --- 資料生成引擎 ---
+const generateMockData = (): Task[] => {
+  const tasks: Task[] = []
+  const TOTAL_WORK_ORDERS = 1000
   let taskIdCounter = 1
 
-  const machineAvailableTimes: Record<string, any> = {}
+  const machineAvailableTimes: Record<string, Date> = {}
   MACHINES.forEach(
     m => (machineAvailableTimes[m.id] = new Date(BASE_DATE.getTime()))
   )
@@ -125,7 +191,7 @@ const generateMockData = () => {
         }
       })
 
-      const actualStart: any = earliestAvailable
+      const actualStart: Date = earliestAvailable
       const durationHours = 2 + Math.floor(Math.random() * 6)
       const endTime = new Date(
         actualStart.getTime() + durationHours * 60 * 60 * 1000
@@ -135,15 +201,18 @@ const generateMockData = () => {
         endTime.getTime() + 0.5 * 60 * 60 * 1000
       )
 
-      let status = 'PENDING'
+      let status: TaskStatus = 'PENDING'
       if (endTime < nowTime) status = 'COMPLETED'
       else if (actualStart <= nowTime && endTime >= nowTime)
         status = 'IN_PROGRESS'
 
-      const processObj: any = PROCESSES.find(p => p.name === processName)
+      const processObj = PROCESSES.find(p => p.name === processName)
+      const colorClass = processObj
+        ? processObj.color
+        : 'bg-slate-500 border-slate-600 text-slate-100'
 
-      // 預先計算 CSS 渲染所需座標，大幅節省 Scroll 時的 CPU 計算
-      const diffHours = (actualStart - BASE_DATE) / (1000 * 60 * 60)
+      const diffHours =
+        (actualStart.getTime() - BASE_DATE.getTime()) / (1000 * 60 * 60)
       const left = diffHours * PIXELS_PER_HOUR
       const width = durationHours * PIXELS_PER_HOUR
 
@@ -153,9 +222,9 @@ const generateMockData = () => {
         subOrderId: `${workOrderId}-${idx + 1}`,
         machineId: selectedMachine.id,
         process: processName,
-        colorClass: processObj.color,
-        startTime: new Date(actualStart),
-        endTime: new Date(endTime),
+        colorClass,
+        startTime: actualStart,
+        endTime,
         status,
         duration: durationHours,
         routingName: routing.name,
@@ -171,39 +240,47 @@ const generateMockData = () => {
   return tasks
 }
 
-const formatTime = (date: any) => {
+const formatTime = (date: Date): string => {
   return `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
 }
 
 // --- 主元件 ---
 export default function GanttChart() {
-  const [tasksByMachine, setTasksByMachine] = useState<Record<string, any>>({})
-  const [loading, setLoading] = useState(true)
+  const [tasksByMachine, setTasksByMachine] = useState<Record<string, Task[]>>(
+    {}
+  )
+  const [loading, setLoading] = useState<boolean>(true)
+  const [sidebarWidth, setSidebarWidth] = useState<number>(256)
 
   // 虛擬渲染視窗狀態
-  const [viewport, setViewport] = useState({
+  const [viewport, setViewport] = useState<Viewport>({
     top: 0,
     left: 0,
     width: 1200,
     height: 800
   })
-  const scrollContainerRef = useRef<any | null>(null)
-  const sidebarRef = useRef<any | null>(null)
 
-  const [tooltip, setTooltip] = useState<{
-    visible: boolean
-    x: number
-    y: number
-    data: any
-    isTop?: boolean
-  }>({
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const sidebarRef = useRef<HTMLDivElement>(null)
+
+  const [tooltip, setTooltip] = useState<TooltipState>({
     visible: false,
     x: 0,
     y: 0,
     data: null
   })
 
-  // 監聽容器大小，確保虛擬渲染邊界正確。依賴於 loading 確保在 DOM 節點存在後才綁定
+  // 處理 RWD：螢幕過小則縮減左側 Sidebar 寬度
+  useEffect(() => {
+    const handleResize = () => {
+      setSidebarWidth(window.innerWidth < 768 ? 120 : 256)
+    }
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // 監聽容器大小，確保虛擬渲染邊界正確
   useEffect(() => {
     if (!loading && scrollContainerRef.current) {
       const observer = new ResizeObserver(entries => {
@@ -223,8 +300,7 @@ export default function GanttChart() {
       setLoading(true)
       setTimeout(() => {
         const rawTasks = generateMockData()
-        // 將資料分組至對應機台
-        const map: Record<string, any> = {}
+        const map: Record<string, Task[]> = {}
         MACHINES.forEach(m => (map[m.id] = []))
         rawTasks.forEach(task => map[task.machineId].push(task))
 
@@ -250,8 +326,59 @@ export default function GanttChart() {
     return headers
   }, [])
 
-  // 處理高效能滾動更新 (包含同步更新側邊欄，避免 null 參照錯誤)
-  const handleScroll = useCallback((e: any) => {
+  // --- 匯出 CSV 報表功能 ---
+  const handleExportCSV = useCallback(() => {
+    if (loading) return
+
+    const allTasks = Object.values(tasksByMachine).flat()
+    if (allTasks.length === 0) return
+
+    const headers = [
+      '主工單',
+      '子工單',
+      '機台',
+      '製程',
+      '開始時間',
+      '結束時間',
+      '工時(H)',
+      '狀態'
+    ]
+    const rows = allTasks.map(t => [
+      t.workOrderId,
+      t.subOrderId,
+      MACHINES.find(m => m.id === t.machineId)?.name || t.machineId,
+      t.process,
+      formatTime(t.startTime),
+      formatTime(t.endTime),
+      t.duration.toString(),
+      t.status === 'COMPLETED'
+        ? '已完成'
+        : t.status === 'IN_PROGRESS'
+          ? '加工中'
+          : '待派工'
+    ])
+
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join(
+      '\n'
+    )
+
+    const bom = new Uint8Array([0xef, 0xbb, 0xbf])
+    const blob = new Blob([bom, csvContent], {
+      type: 'text/csv;charset=utf-8;'
+    })
+
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.setAttribute('href', url)
+    link.setAttribute('download', `排程甘特圖報表.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }, [tasksByMachine, loading])
+
+  // 處理高效能滾動更新
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     const target = e.currentTarget
     const top = target.scrollTop
     const left = target.scrollLeft
@@ -267,27 +394,30 @@ export default function GanttChart() {
     }
   }, [])
 
-  const handleMouseEnterTask = useCallback((e: any, task: any) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const isTop = rect.top > window.innerHeight / 2
-    const yOffset = isTop ? rect.top - 10 : rect.bottom + 10
+  const handleMouseEnterTask = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>, task: Task) => {
+      const rect = e.currentTarget.getBoundingClientRect()
+      const isTop = rect.top > window.innerHeight / 2
+      const yOffset = isTop ? rect.top - 10 : rect.bottom + 10
 
-    setTooltip({
-      visible: true,
-      x: rect.left + rect.width / 2,
-      y: yOffset,
-      data: task,
-      isTop
-    })
-  }, [])
+      setTooltip({
+        visible: true,
+        x: rect.left + rect.width / 2,
+        y: yOffset,
+        data: task,
+        isTop
+      })
+    },
+    []
+  )
 
   const handleMouseLeaveTask = useCallback(() => {
     setTooltip(prev => ({ ...prev, visible: false }))
   }, [])
 
-  // --- 虛擬渲染核心邏輯 (Virtualization Core) ---
-  const OVERSCAN_Y = 5 // 垂直預載列數
-  const OVERSCAN_X = 500 // 水平預載像素
+  // --- 虛擬渲染核心邏輯 ---
+  const OVERSCAN_Y = 5
+  const OVERSCAN_X = 500
 
   const visibleMachines = useMemo(() => {
     const startIndex = Math.max(
@@ -299,7 +429,7 @@ export default function GanttChart() {
       Math.ceil((viewport.top + viewport.height) / ROW_HEIGHT) + OVERSCAN_Y
     )
 
-    const result: any[] = []
+    const result: (Machine & { index: number })[] = []
     for (let i = startIndex; i <= endIndex; i++) {
       if (MACHINES[i]) {
         result.push({ ...MACHINES[i], index: i })
@@ -313,15 +443,15 @@ export default function GanttChart() {
 
   return (
     <div className='flex flex-col h-full bg-slate-50 font-sans text-slate-800 overflow-hidden'>
-      {/* Toolbar */}
-      <div className='flex items-center justify-between px-4 py-2 bg-white border-b border-slate-200 shadow-sm z-10 shrink-0 overflow-x-auto scrollbar-hide'>
-        <div className='flex items-center gap-4 text-xs font-medium text-slate-600 whitespace-nowrap'>
-          <span className='flex items-center gap-1'>
+      {/* RWD Toolbar */}
+      <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 py-3 bg-white border-b border-slate-200 shadow-sm z-10 shrink-0 gap-3 sm:gap-0'>
+        <div className='flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs font-medium text-slate-600'>
+          <span className='flex items-center gap-1 font-bold'>
             <Calendar size={14} /> 排程區間：未來 {DAYS_TO_SHOW} 天
           </span>
-          <div className='h-4 w-px bg-slate-300'></div>
-          <div className='flex items-center gap-3'>
-            製程圖例：
+          <div className='hidden sm:block h-4 w-px bg-slate-300'></div>
+          <div className='flex flex-wrap items-center gap-3'>
+            <span className='hidden md:inline'>製程圖例：</span>
             {PROCESSES.map(p => (
               <div key={p.name} className='flex items-center gap-1'>
                 <div
@@ -332,8 +462,12 @@ export default function GanttChart() {
             ))}
           </div>
         </div>
-        <button className='text-sm bg-blue-50 text-blue-600 px-3 py-1.5 rounded border border-blue-200 font-medium hover:bg-blue-100 transition-colors flex items-center gap-1 whitespace-nowrap ml-4'>
-          <CheckCircle2 size={14} /> 產能衝突已解決
+        <button
+          onClick={handleExportCSV}
+          disabled={loading}
+          className='w-full sm:w-auto text-sm bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-emerald-500 transition-colors flex items-center justify-center gap-2 shadow-sm whitespace-nowrap shrink-0 disabled:opacity-50 disabled:cursor-not-allowed'
+        >
+          <Download size={16} /> 匯出報表
         </button>
       </div>
 
@@ -354,20 +488,19 @@ export default function GanttChart() {
             ref={scrollContainerRef}
             onScroll={handleScroll}
             className='w-full h-full overflow-auto relative'
-            style={{ willChange: 'transform' }} // 提示瀏覽器優化捲動
+            style={{ willChange: 'transform' }}
           >
-            {/* 總內容尺寸容器，撐開捲軸 */}
             <div
               style={{
-                width: SIDEBAR_WIDTH + totalTimeWidth,
+                width: sidebarWidth + totalTimeWidth,
                 height: 60 + totalContentHeight,
                 position: 'relative'
               }}
             >
               {/* Top-Left Corner (Sticky) */}
               <div
-                className='sticky top-0 left-0 bg-slate-100 border-b border-r border-slate-300 z-40 flex items-center px-4 font-bold text-slate-700 text-sm shadow-[2px_2px_5px_rgba(0,0,0,0.05)]'
-                style={{ width: SIDEBAR_WIDTH, height: 60 }}
+                className='sticky top-0 left-0 bg-slate-100 border-b border-r border-slate-300 z-40 flex items-center px-2 md:px-4 font-bold text-slate-700 text-xs md:text-sm shadow-[2px_2px_5px_rgba(0,0,0,0.05)]'
+                style={{ width: sidebarWidth, height: 60 }}
               >
                 設備資源清單 ({MACHINES.length}台)
               </div>
@@ -376,11 +509,11 @@ export default function GanttChart() {
               <div
                 className='sticky top-0 flex z-30 bg-white border-b border-slate-300 shadow-sm'
                 style={{
-                  left: SIDEBAR_WIDTH,
+                  left: sidebarWidth,
                   width: totalTimeWidth,
                   height: 60,
                   marginTop: -60,
-                  marginLeft: SIDEBAR_WIDTH
+                  marginLeft: sidebarWidth
                 }}
               >
                 {timelineHeaders.map((day, dIdx) => (
@@ -407,11 +540,11 @@ export default function GanttChart() {
                 ))}
               </div>
 
-              {/* Grid Background (純 CSS 繪製，無 DOM 節點) */}
+              {/* Grid Background */}
               <div
                 className='absolute top-[60px] bottom-0 z-0'
                 style={{
-                  left: SIDEBAR_WIDTH,
+                  left: sidebarWidth,
                   width: totalTimeWidth,
                   backgroundImage: `repeating-linear-gradient(to right, transparent, transparent ${PIXELS_PER_HOUR - 1}px, #f1f5f9 ${PIXELS_PER_HOUR - 1}px, #f1f5f9 ${PIXELS_PER_HOUR}px)`
                 }}
@@ -423,7 +556,7 @@ export default function GanttChart() {
                 style={{ height: totalContentHeight }}
               >
                 {visibleMachines.map(m => {
-                  const tasks: any[] = tasksByMachine[m.id] || []
+                  const tasks: Task[] = tasksByMachine[m.id] || []
                   const topOffset = m.index * ROW_HEIGHT
 
                   return (
@@ -434,24 +567,25 @@ export default function GanttChart() {
                     >
                       {/* Sidebar Machine Cell (Sticky Left) */}
                       <div
-                        className='sticky left-0 bg-white border-r border-slate-200 z-20 flex flex-col justify-center px-4 shrink-0'
-                        style={{ width: SIDEBAR_WIDTH }}
+                        className='sticky left-0 bg-white border-r border-slate-200 z-20 flex flex-col justify-center px-2 md:px-4 shrink-0'
+                        style={{ width: sidebarWidth }}
                       >
-                        <div className='font-semibold text-sm text-slate-800 truncate'>
+                        <div className='font-semibold text-xs md:text-sm text-slate-800 truncate'>
                           {m.name}
                         </div>
-                        <div className='text-[10px] text-slate-400 font-mono'>
-                          {m.id} · {m.type}
-                        </div>
+                        {sidebarWidth > 120 && (
+                          <div className='text-[10px] text-slate-400 font-mono truncate'>
+                            {m.id} · {m.type}
+                          </div>
+                        )}
                       </div>
 
-                      {/* Tasks Container 加上 overflow-hidden 避免跑版撐破 */}
+                      {/* Tasks Container */}
                       <div className='relative flex-1 overflow-hidden'>
                         {tasks.map(task => {
-                          // Horizontal Culling (水平視角裁切)
                           const isVisibleX =
                             task.left + task.width >=
-                              viewport.left - SIDEBAR_WIDTH - OVERSCAN_X &&
+                              viewport.left - sidebarWidth - OVERSCAN_X &&
                             task.left <=
                               viewport.left + viewport.width + OVERSCAN_X
 
@@ -465,7 +599,7 @@ export default function GanttChart() {
                               className={`absolute top-1.5 bottom-1.5 rounded shadow-sm border flex flex-col justify-center px-2 cursor-pointer transition-transform hover:scale-[1.03] hover:z-30 overflow-hidden ${task.colorClass}`}
                               style={{
                                 left: task.left,
-                                width: Math.max(task.width, 60), // 確保寬度不會過小導致文字看不見
+                                width: Math.max(task.width, 60),
                                 opacity: task.status === 'COMPLETED' ? 0.4 : 1
                               }}
                             >
@@ -509,20 +643,19 @@ export default function GanttChart() {
       {/* --- Global Tooltip --- */}
       {tooltip.visible && tooltip.data && (
         <div
-          className={`fixed z-50 bg-slate-900 text-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] border border-slate-700 p-5 w-[340px] pointer-events-none transform -translate-x-1/2 transition-opacity duration-150 ${tooltip.isTop ? '-translate-y-full' : 'translate-y-0'}`}
+          className={`fixed z-50 bg-slate-900 text-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] border border-slate-700 p-4 sm:p-5 w-[300px] sm:w-[340px] pointer-events-none transform -translate-x-1/2 transition-opacity duration-150 ${tooltip.isTop ? '-translate-y-full' : 'translate-y-0'}`}
           style={{
             left: tooltip.x,
             top: tooltip.y,
             marginTop: tooltip.isTop ? 0 : '10px'
           }}
         >
-          {/* Header */}
           <div className='flex justify-between items-start border-b border-slate-700 pb-3 mb-3'>
             <div>
               <div className='text-xs text-blue-400 font-mono mb-1 flex items-center gap-1'>
                 <MapIcon size={12} /> 子工單：{tooltip.data.subOrderId}
               </div>
-              <div className='font-bold text-lg text-white'>
+              <div className='font-bold text-base sm:text-lg text-white'>
                 主工單：{tooltip.data.workOrderId}
               </div>
             </div>
@@ -543,8 +676,7 @@ export default function GanttChart() {
             </div>
           </div>
 
-          {/* Detailed Info */}
-          <div className='space-y-2.5 text-sm bg-slate-800/50 p-3 rounded-lg border border-slate-700/50 mb-4'>
+          <div className='space-y-2.5 text-xs sm:text-sm bg-slate-800/50 p-3 rounded-lg border border-slate-700/50 mb-4'>
             <div className='flex items-center gap-2'>
               <Settings size={14} className='text-slate-400 shrink-0' />
               <span className='text-slate-400 w-12'>製程：</span>
@@ -556,7 +688,7 @@ export default function GanttChart() {
               <BarChart2 size={14} className='text-slate-400 shrink-0' />
               <span className='text-slate-400 w-12'>機台：</span>
               <span className='text-white truncate'>
-                {MACHINES.find(m => m.id === tooltip.data.machineId)?.name}
+                {MACHINES.find(m => m.id === tooltip.data?.machineId)?.name}
               </span>
             </div>
             <div className='flex items-start gap-2'>
@@ -569,7 +701,7 @@ export default function GanttChart() {
                   </span>{' '}
                   小時
                 </span>
-                <span className='font-mono text-[11px] mt-1 text-slate-300'>
+                <span className='font-mono text-[10px] sm:text-[11px] mt-1 text-slate-300'>
                   {formatTime(tooltip.data.startTime)} ~{' '}
                   {formatTime(tooltip.data.endTime)}
                 </span>
@@ -577,7 +709,6 @@ export default function GanttChart() {
             </div>
           </div>
 
-          {/* Routing Visualizer */}
           <div className='pt-2 border-t border-slate-700'>
             <div className='text-[11px] text-slate-400 mb-3 flex items-center gap-1.5'>
               <Route size={12} />
@@ -591,16 +722,16 @@ export default function GanttChart() {
 
             <div className='flex items-center w-full justify-between relative'>
               <div className='absolute top-1/2 left-0 w-full h-0.5 bg-slate-700 -translate-y-1/2 z-0'></div>
-              {tooltip.data.routingSteps.map((step: any, idx: number) => {
-                const isCurrent = idx === tooltip.data.stepIndex
-                const isPast = idx < tooltip.data.stepIndex
+              {tooltip.data.routingSteps.map((step: string, idx: number) => {
+                const isCurrent = idx === tooltip.data!.stepIndex
+                const isPast = idx < tooltip.data!.stepIndex
                 return (
                   <div
                     key={idx}
                     className='relative z-10 flex flex-col items-center'
                   >
                     <div
-                      className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                      className={`w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full border-2 flex items-center justify-center transition-colors ${
                         isCurrent
                           ? 'bg-blue-500 border-blue-400 shadow-[0_0_8px_rgba(59,130,246,0.8)]'
                           : isPast
@@ -613,7 +744,7 @@ export default function GanttChart() {
                       )}
                     </div>
                     <div
-                      className={`absolute top-5 text-[10px] whitespace-nowrap px-1 py-0.5 rounded transition-colors ${
+                      className={`absolute top-5 text-[9px] sm:text-[10px] whitespace-nowrap px-1 py-0.5 rounded transition-colors ${
                         isCurrent
                           ? 'text-blue-300 font-bold'
                           : isPast
