@@ -469,7 +469,7 @@ const ProductionCard: React.FC<{
             percent={order.progress}
             size='small'
             strokeColor={order.isRush ? '#f59e0b' : '#3b82f6'}
-            trailColor='#f1f5f9'
+            railColor='#f1f5f9'
           />
         </div>
 

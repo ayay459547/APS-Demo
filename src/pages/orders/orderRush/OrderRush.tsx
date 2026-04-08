@@ -346,7 +346,7 @@ const OrderRush: React.FC = () => {
   return (
     <div className='px-2 pt-2 pb-8 space-y-4 animate-fade-in'>
       {/* 頂部導航列 */}
-      <div className='flex flex-wrap items-center justify-between px-1 gap-y-4 bg-white/50 py-2 rounded-xl sticky top-0 z-10 backdrop-blur-sm'>
+      <div className='flex flex-wrap items-center justify-between px-1 gap-y-4 bg-white/50 py-2 rounded-xl sticky top-0 z-20 backdrop-blur-sm'>
         <div className='flex items-center gap-3'>
           <div className='bg-amber-500 p-1.5 rounded-lg shadow-amber-200 shadow-lg'>
             <Zap size={18} className='text-white fill-white' />

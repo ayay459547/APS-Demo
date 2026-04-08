@@ -10,6 +10,10 @@ import OrderList from '@/pages/orders/orderList/OrderList'
 import OrderRush from '@/pages/orders/orderRush/OrderRush'
 import VisualOrderRush from '@/pages/orders/visualOrderRush/VisualOrderRush'
 
+// 訂單與工單 - 工單管理
+import WorkOrderList from '@/pages/workOrders/workOrderList/WorkOrderList'
+import WorkOrderSplit from '@/pages/workOrders/workOrderSplit/WorkOrderSplit.tsx'
+
 // 排程分析 - 視覺化
 import GanttChart from '@/pages/visualization/ganttChart/GanttChart'
 import LoadChart from '@/pages/visualization/loadChart/LoadChart'
@@ -31,6 +35,9 @@ const routes: RouteObject[] = [
       { path: 'o_list', element: <OrderList /> },
       { path: 'o_rush', element: <OrderRush /> },
       { path: 'o_visual_rush', element: <VisualOrderRush /> },
+
+      { path: 'wo_list', element: <WorkOrderList /> },
+      { path: 'wo_split', element: <WorkOrderSplit /> },
 
       { path: 'gantt_chart', element: <GanttChart /> },
       { path: 'load_chart', element: <LoadChart /> },
