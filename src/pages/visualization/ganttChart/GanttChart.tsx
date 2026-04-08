@@ -442,7 +442,7 @@ export default function GanttChart() {
   const totalContentHeight = MACHINES.length * ROW_HEIGHT
 
   return (
-    <div className='flex flex-col h-full bg-slate-50 font-sans text-slate-800 overflow-hidden'>
+    <div className='p-2 flex flex-col h-full bg-slate-50 font-sans text-slate-800 overflow-hidden'>
       {/* RWD Toolbar */}
       <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 py-3 bg-white border-b border-slate-200 shadow-sm z-10 shrink-0 gap-3 sm:gap-0'>
         <div className='flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs font-medium text-slate-600'>

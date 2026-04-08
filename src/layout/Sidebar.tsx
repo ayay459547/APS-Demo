@@ -27,7 +27,8 @@ const menuData = [
         label: '訂單管理',
         children: [
           { id: 'o_list', label: '訂單列表' },
-          { id: 'o_rush', label: '插單管理' }
+          { id: 'o_rush', label: '插單管理' },
+          { id: 'o_visual_rush', label: '視覺化插單' }
         ]
       },
       {

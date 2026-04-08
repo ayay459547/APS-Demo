@@ -6,15 +6,17 @@ import Layout from '@/layout/Layout.tsx'
 import DashboardContent from '@/pages/dashboard/DashboardContent.tsx'
 
 // 訂單與工單 - 訂單管理
-import OrderList from '@/pages/orders/order-list/OrderList.tsx'
+import OrderList from '@/pages/orders/orderList/OrderList'
+import OrderRush from '@/pages/orders/orderRush/OrderRush'
+import VisualOrderRush from '@/pages/orders/visualOrderRush/VisualOrderRush'
 
 // 排程分析 - 視覺化
-import GanttChart from '@/pages/visualization/gantt-chart/GanttChart.tsx'
-import LoadChart from '@/pages/visualization/load-chart/LoadChart.tsx'
+import GanttChart from '@/pages/visualization/ganttChart/GanttChart'
+import LoadChart from '@/pages/visualization/loadChart/LoadChart'
 
 // 排程分析 - 分析
-import MachineBottleneck from '@/pages/analysis/machine-bottleneck/MachineBottleneck.tsx'
-import MaterialBottleneck from '@/pages/analysis/material-bottleneck/MaterialBottleneck.tsx'
+import MachineBottleneck from '@/pages/analysis/machineBottleneck/MachineBottleneck'
+import MaterialBottleneck from '@/pages/analysis/materialBottleneck/MaterialBottleneck'
 
 // 功能尚未開發
 import NotFound from '@/pages/NotFound.tsx'
@@ -27,6 +29,8 @@ const routes: RouteObject[] = [
       { index: true, element: <DashboardContent /> },
 
       { path: 'o_list', element: <OrderList /> },
+      { path: 'o_rush', element: <OrderRush /> },
+      { path: 'o_visual_rush', element: <VisualOrderRush /> },
 
       { path: 'gantt_chart', element: <GanttChart /> },
       { path: 'load_chart', element: <LoadChart /> },

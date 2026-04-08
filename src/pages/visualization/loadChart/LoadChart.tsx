@@ -429,7 +429,7 @@ export default function MachineLoadDashboard() {
   }
 
   return (
-    <div className='flex flex-col h-full bg-slate-50 font-sans text-slate-800'>
+    <div className='p-2 flex flex-col h-full bg-slate-50 font-sans text-slate-800'>
       {/* 2. Main Content Area */}
       <main className='flex-1 flex overflow-hidden'>
         {/* --- Left Panel: Machine List --- */}

@@ -181,7 +181,7 @@ const OrderList: React.FC = () => {
   }, [])
 
   const statsContent = (
-    <div className='w-full max-w-[480px] p-1'>
+    <div className='w-full max-w-[480px] py-2'>
       <div className='flex items-center gap-2 mb-4 border-b pb-2'>
         <BarChart3 size={16} className='text-blue-600' />
         <span className='font-bold text-slate-800'>生產指標詳情</span>
@@ -413,7 +413,7 @@ const OrderList: React.FC = () => {
   }
 
   return (
-    <div className='space-y-4 animate-fade-in pb-8'>
+    <div className='px-2 pt-2 pb-8 space-y-4 animate-fade-in'>
       {/* 頂部導航列 */}
       <div className='flex flex-wrap items-center justify-between px-1 gap-y-4 bg-white/50 py-2 rounded-xl sticky top-0 z-10 backdrop-blur-sm'>
         <div className='flex items-center gap-3'>
@@ -481,7 +481,7 @@ const OrderList: React.FC = () => {
 
       <Card
         className='shadow-sm border-none rounded-2xl overflow-hidden p-0'
-        bodyStyle={{ padding: 0 }}
+        styles={{ body: { padding: 0 } }}
       >
         <div className='flex flex-col'>
           {/* 表格工具列 */}

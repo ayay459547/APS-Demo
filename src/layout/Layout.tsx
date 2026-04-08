@@ -83,7 +83,7 @@ export default function Layout() {
         </header>
 
         {/* 內容區塊 */}
-        <div className='flex-1 overflow-auto p-2  bg-slate-50/50 relative'>
+        <div className='flex-1 overflow-auto  bg-slate-50/50 relative'>
           <Outlet />
         </div>
       </main>
