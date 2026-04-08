@@ -1,6 +1,8 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import * as echarts from 'echarts'
 import {
   Calendar,
+  Download,
   Activity,
   Zap,
   TrendingUp,
@@ -9,8 +11,66 @@ import {
   Factory
 } from 'lucide-react'
 
+// --- 型別定義 (Type Definitions) ---
+type MachineType =
+  | 'CNC'
+  | '5-AXIS'
+  | 'LASER'
+  | 'WELDING'
+  | 'HEAT'
+  | 'GRIND'
+  | 'COATING'
+  | 'ASM'
+  | 'QC'
+  | 'PACK'
+
+interface BaseMachine {
+  type: MachineType
+  name: string
+}
+
+interface Machine {
+  id: string
+  name: string
+  type: MachineType
+}
+
+interface Routing {
+  steps: string[]
+}
+
+interface LoadStatus {
+  color: string
+  hex: string
+  text: string
+  label: string
+  bg: string
+}
+
+interface MachineSummary extends Machine {
+  totalScheduledHours: number
+  avgLoadPercent: number
+  status: LoadStatus
+}
+
+interface ChartDataPoint {
+  dayIndex: number
+  dateLabel: string
+  scheduledHours: number
+  availableHours: number
+  percent: number
+  status: LoadStatus
+}
+
+interface DashboardStats {
+  totalReq: number
+  totalAvail: number
+  avg: number
+  peak: number
+}
+
 // --- 設定與常數 ---
-const BASE_MACHINES = [
+const BASE_MACHINES: BaseMachine[] = [
   { type: 'CNC', name: 'CNC 銑床' },
   { type: 'CNC', name: 'CNC 車床' },
   { type: '5-AXIS', name: '五軸加工機' },
@@ -24,7 +84,7 @@ const BASE_MACHINES = [
   { type: 'PACK', name: '出貨包裝站' }
 ]
 
-const MACHINES = Array.from({ length: 100 }, (_, i) => {
+const MACHINES: Machine[] = Array.from({ length: 100 }, (_, i) => {
   const base = BASE_MACHINES[i % BASE_MACHINES.length]
   return {
     id: `MCH-${String(i + 1).padStart(3, '0')}`,
@@ -33,7 +93,7 @@ const MACHINES = Array.from({ length: 100 }, (_, i) => {
   }
 })
 
-const PROCESS_MACHINE_MAP: Record<string, string[]> = {
+const PROCESS_MACHINE_MAP: Record<string, MachineType[]> = {
   下料: ['LASER'],
   CNC加工: ['CNC', '5-AXIS'],
   熱處理: ['HEAT'],
@@ -43,27 +103,27 @@ const PROCESS_MACHINE_MAP: Record<string, string[]> = {
   檢驗: ['QC', 'PACK']
 }
 
-const ROUTINGS = [
+const ROUTINGS: Routing[] = [
   { steps: ['下料', 'CNC加工', '表面處理', '檢驗'] },
   { steps: ['下料', 'CNC加工', '研磨', '檢驗'] },
   { steps: ['下料', '組裝', '表面處理', '檢驗'] }
 ]
 
 const DAYS_TO_SHOW = 14
-const getBaseDate = () => {
+const getBaseDate = (): Date => {
   const d = new Date()
   d.setHours(0, 0, 0, 0)
   return d
 }
-const BASE_DATE: any = getBaseDate()
+const BASE_DATE = getBaseDate()
 
 // --- 資料生成引擎 ---
 // 為了呈現負載圖，我們簡化為直接產出每日負載時數
-const generateLoadData = () => {
-  const loadMap: Record<string, any> = {}
+const generateLoadData = (): Record<string, number[]> => {
+  const loadMap: Record<string, number[]> = {}
   MACHINES.forEach(m => (loadMap[m.id] = Array(DAYS_TO_SHOW).fill(0)))
 
-  const machineAvailableTimes: Record<string, any> = {}
+  const machineAvailableTimes: Record<string, Date> = {}
   MACHINES.forEach(
     m => (machineAvailableTimes[m.id] = new Date(BASE_DATE.getTime()))
   )
@@ -125,16 +185,17 @@ const generateLoadData = () => {
 }
 
 // 格式化日期 (MM/DD)
-const formatDate = (offsetDays: any) => {
+const formatDate = (offsetDays: number): string => {
   const d = new Date(BASE_DATE.getTime() + offsetDays * 24 * 60 * 60 * 1000)
   return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`
 }
 
-// 取得負載顏色與狀態
-const getLoadStatus = (percent: number) => {
+// 取得負載顏色與狀態 (包含 hex 以供 ECharts 使用)
+const getLoadStatus = (percent: number): LoadStatus => {
   if (percent >= 85)
     return {
       color: 'bg-red-500',
+      hex: '#ef4444',
       text: 'text-red-500',
       label: '超載',
       bg: 'bg-red-50'
@@ -142,12 +203,14 @@ const getLoadStatus = (percent: number) => {
   if (percent >= 60)
     return {
       color: 'bg-amber-400',
+      hex: '#fbbf24',
       text: 'text-amber-500',
       label: '滿載',
       bg: 'bg-amber-50'
     }
   return {
     color: 'bg-emerald-400',
+    hex: '#34d399',
     text: 'text-emerald-500',
     label: '健康',
     bg: 'bg-emerald-50'
@@ -156,11 +219,12 @@ const getLoadStatus = (percent: number) => {
 
 // --- 主元件 ---
 export default function MachineLoadDashboard() {
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState<boolean>(true)
   const [dailyLoadByMachine, setDailyLoadByMachine] = useState<
-    Record<string, any>
+    Record<string, number[]>
   >({})
   const [selectedMachineId, setSelectedMachineId] = useState<string>('ALL') // 'ALL' 或 特定 machineId
+  const chartRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const loadData = async () => {
@@ -175,11 +239,11 @@ export default function MachineLoadDashboard() {
   }, [])
 
   // 計算機台總覽數據 (供左側列表使用)
-  const machineSummaries = useMemo(() => {
+  const machineSummaries = useMemo<MachineSummary[]>(() => {
     if (Object.keys(dailyLoadByMachine).length === 0) return []
 
     return MACHINES.map(m => {
-      const loads: any[] = dailyLoadByMachine[m.id]
+      const loads = dailyLoadByMachine[m.id]
       const totalScheduledHours = loads.reduce((sum, h) => sum + h, 0)
       const totalAvailableHours = DAYS_TO_SHOW * 24
       const avgLoadPercent = Math.round(
@@ -196,10 +260,10 @@ export default function MachineLoadDashboard() {
   }, [dailyLoadByMachine])
 
   // 計算圖表顯示數據 (全廠 或 單一機台)
-  const chartData = useMemo(() => {
+  const chartData = useMemo<ChartDataPoint[]>(() => {
     if (Object.keys(dailyLoadByMachine).length === 0) return []
 
-    const data = []
+    const data: ChartDataPoint[] = []
     for (let d = 0; d < DAYS_TO_SHOW; d++) {
       let dailyHours = 0
       let availableHours = 24
@@ -229,7 +293,7 @@ export default function MachineLoadDashboard() {
   }, [dailyLoadByMachine, selectedMachineId])
 
   // 綜合統計數據 (圖表下方卡片)
-  const stats = useMemo(() => {
+  const stats = useMemo<DashboardStats>(() => {
     if (chartData.length === 0)
       return { totalReq: 0, totalAvail: 0, avg: 0, peak: 0 }
     const totalReq = chartData.reduce((s, d) => s + d.scheduledHours, 0)
@@ -238,6 +302,131 @@ export default function MachineLoadDashboard() {
     const peak = Math.max(...chartData.map(d => d.percent))
     return { totalReq, totalAvail, avg, peak }
   }, [chartData])
+
+  // 初始化與更新 ECharts
+  useEffect(() => {
+    if (loading || chartData.length === 0 || !chartRef.current) return
+
+    let chartInstance = echarts.getInstanceByDom(chartRef.current)
+    if (!chartInstance) {
+      chartInstance = echarts.init(chartRef.current)
+    }
+
+    const option = {
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        backgroundColor: '#1e293b',
+        borderColor: '#334155',
+        textStyle: { color: '#f8fafc', fontSize: 12 },
+        formatter: function (params: any[]) {
+          const dataIndex = params[0].dataIndex
+          const d = chartData[dataIndex]
+          return `
+            <div style="font-weight:bold; border-bottom:1px solid #475569; padding-bottom:6px; margin-bottom:6px; text-align:center;">${d.dateLabel}</div>
+            <div style="margin-bottom:4px;">負載：<span style="font-weight:bold; color:${d.status.hex};">${d.percent}%</span></div>
+            <div style="color:#94a3b8; font-family:monospace;">時數：${d.scheduledHours.toFixed(1)} / ${d.availableHours}</div>
+          `
+        }
+      },
+      grid: {
+        top: '10%',
+        left: '2%',
+        right: '4%',
+        bottom: '5%',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'category',
+        data: chartData.map(d => d.dateLabel),
+        axisLabel: { color: '#64748b', margin: 12 },
+        axisTick: { show: false },
+        axisLine: { lineStyle: { color: '#cbd5e1' } }
+      },
+      yAxis: {
+        type: 'value',
+        max: 120, // 視覺最高限制到 120% 來顯示超載
+        axisLabel: { formatter: '{value}%', color: '#64748b' },
+        splitLine: { lineStyle: { color: '#f1f5f9' } }
+      },
+      series: [
+        {
+          type: 'bar',
+          data: chartData.map(d => ({
+            value: Math.min(d.percent, 120),
+            itemStyle: { color: d.status.hex }
+          })),
+          barMaxWidth: 40,
+          itemStyle: {
+            borderRadius: [2, 2, 0, 0]
+          },
+          markLine: {
+            silent: true,
+            symbol: 'none',
+            label: { show: false },
+            lineStyle: { color: '#fca5a5', type: 'dashed', width: 2 },
+            data: [{ yAxis: 100 }]
+          }
+        }
+      ]
+    }
+
+    chartInstance.setOption(option)
+
+    const handleResize = () => {
+      if (chartInstance) chartInstance.resize()
+    }
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [chartData, loading])
+
+  // --- 匯出 CSV 報表功能 ---
+  const handleExportCSV = () => {
+    if (chartData.length === 0) return
+
+    const machineName =
+      selectedMachineId === 'ALL'
+        ? '全廠綜合'
+        : MACHINES.find(m => m.id === selectedMachineId)?.name || '未知設備'
+
+    const headers = [
+      '日期',
+      '分析對象',
+      '已排程工時(H)',
+      '總可用產能(H)',
+      '稼動率(%)',
+      '負載狀態'
+    ]
+    const rows = chartData.map(d => [
+      d.dateLabel,
+      machineName,
+      d.scheduledHours.toFixed(1),
+      d.availableHours,
+      d.percent,
+      d.status.label
+    ])
+
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join(
+      '\n'
+    )
+
+    const bom = new Uint8Array([0xef, 0xbb, 0xbf])
+    const blob = new Blob([bom, csvContent], {
+      type: 'text/csv;charset=utf-8;'
+    })
+
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.setAttribute('href', url)
+    link.setAttribute('download', `機台負載分析報表_${machineName}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
 
   return (
     <div className='flex flex-col h-full bg-slate-50 font-sans text-slate-800'>
@@ -337,9 +526,9 @@ export default function MachineLoadDashboard() {
           ) : (
             <div className='p-6 md:p-8 max-w-6xl mx-auto w-full flex flex-col gap-6'>
               {/* Context Header */}
-              <div className='flex items-end justify-between mb-2'>
+              <div className='flex flex-col xl:flex-row xl:items-end justify-between mb-4 gap-4'>
                 <div>
-                  <h2 className='text-2xl font-black text-slate-800'>
+                  <h2 className='text-xl sm:text-2xl font-black text-slate-800'>
                     {selectedMachineId === 'ALL'
                       ? '全廠綜合負載趨勢'
                       : MACHINES.find(m => m.id === selectedMachineId)?.name}
@@ -348,150 +537,96 @@ export default function MachineLoadDashboard() {
                     <Calendar size={14} /> 分析區間：未來 {DAYS_TO_SHOW} 天
                   </p>
                 </div>
-                <div className='flex items-center gap-4 text-xs font-medium text-slate-600 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm'>
-                  <div className='flex items-center gap-1.5'>
-                    <div className='w-3 h-3 rounded-sm bg-emerald-400'></div>{' '}
-                    健康 (&lt;60%)
+                <div className='flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full lg:w-auto'>
+                  <div className='flex flex-wrap items-center gap-3 sm:gap-4 text-xs font-medium text-slate-600 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm w-full sm:w-auto justify-start sm:justify-center'>
+                    <div className='flex items-center gap-1.5 whitespace-nowrap'>
+                      <div className='w-3 h-3 rounded-sm bg-emerald-400 shrink-0'></div>{' '}
+                      健康 (&lt;60%)
+                    </div>
+                    <div className='flex items-center gap-1.5 whitespace-nowrap'>
+                      <div className='w-3 h-3 rounded-sm bg-amber-400 shrink-0'></div>{' '}
+                      滿載 (60~84%)
+                    </div>
+                    <div className='flex items-center gap-1.5 whitespace-nowrap'>
+                      <div className='w-3 h-3 rounded-sm bg-red-500 shrink-0'></div>{' '}
+                      超載 (&ge;85%)
+                    </div>
                   </div>
-                  <div className='flex items-center gap-1.5'>
-                    <div className='w-3 h-3 rounded-sm bg-amber-400'></div> 滿載
-                    (60~84%)
-                  </div>
-                  <div className='flex items-center gap-1.5'>
-                    <div className='w-3 h-3 rounded-sm bg-red-500'></div> 超載
-                    (&ge;85%)
-                  </div>
+                  <button
+                    onClick={handleExportCSV}
+                    disabled={loading}
+                    className='w-full sm:w-auto text-sm bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-emerald-500 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shrink-0 whitespace-nowrap'
+                  >
+                    <Download size={16} /> 匯出報表
+                  </button>
                 </div>
               </div>
 
               {/* Stats Cards */}
-              <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
-                <div className='bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col'>
-                  <span className='text-slate-500 text-sm font-medium flex items-center gap-1.5'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4'>
+                <div className='bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col'>
+                  <span className='text-slate-500 text-xs sm:text-sm font-medium flex items-center gap-1.5'>
                     <TrendingUp size={16} /> 平均稼動率
                   </span>
                   <div className='mt-2 flex items-baseline gap-2'>
-                    <span className='text-3xl font-black text-slate-800'>
+                    <span className='text-2xl sm:text-3xl font-black text-slate-800'>
                       {stats.avg}%
                     </span>
                   </div>
                 </div>
-                <div className='bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col'>
-                  <span className='text-slate-500 text-sm font-medium flex items-center gap-1.5'>
+                <div className='bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col'>
+                  <span className='text-slate-500 text-xs sm:text-sm font-medium flex items-center gap-1.5'>
                     <AlertTriangle size={16} /> 尖峰負載
                   </span>
                   <div className='mt-2 flex items-baseline gap-2'>
                     <span
-                      className={`text-3xl font-black ${stats.peak >= 85 ? 'text-red-500' : 'text-slate-800'}`}
+                      className={`text-2xl sm:text-3xl font-black ${stats.peak >= 85 ? 'text-red-500' : 'text-slate-800'}`}
                     >
                       {stats.peak}%
                     </span>
                   </div>
                 </div>
-                <div className='bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col'>
-                  <span className='text-slate-500 text-sm font-medium flex items-center gap-1.5'>
+                <div className='bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col'>
+                  <span className='text-slate-500 text-xs sm:text-sm font-medium flex items-center gap-1.5'>
                     <Clock size={16} /> 已排程工時
                   </span>
                   <div className='mt-2 flex items-baseline gap-2'>
-                    <span className='text-3xl font-black text-blue-600'>
+                    <span className='text-2xl sm:text-3xl font-black text-blue-600'>
                       {Math.round(stats.totalReq)}
                     </span>
-                    <span className='text-sm font-bold text-slate-400'>H</span>
+                    <span className='text-xs sm:text-sm font-bold text-slate-400'>
+                      H
+                    </span>
                   </div>
                 </div>
-                <div className='bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col'>
-                  <span className='text-slate-500 text-sm font-medium flex items-center gap-1.5'>
+                <div className='bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col'>
+                  <span className='text-slate-500 text-xs sm:text-sm font-medium flex items-center gap-1.5'>
                     <Zap size={16} /> 總可用產能
                   </span>
                   <div className='mt-2 flex items-baseline gap-2'>
-                    <span className='text-3xl font-black text-slate-800'>
+                    <span className='text-2xl sm:text-3xl font-black text-slate-800'>
                       {stats.totalAvail}
                     </span>
-                    <span className='text-sm font-bold text-slate-400'>H</span>
+                    <span className='text-xs sm:text-sm font-bold text-slate-400'>
+                      H
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* The Classic Bar Chart */}
+              {/* The Classic Bar Chart using ECharts */}
               <div className='bg-white p-6 rounded-xl border border-slate-200 shadow-sm mt-4'>
-                <h3 className='text-sm font-bold text-slate-700 mb-8'>
+                <h3 className='text-sm font-bold text-slate-700 mb-4'>
                   每日負載分佈 (%)
                 </h3>
 
-                {/* Chart Container */}
-                <div className='relative h-80 w-full pl-10 pb-8'>
-                  {/* Y-Axis Lines & Labels (Max 120% to show overload) */}
-                  {[120, 100, 75, 50, 25, 0].map(val => (
-                    <div
-                      key={val}
-                      className='absolute left-10 right-0 flex items-center'
-                      style={{ bottom: `${(val / 120) * 100}%` }}
-                    >
-                      <span className='absolute -left-10 text-xs text-slate-400 font-medium w-8 text-right'>
-                        {val}%
-                      </span>
-                      <div
-                        className={`w-full h-px ${val === 100 ? 'bg-red-300 border-t border-dashed border-red-400' : 'bg-slate-100'}`}
-                      ></div>
-                    </div>
-                  ))}
-
-                  {/* Bars Area */}
-                  <div className='absolute left-10 right-0 bottom-8 top-0 flex items-end justify-between px-2 gap-2'>
-                    {chartData.map((d, i) => {
-                      // 限制長條圖視覺最高到 120%
-                      const barHeightPercent = Math.min(
-                        (d.percent / 120) * 100,
-                        100
-                      )
-
-                      return (
-                        <div
-                          key={i}
-                          className='relative flex-1 flex flex-col items-center group'
-                        >
-                          {/* Tooltip */}
-                          <div className='absolute bottom-full mb-2 bg-slate-800 text-white text-xs px-3 py-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg whitespace-nowrap text-center'>
-                            <div className='font-bold mb-1 border-b border-slate-600 pb-1'>
-                              {d.dateLabel}
-                            </div>
-                            <div className='mb-0.5'>
-                              負載：
-                              <span
-                                className={`font-bold ${d.status.text.replace('500', '400')}`}
-                              >
-                                {d.percent}%
-                              </span>
-                            </div>
-                            <div className='text-slate-400 font-mono'>
-                              時數：{d.scheduledHours.toFixed(1)} /{' '}
-                              {d.availableHours}
-                            </div>
-                            <div className='absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-800 transform rotate-45 -mt-1'></div>
-                          </div>
-
-                          {/* Bar */}
-                          <div
-                            className={`w-full max-w-[40px] rounded-t-sm shadow-sm ${d.status.color} transition-all duration-500 ease-out hover:brightness-110 hover:shadow-md cursor-pointer`}
-                            style={{
-                              height: `${Math.max(barHeightPercent, 1)}%`
-                            }} // 最少給 1% 顯示底線
-                          ></div>
-
-                          {/* X-Axis Label */}
-                          <div className='absolute top-full mt-3 text-xs text-slate-500 font-medium rotate-45 origin-top-left ml-2 whitespace-nowrap'>
-                            {d.dateLabel}
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
+                {/* ECharts Container */}
+                <div ref={chartRef} className='h-80 w-full' />
               </div>
 
               {/* Context Warning Box */}
               {stats.peak >= 100 && (
-                <div className='bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3 items-start'>
+                <div className='bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3 items-start mt-4'>
                   <AlertTriangle
                     className='text-red-500 shrink-0 mt-0.5'
                     size={20}

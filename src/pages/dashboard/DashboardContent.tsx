@@ -10,7 +10,7 @@ import {
   ClipboardList
 } from 'lucide-react'
 import AntDesignLogo from '@/assets/ant-design.svg'
-import FeatureCards from '@/layout/FeatureCards.tsx'
+import FeatureCards from './FeatureCards.tsx'
 import { Button } from 'antd'
 
 // --- Dashboard 內容元件 (高質感 UI + ECharts) ---

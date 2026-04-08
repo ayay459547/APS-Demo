@@ -2,9 +2,9 @@ import type { RouteObject } from 'react-router-dom'
 import { useRoutes } from 'react-router-dom'
 import Layout from '@/layout/Layout.tsx'
 
-import DashboardContent from '@/pages/DashboardContent.tsx'
+import DashboardContent from '@/pages/dashboard/DashboardContent.tsx'
 
-import GanttChart from '@/pages/GanttChart.tsx'
+import GanttChart from '@/pages//GanttChart.tsx'
 import LoadChart from '@/pages/LoadChart.tsx'
 
 import NotFound from '@/pages/NotFound.tsx'
