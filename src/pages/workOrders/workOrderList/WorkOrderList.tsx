@@ -23,11 +23,10 @@ import {
   PlayCircle,
   PauseCircle,
   Printer,
-  Cpu,
-  User,
   Activity
 } from 'lucide-react'
 import type { ColumnsType } from 'antd/es/table'
+import { clsx } from 'clsx'
 
 const { RangePicker } = DatePicker
 
@@ -42,17 +41,17 @@ type WorkOrderStatus =
 
 interface WorkOrderItem {
   key: string
-  woId: string // 工單編號 (MO-xxx)
-  itemCode: string // 產品代碼
-  itemName: string // 產品名稱
-  plannedQty: number // 計畫產量
-  actualQty: number // 實際產量
+  woId: string
+  itemCode: string
+  itemName: string
+  plannedQty: number
+  actualQty: number
   startDate: string
   endDate: string
-  machine: string // 派發機台
-  operator: string // 操作員
+  machine: string
+  operator: string
   status: WorkOrderStatus
-  yieldRate: number // 良率
+  yieldRate: number
 }
 
 interface StatCardProps {
@@ -60,14 +59,14 @@ interface StatCardProps {
   value: string | number
   unit: string
   icon: React.ElementType
-  color: string
-  bg: string
-  iconColor: string
+  colorClass: string
+  bgClass: string
+  iconColorClass: string
   trend?: string
   isAlert?: boolean
 }
 
-// --- 假資料生成器 (300 筆工單) ---
+// --- 假資料生成器 ---
 const generateWOMockData = (count: number): WorkOrderItem[] => {
   const items = [
     { code: 'IC-7022', name: 'M3 Pro Mainboard' },
@@ -108,27 +107,30 @@ const generateWOMockData = (count: number): WorkOrderItem[] => {
       machine: machines[Math.floor(Math.random() * machines.length)],
       operator: operators[Math.floor(Math.random() * operators.length)],
       status,
-      yieldRate: 95 + Math.random() * 4.9 // 良率 95%-99.9%
+      yieldRate: 95 + Math.random() * 4.9
     }
   })
 }
 
 const allMockData = generateWOMockData(300)
 
-// --- 子組件：統計卡片 ---
+// --- 子組件：統計卡片 (使用 clsx 優化) ---
 const StatCard: React.FC<StatCardProps> = ({
   title,
   value,
   unit,
   icon: Icon,
-  color,
-  bg,
-  iconColor,
+  colorClass,
+  bgClass,
+  iconColorClass,
   trend,
   isAlert
 }) => (
   <div
-    className={`bg-white rounded-xl p-4 border border-slate-100 shadow-sm flex items-center justify-between ${isAlert ? 'ring-1 ring-rose-100' : ''}`}
+    className={clsx(
+      'bg-white rounded-xl p-4 border border-slate-100 shadow-sm flex items-center justify-between transition-all hover:shadow-md',
+      isAlert && 'ring-1 ring-rose-100'
+    )}
   >
     <div>
       <p className='text-[12px] text-slate-500 mb-0.5 font-medium'>{title}</p>
@@ -139,11 +141,13 @@ const StatCard: React.FC<StatCardProps> = ({
         <span className='text-[10px] text-slate-400 font-medium'>{unit}</span>
       </div>
       {trend && (
-        <div className={`mt-1 text-[10px] font-bold ${color}`}>{trend}</div>
+        <div className={clsx('mt-1 text-[10px] font-bold', colorClass)}>
+          {trend}
+        </div>
       )}
     </div>
-    <div className={`p-2 rounded-lg ${bg}`}>
-      <Icon size={18} className={iconColor} />
+    <div className={clsx('p-2 rounded-lg', bgClass)}>
+      <Icon size={18} className={iconColorClass} />
     </div>
   </div>
 )
@@ -179,18 +183,18 @@ const WorkOrderList: React.FC = () => {
           value={stats.running}
           unit='筆'
           icon={PlayCircle}
-          color='text-blue-600'
-          bg='bg-blue-50'
-          iconColor='text-blue-500'
+          colorClass='text-blue-600'
+          bgClass='bg-blue-50'
+          iconColorClass='text-blue-500'
         />
         <StatCard
           title='現場異常報工'
           value={stats.abnormal}
           unit='筆'
           icon={AlertTriangle}
-          color='text-rose-600'
-          bg='bg-rose-50'
-          iconColor='text-rose-500'
+          colorClass='text-rose-600'
+          bgClass='bg-rose-50'
+          iconColorClass='text-rose-500'
           trend='需立即處理'
           isAlert
         />
@@ -199,18 +203,18 @@ const WorkOrderList: React.FC = () => {
           value={stats.avgYield}
           unit='%'
           icon={CheckCircle2}
-          color='text-emerald-600'
-          bg='bg-emerald-50'
-          iconColor='text-emerald-500'
+          colorClass='text-emerald-600'
+          bgClass='bg-emerald-50'
+          iconColorClass='text-emerald-500'
         />
         <StatCard
           title='今日計畫產出'
           value={stats.todayTarget}
           unit='PCS'
           icon={BarChart3}
-          color='text-slate-600'
-          bg='bg-slate-50'
-          iconColor='text-slate-500'
+          colorClass='text-slate-600'
+          bgClass='bg-slate-50'
+          iconColorClass='text-slate-500'
         />
       </div>
     </div>
@@ -225,12 +229,7 @@ const WorkOrderList: React.FC = () => {
         <span className='font-mono font-bold text-slate-700'>{text}</span>
       ),
       width: 150,
-      fixed: 'left',
-      filters: allMockData
-        .slice(0, 10)
-        .map(d => ({ text: d.woId, value: d.woId })),
-      filterSearch: true,
-      onFilter: (value, record) => record.woId === value
+      fixed: 'left'
     },
     {
       title: '產品資訊',
@@ -247,25 +246,7 @@ const WorkOrderList: React.FC = () => {
       )
     },
     {
-      title: '機台 / 人員',
-      dataIndex: 'machine',
-      key: 'resource',
-      width: 140,
-      render: (machine, record) => (
-        <div className='flex flex-col gap-1'>
-          <div className='flex items-center gap-1.5 text-slate-600'>
-            <Cpu size={12} className='text-slate-400' />
-            <span className='text-[11px] font-bold'>{machine}</span>
-          </div>
-          <div className='flex items-center gap-1.5 text-slate-400'>
-            <User size={12} />
-            <span className='text-[10px]'>{record.operator}</span>
-          </div>
-        </div>
-      )
-    },
-    {
-      title: '生產進度 (實際/計畫)',
+      title: '進度 (實際/計畫)',
       key: 'progress',
       width: 180,
       render: (_, record) => {
@@ -295,13 +276,6 @@ const WorkOrderList: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       width: 120,
-      filters: [
-        { text: '生產中', value: 'In Progress' },
-        { text: '計畫中', value: 'Planned' },
-        { text: '已完工', value: 'Completed' },
-        { text: '異常停滯', value: 'Abnormal' }
-      ],
-      onFilter: (value, record) => record.status === value,
       render: (status: WorkOrderStatus) => {
         const statusMap: Record<
           WorkOrderStatus,
@@ -310,32 +284,32 @@ const WorkOrderList: React.FC = () => {
           'In Progress': {
             color: 'processing',
             text: '生產中',
-            icon: <PlayCircle size={10} className='mr-1' />
+            icon: <PlayCircle size={10} className='mr-1 inline' />
           },
           Planned: {
             color: 'default',
             text: '計畫中',
-            icon: <Clock size={10} className='mr-1' />
+            icon: <Clock size={10} className='mr-1 inline' />
           },
           Scheduled: {
             color: 'warning',
             text: '已排產',
-            icon: <Clock size={10} className='mr-1' />
+            icon: <Clock size={10} className='mr-1 inline' />
           },
           Paused: {
             color: 'warning',
             text: '暫停',
-            icon: <PauseCircle size={10} className='mr-1' />
+            icon: <PauseCircle size={10} className='mr-1 inline' />
           },
           Completed: {
             color: 'success',
             text: '已完工',
-            icon: <CheckCircle2 size={10} className='mr-1' />
+            icon: <CheckCircle2 size={10} className='mr-1 inline' />
           },
           Abnormal: {
             color: 'error',
             text: '異常',
-            icon: <AlertTriangle size={10} className='mr-1' />
+            icon: <AlertTriangle size={10} className='mr-1 inline' />
           }
         }
         const config = statusMap[status]
@@ -350,20 +324,6 @@ const WorkOrderList: React.FC = () => {
       }
     },
     {
-      title: '良率',
-      dataIndex: 'yieldRate',
-      key: 'yield',
-      width: 90,
-      sorter: (a, b) => a.yieldRate - b.yieldRate,
-      render: rate => (
-        <span
-          className={`font-mono font-bold ${rate < 97 ? 'text-rose-500' : 'text-emerald-500'}`}
-        >
-          {rate.toFixed(1)}%
-        </span>
-      )
-    },
-    {
       title: '操作',
       key: 'action',
       width: 60,
@@ -375,30 +335,19 @@ const WorkOrderList: React.FC = () => {
               {
                 key: 'details',
                 label: '報工明細',
-                icon: <FileText size={14} className='text-blue-500' />
+                icon: <FileText size={14} />
               },
-              {
-                key: 'print',
-                label: '列印工單',
-                icon: <Printer size={14} className='text-slate-500' />
-              },
-              { key: 'divider', type: 'divider' },
-              {
-                key: 'stop',
-                label: '強制結案',
-                danger: true,
-                icon: <PauseCircle size={14} />
-              }
+              { key: 'stop', label: '強制結案', danger: true }
             ]
           }}
           trigger={['click']}
-          placement='bottomRight'
         >
           <Button
-            type='text'
+            variant='text'
+            color='default'
             size='small'
             icon={<MoreVertical size={18} />}
-            className='text-slate-400 flex items-center justify-center hover:bg-slate-100 transition-colors'
+            classNames={{ root: 'text-slate-400' }}
           />
         </Dropdown>
       )
@@ -406,63 +355,69 @@ const WorkOrderList: React.FC = () => {
   ]
 
   return (
-    <div className='px-2 pt-2 pb-8 space-y-4 animate-fade-in'>
+    <div className='px-2 pt-2 pb-8 space-y-4 animate-fade-in relative'>
+      {/* 全域 Loading 遮罩 */}
+      {loading && (
+        <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-[110] flex items-center justify-center rounded-2xl'>
+          <div className='flex flex-col items-center gap-3'>
+            <div className='w-10 h-10 border-4 border-indigo-100 border-t-indigo-500 rounded-full animate-spin' />
+            <span className='text-xs font-black text-indigo-600 tracking-widest uppercase'>
+              Fetching Orders...
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* 頂部導航列 */}
       <div className='flex flex-wrap items-center justify-between px-1 gap-y-4 bg-white/50 py-2 rounded-xl sticky top-0 z-20 backdrop-blur-sm'>
         <div className='flex items-center gap-3'>
           <div className='bg-indigo-600 p-1.5 rounded-lg shadow-indigo-200 shadow-lg'>
             <ClipboardCheck size={18} className='text-white' />
           </div>
-          <div className='flex items-center'>
-            {/* 修正：使用 classNames={{ root: '...' }} 替換已棄用的 overlayClassName */}
-            <Popover
-              content={statsContent}
-              trigger='click'
-              placement='bottomLeft'
-              classNames={{ root: 'custom-stats-popover' }}
-            >
-              <div className='flex items-center gap-2 cursor-pointer hover:bg-white px-3 py-1.5 rounded-full transition-colors group shadow-sm border border-transparent hover:border-indigo-100'>
-                <span className='text-sm font-bold text-slate-600 group-hover:text-indigo-600 whitespace-nowrap'>
-                  生產執行概覽
-                </span>
-                <div className='flex gap-1'>
-                  <Badge
-                    count={stats.running}
-                    style={{
-                      backgroundColor: '#1677ff',
-                      fontSize: '10px',
-                      boxShadow: 'none'
-                    }}
-                  />
-                  <Badge
-                    count={stats.abnormal}
-                    style={{
-                      backgroundColor: '#f5222d',
-                      fontSize: '10px',
-                      boxShadow: 'none'
-                    }}
-                  />
-                </div>
-                <ChevronDown
-                  size={14}
-                  className='text-slate-400 group-hover:text-indigo-600'
+          <Popover
+            content={statsContent}
+            trigger='click'
+            placement='bottomLeft'
+            classNames={{ root: 'custom-stats-popover' }}
+          >
+            <div className='flex items-center gap-2 cursor-pointer hover:bg-white px-3 py-1.5 rounded-full transition-all group border border-transparent hover:border-indigo-100'>
+              <span className='text-sm font-bold text-slate-600 group-hover:text-indigo-600 whitespace-nowrap'>
+                生產執行概覽
+              </span>
+              <div className='flex gap-1'>
+                <Badge
+                  count={stats.running}
+                  style={{ backgroundColor: '#1677ff', fontSize: '10px' }}
+                />
+                <Badge
+                  count={stats.abnormal}
+                  style={{ backgroundColor: '#f5222d', fontSize: '10px' }}
                 />
               </div>
-            </Popover>
-          </div>
+              <ChevronDown
+                size={14}
+                className='text-slate-400 group-hover:text-indigo-600'
+              />
+            </div>
+          </Popover>
         </div>
 
         <div className='flex items-center gap-2'>
           <Button
+            variant='outlined'
+            color='default'
             icon={<Printer size={16} />}
-            className='rounded-xl border-slate-200 font-medium h-10 flex items-center justify-center'
+            classNames={{ root: 'rounded-xl h-10 font-medium' }}
           >
             <span className='hidden lg:inline ml-1 text-xs'>批次列印</span>
           </Button>
           <Button
-            type='primary'
+            variant='solid'
+            color='primary'
             icon={<Plus size={16} />}
-            className='rounded-xl bg-indigo-600 shadow-md shadow-indigo-100 font-bold border-none hover:bg-indigo-700 h-10 flex items-center justify-center'
+            classNames={{
+              root: 'rounded-xl bg-indigo-600 h-10 font-bold border-none'
+            }}
           >
             <span className='hidden sm:inline ml-1 text-xs'>手動開單</span>
           </Button>
@@ -474,32 +429,25 @@ const WorkOrderList: React.FC = () => {
         styles={{ body: { padding: 0 } }}
       >
         <div className='flex flex-col'>
-          <div className='flex flex-wrap items-center justify-between gap-4 py-4 px-4 border-b border-slate-50'>
-            <div className='flex flex-wrap items-center gap-3 flex-1'>
-              <RangePicker className='rounded-xl h-10 border-slate-200 w-full sm:w-auto' />
-              <div className='text-indigo-600 text-[11px] flex items-center gap-1.5 bg-indigo-50 px-3 py-2 rounded-lg border border-indigo-100'>
-                <Activity size={14} />
-                <span>
-                  現場動態：目前共有 {stats.running}{' '}
-                  條產線正在運轉，良率穩定保持在 98% 以上。
-                </span>
-              </div>
+          <div className='flex flex-wrap items-center gap-4 py-4 px-4 border-b border-slate-50'>
+            <RangePicker
+              classNames={{ root: 'rounded-xl h-10 border-slate-200' }}
+            />
+            <div className='text-indigo-600 text-[11px] flex items-center gap-1.5 bg-indigo-50 px-3 py-2 rounded-lg border border-indigo-100'>
+              <Activity size={14} />
+              <span>現場動態：{stats.running} 條產線運轉中，良率穩定。</span>
             </div>
           </div>
 
           <div className='overflow-x-auto'>
             <Table
-              rowSelection={{
-                selectedRowKeys,
-                onChange: keys => setSelectedRowKeys(keys)
-              }}
+              rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
               columns={columns}
               dataSource={allMockData}
-              loading={loading}
               pagination={{
                 pageSize: 10,
                 showSizeChanger: true,
-                showTotal: total => `共計 ${total} 筆工單指令`,
+                showTotal: total => `共 ${total} 筆工單`,
                 className: 'px-4 pb-4'
               }}
               scroll={{ x: 'max-content' }}
@@ -509,33 +457,12 @@ const WorkOrderList: React.FC = () => {
         </div>
       </Card>
 
-      <style>
-        {`
-          .work-order-table .ant-table-thead > tr > th {
-            background: #f8faff !important;
-            color: #475569 !important;
-            font-weight: 700 !important;
-            border-bottom: 1px solid #e2e8f0 !important;
-            white-space: nowrap;
-          }
-          .work-order-table .ant-table-tbody > tr:hover > td {
-            background: #f1f5ff !important;
-          }
-          .custom-stats-popover .ant-popover-inner {
-            border-radius: 16px !important;
-            padding: 16px !important;
-            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.1) !important;
-            border: 1px solid #e0e7ff;
-          }
-          .animate-fade-in {
-            animation: fadeIn 0.4s ease-out forwards;
-          }
-          @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-        `}
-      </style>
+      <style>{`
+        .work-order-table .ant-table-thead > tr > th { background: #f8faff !important; color: #475569 !important; font-weight: 700 !important; }
+        .custom-stats-popover .ant-popover-inner { border-radius: 16px !important; padding: 16px !important; border: 1px solid #e0e7ff; }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+      `}</style>
     </div>
   )
 }

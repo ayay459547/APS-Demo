@@ -2,8 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react'
 import {
   Table,
   Tag,
-  Space,
-  // Input,
   Button,
   Card,
   Progress,
@@ -11,7 +9,8 @@ import {
   Dropdown,
   DatePicker,
   Popover,
-  Tooltip
+  Tooltip,
+  Space
 } from 'antd'
 import {
   Plus,
@@ -31,7 +30,15 @@ import {
   CalendarDays
 } from 'lucide-react'
 import type { ColumnsType, TableProps } from 'antd/es/table'
-import './OrderList.scss'
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+/**
+ * 合併 Tailwind 類名的工具函數
+ */
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
 
 const { RangePicker } = DatePicker
 
@@ -57,9 +64,9 @@ interface StatCardProps {
   value: string | number
   unit: string
   icon: React.ElementType
-  color: string
-  bg: string
-  iconColor: string
+  colorClass: string
+  bgClass: string
+  iconColorClass: string
   trend?: string
   isAlert?: boolean
 }
@@ -117,20 +124,23 @@ const generateMockData = (count: number): OrderItem[] => {
 
 const allMockData = generateMockData(500)
 
-// --- 子組件：統計卡片 ---
+// --- 子組件：統計卡片 (使用 clsx 優化) ---
 const StatCard: React.FC<StatCardProps> = ({
   title,
   value,
   unit,
   icon: Icon,
-  color,
-  bg,
-  iconColor,
+  colorClass,
+  bgClass,
+  iconColorClass,
   trend,
   isAlert
 }) => (
   <div
-    className={`bg-white rounded-xl p-4 border border-slate-100 shadow-sm flex items-center justify-between ${isAlert ? 'ring-1 ring-rose-100' : ''}`}
+    className={cn(
+      'bg-white rounded-xl p-4 border border-slate-100 shadow-sm flex items-center justify-between transition-all hover:shadow-md',
+      isAlert && 'ring-1 ring-rose-100 bg-rose-50/10'
+    )}
   >
     <div>
       <p className='text-[12px] text-slate-500 mb-0.5 font-medium'>{title}</p>
@@ -141,11 +151,13 @@ const StatCard: React.FC<StatCardProps> = ({
         <span className='text-[10px] text-slate-400 font-medium'>{unit}</span>
       </div>
       {trend && (
-        <div className={`mt-1 text-[10px] font-bold ${color}`}>{trend}</div>
+        <div className={cn('mt-1 text-[10px] font-bold', colorClass)}>
+          {trend}
+        </div>
       )}
     </div>
-    <div className={`p-2 rounded-lg ${bg}`}>
-      <Icon size={18} className={iconColor} />
+    <div className={cn('p-2.5 rounded-lg', bgClass)}>
+      <Icon size={18} className={iconColorClass} />
     </div>
   </div>
 )
@@ -181,8 +193,8 @@ const OrderList: React.FC = () => {
   }, [])
 
   const statsContent = (
-    <div className='w-full max-w-[480px] py-2'>
-      <div className='flex items-center gap-2 mb-4 border-b pb-2'>
+    <div className='w-full max-w-[480px] py-1'>
+      <div className='flex items-center gap-2 mb-4 border-b border-slate-100 pb-2.5'>
         <BarChart3 size={16} className='text-blue-600' />
         <span className='font-bold text-slate-800'>生產指標詳情</span>
       </div>
@@ -192,27 +204,27 @@ const OrderList: React.FC = () => {
           value={stats.pending}
           unit='筆'
           icon={ClipboardList}
-          color='text-blue-600'
-          bg='bg-blue-50'
-          iconColor='text-blue-500'
+          colorClass='text-blue-600'
+          bgClass='bg-blue-50'
+          iconColorClass='text-blue-500'
         />
         <StatCard
           title='生產中訂單'
           value={stats.production}
           unit='筆'
           icon={Clock}
-          color='text-indigo-600'
-          bg='bg-indigo-50'
-          iconColor='text-indigo-500'
+          colorClass='text-indigo-600'
+          bgClass='bg-indigo-50'
+          iconColorClass='text-indigo-500'
         />
         <StatCard
           title='逾期警告'
           value={stats.delayed}
           unit='筆'
           icon={AlertTriangle}
-          color='text-rose-600'
-          bg='bg-rose-50'
-          iconColor='text-rose-500'
+          colorClass='text-rose-600'
+          bgClass='bg-rose-50'
+          iconColorClass='text-rose-500'
           trend='+12% 較上月'
           isAlert={true}
         />
@@ -221,15 +233,15 @@ const OrderList: React.FC = () => {
           value={stats.completed}
           unit='筆'
           icon={CheckCircle2}
-          color='text-emerald-600'
-          bg='bg-emerald-50'
-          iconColor='text-emerald-500'
+          colorClass='text-emerald-600'
+          bgClass='bg-emerald-50'
+          iconColorClass='text-emerald-500'
           trend='+45 較上月'
         />
       </div>
-      <div className='mt-4 bg-slate-50 p-2 rounded-lg text-[11px] text-slate-400 flex items-center gap-2'>
-        <Info size={12} />
-        數據每 5 分鐘自動更新，當前顯示為即時計算結果。
+      <div className='mt-4 bg-slate-50 p-2.5 rounded-lg text-[11px] text-slate-400 flex items-start gap-2'>
+        <Info size={14} className='shrink-0 mt-0.5' />
+        <span>數據每 5 分鐘自動更新，當前顯示為系統即時計算結果。</span>
       </div>
     </div>
   )
@@ -243,7 +255,7 @@ const OrderList: React.FC = () => {
         <span className='font-mono font-bold text-blue-600'>{text}</span>
       ),
       sorter: (a, b) => a.orderId.localeCompare(b.orderId),
-      width: 140,
+      width: 150,
       filters: orderIdFilters,
       filterSearch: true,
       onFilter: (value, record) => record.orderId === value
@@ -294,7 +306,7 @@ const OrderList: React.FC = () => {
     {
       title: '生產進度',
       key: 'progress',
-      width: 130,
+      width: 140,
       render: (_, record) => (
         <div className='w-full'>
           <Progress
@@ -310,7 +322,7 @@ const OrderList: React.FC = () => {
       title: '狀態',
       dataIndex: 'status',
       key: 'status',
-      width: 100,
+      width: 110,
       filters: [
         { text: '生產中', value: 'In Production' },
         { text: '待排產', value: 'Pending' },
@@ -345,16 +357,17 @@ const OrderList: React.FC = () => {
       title: '預計交期',
       dataIndex: 'deliveryDate',
       key: 'deliveryDate',
-      width: 110,
+      width: 130,
       sorter: (a, b) =>
         new Date(a.deliveryDate).getTime() - new Date(b.deliveryDate).getTime(),
       render: (date: string, record) => (
         <span
-          className={
+          className={cn(
+            'font-medium',
             record.status === 'Delayed'
               ? 'text-rose-500 font-bold'
-              : 'text-slate-600 font-medium'
-          }
+              : 'text-slate-600'
+          )}
         >
           {date}
         </span>
@@ -397,10 +410,13 @@ const OrderList: React.FC = () => {
           placement='bottomRight'
         >
           <Button
-            type='text'
+            variant='text'
+            color='default'
             size='small'
             icon={<MoreVertical size={18} />}
-            className='text-slate-400 flex items-center justify-center hover:bg-slate-100 transition-colors'
+            classNames={{
+              root: 'text-slate-400 flex items-center justify-center hover:bg-slate-100'
+            }}
           />
         </Dropdown>
       )
@@ -413,7 +429,19 @@ const OrderList: React.FC = () => {
   }
 
   return (
-    <div className='px-2 pt-2 pb-8 space-y-4 animate-fade-in'>
+    <div className='px-2 pt-2 pb-8 space-y-4 animate-fade-in relative'>
+      {/* 全域 Loading 遮罩 */}
+      {loading && (
+        <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-[110] flex items-center justify-center rounded-2xl'>
+          <div className='flex flex-col items-center gap-3'>
+            <div className='w-10 h-10 border-4 border-blue-100 border-t-blue-500 rounded-full animate-spin' />
+            <span className='text-xs font-black text-blue-600 tracking-widest uppercase'>
+              Fetching Order Data...
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* 頂部導航列 */}
       <div className='flex flex-wrap items-center justify-between px-1 gap-y-4 bg-white/50 py-2 rounded-xl sticky top-0 z-20 backdrop-blur-sm'>
         <div className='flex items-center gap-3'>
@@ -421,14 +449,13 @@ const OrderList: React.FC = () => {
             <BarChart3 size={18} className='text-white' />
           </div>
           <div className='flex items-center'>
-            {/* 即時生產概覽 Popover */}
             <Popover
               content={statsContent}
               trigger='click'
               placement='bottomLeft'
               classNames={{ root: 'custom-stats-popover' }}
             >
-              <div className='flex items-center gap-2 cursor-pointer hover:bg-white px-2 sm:px-3 py-1.5 rounded-full transition-colors group shadow-sm sm:shadow-none border border-transparent sm:border-none hover:border-slate-100'>
+              <div className='flex items-center gap-2 cursor-pointer hover:bg-white px-2 sm:px-3 py-1.5 rounded-full transition-all group border border-transparent hover:border-slate-100'>
                 <span className='text-sm font-bold text-slate-600 group-hover:text-blue-600 whitespace-nowrap'>
                   即時概覽
                 </span>
@@ -459,20 +486,26 @@ const OrderList: React.FC = () => {
           </div>
         </div>
 
-        {/* 頂部右側動作按鈕 */}
         <div className='flex items-center gap-2'>
           <Tooltip title='導出 Excel 報表'>
             <Button
+              variant='outlined'
+              color='default'
               icon={<Download size={16} />}
-              className='rounded-xl border-slate-200 font-medium h-10 flex items-center justify-center'
+              classNames={{
+                root: 'rounded-xl font-medium h-10 flex items-center justify-center'
+              }}
             >
               <span className='hidden lg:inline ml-1 text-xs'>匯出報表</span>
             </Button>
           </Tooltip>
           <Button
-            type='primary'
+            variant='solid'
+            color='primary'
             icon={<Plus size={16} />}
-            className='rounded-xl bg-blue-600 shadow-md shadow-blue-100 font-bold border-none hover:bg-blue-700 h-10 flex items-center justify-center'
+            classNames={{
+              root: 'rounded-xl bg-blue-600 shadow-md shadow-blue-100 font-bold border-none h-10 flex items-center justify-center'
+            }}
           >
             <span className='hidden sm:inline ml-1 text-xs'>建立訂單</span>
           </Button>
@@ -487,7 +520,11 @@ const OrderList: React.FC = () => {
           {/* 表格工具列 */}
           <div className='flex flex-wrap items-center justify-between gap-4 py-4 px-4 border-b border-slate-50'>
             <div className='flex flex-wrap items-center gap-3 flex-1'>
-              <RangePicker className='rounded-xl h-10 border-slate-200 w-full sm:w-auto' />
+              <RangePicker
+                classNames={{
+                  root: 'rounded-xl h-10 border-slate-200 w-full sm:w-auto'
+                }}
+              />
               <div className='text-slate-400 text-[11px] flex items-center gap-1.5 bg-slate-50 px-3 py-2 rounded-lg border border-slate-100'>
                 <Info size={14} className='text-blue-400' />
                 <span>提示：點擊各欄位表頭可進行精確篩選或排序</span>
@@ -506,25 +543,27 @@ const OrderList: React.FC = () => {
               </div>
               <Space>
                 <Button
+                  variant='solid'
+                  color='primary'
                   size='small'
-                  type='primary'
-                  className='rounded-lg font-bold border-none text-xs'
+                  classNames={{ root: 'rounded-lg font-bold text-xs' }}
                 >
                   批量排產
                 </Button>
                 <Button
+                  variant='outlined'
+                  color='danger'
                   size='small'
-                  danger
-                  ghost
-                  className='rounded-lg font-bold text-xs'
+                  classNames={{ root: 'rounded-lg font-bold text-xs' }}
                 >
                   批量取消
                 </Button>
                 <Button
+                  variant='text'
+                  color='default'
                   size='small'
-                  type='text'
                   onClick={() => setSelectedRowKeys([])}
-                  className='text-slate-400 text-xs'
+                  classNames={{ root: 'text-slate-400 text-xs' }}
                 >
                   取消
                 </Button>
@@ -550,6 +589,27 @@ const OrderList: React.FC = () => {
           </div>
         </div>
       </Card>
+
+      <style>{`
+        .order-manage-table .ant-table-thead > tr > th {
+          background: #f8fafc !important;
+          color: #64748b !important;
+          font-weight: 700 !important;
+          border-bottom: 1px solid #f1f5f9 !important;
+          white-space: nowrap;
+        }
+        .order-manage-table .ant-table-tbody > tr:hover > td {
+          background: #f1f7ff !important;
+        }
+        .custom-stats-popover .ant-popover-inner {
+          border-radius: 16px !important;
+          padding: 16px !important;
+          box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
+          border: 1px solid #e0e7ff;
+        }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+      `}</style>
     </div>
   )
 }

@@ -28,7 +28,15 @@ import {
   TrendingDown
 } from 'lucide-react'
 import type { ColumnsType } from 'antd/es/table'
-import './OrderRush.scss'
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+/**
+ * 合併 Tailwind 類名的工具函數
+ */
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
 
 const { RangePicker } = DatePicker
 
@@ -46,7 +54,7 @@ interface OrderItem {
   priority: PriorityType
   status: OrderStatusType
   progress: number
-  impactScore: number // 0-100, 數值越高表示對排程衝擊越大
+  impactScore: number // 0-100
   isRush: boolean
 }
 
@@ -55,14 +63,14 @@ interface StatCardProps {
   value: string | number
   unit: string
   icon: React.ElementType
-  color: string
-  bg: string
-  iconColor: string
+  colorClass: string
+  bgClass: string
+  iconColorClass: string
   trend?: string
   isAlert?: boolean
 }
 
-// --- 假資料生成器 (針對插單場景優化) ---
+// --- 假資料生成器 ---
 const generateRushMockData = (count: number): OrderItem[] => {
   const customers = [
     'Tesla Giga',
@@ -107,20 +115,23 @@ const generateRushMockData = (count: number): OrderItem[] => {
 
 const rushMockData = generateRushMockData(150)
 
-// --- 子組件：統計卡片 ---
+// --- 子組件：統計卡片 (使用 clsx) ---
 const StatCard: React.FC<StatCardProps> = ({
   title,
   value,
   unit,
   icon: Icon,
-  color,
-  bg,
-  iconColor,
+  colorClass,
+  bgClass,
+  iconColorClass,
   trend,
   isAlert
 }) => (
   <div
-    className={`bg-white rounded-xl p-4 border border-slate-100 shadow-sm flex items-center justify-between ${isAlert ? 'ring-1 ring-amber-100' : ''}`}
+    className={cn(
+      'bg-white rounded-xl p-4 border border-slate-100 shadow-sm flex items-center justify-between transition-all hover:shadow-md',
+      isAlert && 'ring-1 ring-amber-100 bg-amber-50/10'
+    )}
   >
     <div>
       <p className='text-[12px] text-slate-500 mb-0.5 font-medium'>{title}</p>
@@ -131,11 +142,13 @@ const StatCard: React.FC<StatCardProps> = ({
         <span className='text-[10px] text-slate-400 font-medium'>{unit}</span>
       </div>
       {trend && (
-        <div className={`mt-1 text-[10px] font-bold ${color}`}>{trend}</div>
+        <div className={cn('mt-1 text-[10px] font-bold', colorClass)}>
+          {trend}
+        </div>
       )}
     </div>
-    <div className={`p-2 rounded-lg ${bg}`}>
-      <Icon size={18} className={iconColor} />
+    <div className={cn('p-2.5 rounded-lg', bgClass)}>
+      <Icon size={18} className={iconColorClass} />
     </div>
   </div>
 )
@@ -162,9 +175,9 @@ const OrderRush: React.FC = () => {
 
   const statsContent = (
     <div className='w-full max-w-[480px] p-1'>
-      <div className='flex items-center gap-2 mb-4 border-b pb-2'>
+      <div className='flex items-center gap-2 mb-4 border-b border-slate-100 pb-2.5'>
         <Activity size={16} className='text-indigo-600' />
-        <span className='font-bold text-slate-800'>插單分析看板 (模擬值)</span>
+        <span className='font-bold text-slate-800'>插單決策分析看板</span>
       </div>
       <div className='grid grid-cols-2 gap-3'>
         <StatCard
@@ -172,18 +185,18 @@ const OrderRush: React.FC = () => {
           value={stats.rushCount}
           unit='筆'
           icon={Zap}
-          color='text-amber-600'
-          bg='bg-amber-50'
-          iconColor='text-amber-500'
+          colorClass='text-amber-600'
+          bgClass='bg-amber-50'
+          iconColorClass='text-amber-500'
         />
         <StatCard
           title='受影響訂單'
           value={stats.impacted}
           unit='筆'
           icon={TrendingDown}
-          color='text-rose-600'
-          bg='bg-rose-50'
-          iconColor='text-rose-500'
+          colorClass='text-rose-600'
+          bgClass='bg-rose-50'
+          iconColorClass='text-rose-500'
           trend='高風險'
           isAlert
         />
@@ -192,23 +205,25 @@ const OrderRush: React.FC = () => {
           value={stats.efficiencyLoss}
           unit='OEE'
           icon={Clock}
-          color='text-slate-600'
-          bg='bg-slate-50'
-          iconColor='text-slate-500'
+          colorClass='text-slate-600'
+          bgClass='bg-slate-50'
+          iconColorClass='text-slate-500'
         />
         <StatCard
           title='產能負荷'
           value={stats.capacity}
-          unit='Capacity'
+          unit='Cap'
           icon={CheckCircle2}
-          color='text-emerald-600'
-          bg='bg-emerald-50'
-          iconColor='text-emerald-500'
+          colorClass='text-emerald-600'
+          bgClass='bg-emerald-50'
+          iconColorClass='text-emerald-500'
         />
       </div>
-      <div className='mt-4 bg-indigo-50 p-2 rounded-lg text-[11px] text-indigo-600 flex items-center gap-2'>
-        <Info size={12} />
-        插單後系統會自動重算 GANTT 圖，請注意「受影響訂單」的交期變化。
+      <div className='mt-4 bg-indigo-50 p-2.5 rounded-lg text-[11px] text-indigo-600 flex items-start gap-2'>
+        <Info size={14} className='shrink-0 mt-0.5' />
+        <span>
+          插單後系統會自動重算 GANTT 圖與產線順序，請密切注意受影響訂單。
+        </span>
       </div>
     </div>
   )
@@ -219,7 +234,7 @@ const OrderRush: React.FC = () => {
       dataIndex: 'orderId',
       key: 'orderId',
       render: (text, record) => (
-        <Space size={4}>
+        <Space size={6}>
           <span className='font-mono font-bold text-blue-600'>{text}</span>
           {record.isRush && (
             <Tooltip title='急單處理中'>
@@ -238,7 +253,7 @@ const OrderRush: React.FC = () => {
       minWidth: 160
     },
     {
-      title: '當前優先級',
+      title: '優先級',
       dataIndex: 'priority',
       key: 'priority',
       width: 110,
@@ -253,7 +268,7 @@ const OrderRush: React.FC = () => {
         return (
           <Tag
             color={color}
-            className='rounded-full px-3 border-none font-medium'
+            className='rounded-full px-3 border-none font-medium m-0'
           >
             {label}
           </Tag>
@@ -266,30 +281,34 @@ const OrderRush: React.FC = () => {
       key: 'impactScore',
       width: 130,
       render: score => {
-        let color = '#10b981'
-        if (score > 70) color = '#ef4444'
-        else if (score > 40) color = '#f59e0b'
+        const color =
+          score > 70 ? '#ef4444' : score > 40 ? '#f59e0b' : '#10b981'
         return (
-          <div className='flex flex-col gap-1'>
+          <div className='flex flex-col gap-1 w-full max-w-[100px]'>
             <Progress
               percent={score}
               size='small'
               strokeColor={color}
               showInfo={false}
             />
-            <span className='text-[10px] text-slate-400 font-medium'>
-              {score > 70
-                ? '高風險延誤'
-                : score > 40
-                  ? '中度受衝擊'
-                  : '穩定排程中'}
+            <span
+              className={cn(
+                'text-[9px] font-bold uppercase',
+                score > 70
+                  ? 'text-rose-500'
+                  : score > 40
+                    ? 'text-amber-500'
+                    : 'text-emerald-500'
+              )}
+            >
+              {score > 70 ? 'High Risk' : score > 40 ? 'Moderate' : 'Stable'}
             </span>
           </div>
         )
       }
     },
     {
-      title: '預計交期',
+      title: '交期',
       dataIndex: 'originalDelivery',
       key: 'originalDelivery',
       width: 120,
@@ -298,7 +317,7 @@ const OrderRush: React.FC = () => {
     {
       title: '操作',
       key: 'action',
-      width: 80,
+      width: 60,
       align: 'center',
       render: (_, record) => (
         <Dropdown
@@ -320,7 +339,7 @@ const OrderRush: React.FC = () => {
                 label: '變更紀錄',
                 icon: <History size={14} className='text-slate-500' />
               },
-              { key: 'divider', type: 'divider' },
+              { type: 'divider' },
               {
                 key: 'cancel',
                 label: '移除急單',
@@ -333,10 +352,13 @@ const OrderRush: React.FC = () => {
           placement='bottomRight'
         >
           <Button
-            type='text'
+            variant='text'
+            color='default'
             size='small'
             icon={<MoreVertical size={18} />}
-            className='text-slate-400 flex items-center justify-center hover:bg-slate-100 transition-colors'
+            classNames={{
+              root: 'text-slate-400 flex items-center justify-center hover:bg-slate-100'
+            }}
           />
         </Dropdown>
       )
@@ -344,62 +366,79 @@ const OrderRush: React.FC = () => {
   ]
 
   return (
-    <div className='px-2 pt-2 pb-8 space-y-4 animate-fade-in'>
+    <div className='px-2 pt-2 pb-8 space-y-4 animate-fade-in relative'>
+      {/* 全域 Loading 遮罩 */}
+      {loading && (
+        <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-[110] flex items-center justify-center rounded-2xl'>
+          <div className='flex flex-col items-center gap-3'>
+            <div className='w-10 h-10 border-4 border-amber-100 border-t-amber-500 rounded-full animate-spin' />
+            <span className='text-xs font-black text-amber-600 tracking-widest uppercase'>
+              Calculating Impacts...
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* 頂部導航列 */}
       <div className='flex flex-wrap items-center justify-between px-1 gap-y-4 bg-white/50 py-2 rounded-xl sticky top-0 z-20 backdrop-blur-sm'>
         <div className='flex items-center gap-3'>
           <div className='bg-amber-500 p-1.5 rounded-lg shadow-amber-200 shadow-lg'>
             <Zap size={18} className='text-white fill-white' />
           </div>
-          <div className='flex items-center'>
-            <Popover
-              content={statsContent}
-              trigger='click'
-              placement='bottomLeft'
-              classNames={{ root: 'custom-stats-popover' }}
-            >
-              <div className='flex items-center gap-2 cursor-pointer hover:bg-white px-2 sm:px-3 py-1.5 rounded-full transition-colors group shadow-sm border border-transparent hover:border-amber-100'>
-                <span className='text-sm font-bold text-slate-600 group-hover:text-amber-600 whitespace-nowrap'>
-                  插單決策監控
-                </span>
-                <div className='flex gap-1'>
-                  <Badge
-                    count={stats.rushCount}
-                    style={{
-                      backgroundColor: '#f59e0b',
-                      fontSize: '10px',
-                      boxShadow: 'none'
-                    }}
-                  />
-                  <Badge
-                    count={stats.impacted}
-                    style={{
-                      backgroundColor: '#ef4444',
-                      fontSize: '10px',
-                      boxShadow: 'none'
-                    }}
-                  />
-                </div>
-                <ChevronDown
-                  size={14}
-                  className='text-slate-400 group-hover:text-amber-600'
+          <Popover
+            content={statsContent}
+            trigger='click'
+            placement='bottomLeft'
+            classNames={{ root: 'custom-stats-popover' }}
+          >
+            <div className='flex items-center gap-2 cursor-pointer hover:bg-white px-2 sm:px-3 py-1.5 rounded-full transition-all group border border-transparent hover:border-amber-100'>
+              <span className='text-sm font-bold text-slate-600 group-hover:text-amber-600 whitespace-nowrap'>
+                插單監控
+              </span>
+              <div className='flex gap-1'>
+                <Badge
+                  count={stats.rushCount}
+                  style={{
+                    backgroundColor: '#f59e0b',
+                    fontSize: '10px',
+                    boxShadow: 'none'
+                  }}
+                />
+                <Badge
+                  count={stats.impacted}
+                  style={{
+                    backgroundColor: '#ef4444',
+                    fontSize: '10px',
+                    boxShadow: 'none'
+                  }}
                 />
               </div>
-            </Popover>
-          </div>
+              <ChevronDown
+                size={14}
+                className='text-slate-400 group-hover:text-amber-600'
+              />
+            </div>
+          </Popover>
         </div>
 
         <div className='flex items-center gap-2'>
           <Button
+            variant='outlined'
+            color='default'
             icon={<Activity size={16} />}
-            className='rounded-xl border-slate-200 font-medium h-10 flex items-center justify-center'
+            classNames={{
+              root: 'rounded-xl border-slate-200 font-medium h-10'
+            }}
           >
             <span className='hidden lg:inline ml-1 text-xs'>整線優化</span>
           </Button>
           <Button
-            type='primary'
+            variant='solid'
+            color='primary'
             icon={<Zap size={16} />}
-            className='rounded-xl bg-amber-500 shadow-md shadow-amber-100 font-bold border-none hover:bg-amber-600 h-10 flex items-center justify-center'
+            classNames={{
+              root: 'rounded-xl bg-amber-500 shadow-md shadow-amber-100 font-bold border-none h-10'
+            }}
           >
             <span className='hidden sm:inline ml-1 text-xs'>批量插單</span>
           </Button>
@@ -408,16 +447,20 @@ const OrderRush: React.FC = () => {
 
       <Card
         className='shadow-sm border-none rounded-2xl overflow-hidden p-0'
-        bodyStyle={{ padding: 0 }}
+        styles={{ body: { padding: 0 } }}
       >
         <div className='flex flex-col'>
           <div className='flex flex-wrap items-center justify-between gap-4 py-4 px-4 border-b border-slate-50'>
             <div className='flex flex-wrap items-center gap-3 flex-1'>
-              <RangePicker className='rounded-xl h-10 border-slate-200 w-full sm:w-auto' />
+              <RangePicker
+                classNames={{
+                  root: 'rounded-xl h-10 border-slate-200 w-full sm:w-auto'
+                }}
+              />
               <div className='text-amber-600 text-[11px] flex items-center gap-1.5 bg-amber-50 px-3 py-2 rounded-lg border border-amber-100'>
                 <AlertTriangle size={14} />
                 <span>
-                  插單模式：系統將鎖定部分工序以騰出機台產能，請注意其餘訂單延誤風險。
+                  插單模式：系統將重新調配資源，請留意非急單之逾期風險。
                 </span>
               </div>
             </div>
@@ -425,10 +468,7 @@ const OrderRush: React.FC = () => {
 
           <div className='overflow-x-auto'>
             <Table
-              rowSelection={{
-                selectedRowKeys,
-                onChange: keys => setSelectedRowKeys(keys)
-              }}
+              rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
               columns={columns}
               dataSource={rushMockData}
               loading={loading}
@@ -445,27 +485,26 @@ const OrderRush: React.FC = () => {
         </div>
       </Card>
 
-      {/* 插單操作彈窗 */}
+      {/* 插單確認彈窗 */}
       <Modal
-        title={null}
-        visible={isModalOpen}
+        open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
         footer={null}
         width={600}
         centered
-        className='rush-confirm-modal'
+        classNames={{ container: 'rush-confirm-modal-content' }}
       >
-        <div className='p-2'>
-          <div className='flex items-center gap-3 mb-6'>
-            <div className='w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center'>
-              <ArrowUpToLine className='text-amber-600' />
+        <div className='p-2 pt-4'>
+          <div className='flex items-center gap-4 mb-8'>
+            <div className='w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-600 shadow-sm'>
+              <ArrowUpToLine size={28} />
             </div>
             <div>
-              <h3 className='text-lg font-bold text-slate-800 m-0'>
-                執行緊急插單
+              <h3 className='text-xl font-bold text-slate-800 m-0 leading-tight'>
+                確認執行緊急插單
               </h3>
-              <p className='text-slate-400 text-xs'>
-                此動作將重新分配機台 A-04 至 B-12 的生產順序
+              <p className='text-slate-400 text-xs mt-1'>
+                此操作將觸發產能重分佈演算法，優先保障該訂單交期
               </p>
             </div>
           </div>
@@ -477,34 +516,66 @@ const OrderRush: React.FC = () => {
             items={[
               {
                 title: '訂單驗證',
-                description: '檢查物料清單與庫存狀態',
+                description: '檢查 BOM 物料與庫存可用量狀態',
                 status: 'finish'
               },
               {
                 title: '衝擊模擬',
-                description: '預計導致其餘 3 筆訂單延遲 1-2 天',
+                description: '預計導致其餘 3 筆一般訂單延遲 1-2 天',
                 status: 'process'
               },
-              { title: '執行排程', description: '推送更新至現場看板' }
+              {
+                title: '同步看板',
+                description: '推送更新至現場工段看板與機台 PLC'
+              }
             ]}
+            className='mb-10 px-4'
           />
 
-          <div className='mt-8 flex justify-end gap-3'>
+          <div className='flex justify-end gap-3 pt-4 border-t border-slate-50'>
             <Button
+              variant='outlined'
+              color='default'
               onClick={() => setIsModalOpen(false)}
-              className='rounded-lg'
+              classNames={{ root: 'rounded-lg px-6' }}
             >
               暫不執行
             </Button>
             <Button
-              type='primary'
-              className='rounded-lg bg-amber-500 border-none px-8 font-bold'
+              variant='solid'
+              color='primary'
+              classNames={{
+                root: 'rounded-lg bg-amber-500 border-none px-8 font-bold'
+              }}
             >
               確認插單
             </Button>
           </div>
         </div>
       </Modal>
+
+      <style>{`
+        .order-rush-table .ant-table-thead > tr > th {
+          background: #fdfaf6 !important;
+          color: #92400e !important;
+          font-weight: 700 !important;
+          border-bottom: 1px solid #fef3c7 !important;
+        }
+        .order-rush-table .ant-table-tbody > tr:hover > td {
+          background: #fffbeb !important;
+        }
+        .custom-stats-popover .ant-popover-inner {
+          border-radius: 16px !important;
+          padding: 16px !important;
+          border: 1px solid #fef3c7;
+        }
+        .rush-confirm-modal-content {
+          border-radius: 24px !important;
+          padding: 32px !important;
+        }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+      `}</style>
     </div>
   )
 }

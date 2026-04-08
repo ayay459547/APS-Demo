@@ -23,6 +23,7 @@ import {
   AlertCircle,
   Sparkles,
   ArrowRight,
+  Plus,
   ArrowDown
 } from 'lucide-react'
 import dayjs from 'dayjs'
@@ -284,53 +285,57 @@ const WorkOrderMerge: React.FC = () => {
                     />
                   </div>
                   {selectedOrders.map((order, idx) => (
-                    <Card
-                      key={order.id}
-                      classNames={{
-                        root: 'rounded-2xl border-none shadow-sm hover:shadow-md transition-all bg-white relative group'
-                      }}
-                      styles={{
-                        body: { padding: '16px 20px' }
-                      }}
-                    >
-                      <div className='flex items-center justify-between'>
-                        <div className='flex items-center gap-4'>
-                          <div className='w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-xs'>
-                            {idx + 1}
-                          </div>
-                          <div>
-                            <div className='text-sm font-black text-slate-700 leading-none'>
-                              {order.id}
+                    <div key={order.id}>
+                      <Card
+                        classNames={{
+                          root: 'rounded-2xl border-none shadow-sm hover:shadow-md transition-all bg-white relative group'
+                        }}
+                        styles={{
+                          body: { padding: '16px 20px' }
+                        }}
+                      >
+                        <div className='flex items-center justify-between'>
+                          <div className='flex items-center gap-4'>
+                            <div className='w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-xs'>
+                              {idx + 1}
                             </div>
-                            <div className='text-[10px] text-slate-400 mt-1 font-medium'>
-                              {order.qty} PCS • Due {order.deadline}
+                            <div>
+                              <div className='text-sm font-black text-slate-700 leading-none'>
+                                {order.id}
+                              </div>
+                              <div className='text-[10px] text-slate-400 mt-1 font-medium'>
+                                {order.qty} PCS • Due {order.deadline}
+                              </div>
                             </div>
                           </div>
+                          <Button
+                            variant='text'
+                            color='danger'
+                            size='small'
+                            icon={<Trash2 size={14} />}
+                            onClick={() => removeFromMerge(order.id)}
+                            classNames={{
+                              root: 'rounded-lg h-8 w-8 flex items-center justify-center'
+                            }}
+                          />
                         </div>
-                        <Button
-                          variant='text'
-                          color='danger'
-                          size='small'
-                          icon={<Trash2 size={14} />}
-                          onClick={() => removeFromMerge(order.id)}
-                          classNames={{
-                            root: 'rounded-lg h-8 w-8 flex items-center justify-center'
-                          }}
-                        />
-                      </div>
-                    </Card>
+                      </Card>
+                    </div>
                   ))}
-                  <Button
-                    block
-                    variant='dashed'
-                    color='default'
-                    classNames={{
-                      root: 'h-12 rounded-2xl border-2 font-bold text-slate-400 border-slate-200 mt-4'
-                    }}
-                    disabled
-                  >
-                    點擊左側面板加入更多
-                  </Button>
+
+                  {/* 提示文字區域 */}
+                  <div className='p-5 border-2 border-dashed border-slate-100 rounded-[24px] flex flex-col items-center justify-center text-slate-300 bg-slate-50/40 transition-colors group mt-6'>
+                    <Plus
+                      size={20}
+                      className='mb-2 opacity-40 group-hover:scale-110 transition-transform'
+                    />
+                    <span className='text-[11px] font-bold uppercase tracking-widest'>
+                      點擊左側面板加入更多
+                    </span>
+                    <p className='text-[10px] mt-1 opacity-60'>
+                      僅支援相同產品代碼合併
+                    </p>
+                  </div>
                 </div>
 
                 {/* 中間匯流箭頭 */}
