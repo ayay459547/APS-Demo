@@ -145,7 +145,7 @@ const VisualOrderRush: React.FC = () => {
               }
               trigger='click'
               placement='right'
-              overlayClassName='custom-stats-popover'
+              classNames={{ root: 'custom-stats-popover' }}
             >
               <div
                 className={`
@@ -178,7 +178,7 @@ const VisualOrderRush: React.FC = () => {
   return (
     <div className='space-y-4 animate-fade-in max-w-[1400px] mx-auto p-4'>
       {/* 緊湊型頂部控制列 */}
-      <div className='flex flex-wrap items-center justify-between gap-3 bg-white/80 p-2.5 px-4 rounded-2xl border border-white backdrop-blur-xl shadow-sm sticky top-0 z-20'>
+      <div className='flex flex-wrap items-center justify-between gap-3 bg-white/50 p-2.5 px-4 rounded-xl  backdrop-blur-xl shadow-sm sticky top-0 z-20'>
         <div className='flex items-center gap-3'>
           <div className='bg-amber-500 p-1.5 rounded-xl shadow-md shadow-amber-200/50'>
             <Zap size={18} className='text-white fill-white' />

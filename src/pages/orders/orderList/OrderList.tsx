@@ -426,7 +426,7 @@ const OrderList: React.FC = () => {
               content={statsContent}
               trigger='click'
               placement='bottomLeft'
-              overlayClassName='custom-stats-popover'
+              classNames={{ root: 'custom-stats-popover' }}
             >
               <div className='flex items-center gap-2 cursor-pointer hover:bg-white px-2 sm:px-3 py-1.5 rounded-full transition-colors group shadow-sm sm:shadow-none border border-transparent sm:border-none hover:border-slate-100'>
                 <span className='text-sm font-bold text-slate-600 group-hover:text-blue-600 whitespace-nowrap'>

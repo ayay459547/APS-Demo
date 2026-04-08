@@ -344,7 +344,7 @@ const OrderRush: React.FC = () => {
   ]
 
   return (
-    <div className='space-y-4 animate-fade-in pb-8'>
+    <div className='px-2 pt-2 pb-8 space-y-4 animate-fade-in'>
       {/* 頂部導航列 */}
       <div className='flex flex-wrap items-center justify-between px-1 gap-y-4 bg-white/50 py-2 rounded-xl sticky top-0 z-10 backdrop-blur-sm'>
         <div className='flex items-center gap-3'>
@@ -356,7 +356,7 @@ const OrderRush: React.FC = () => {
               content={statsContent}
               trigger='click'
               placement='bottomLeft'
-              overlayClassName='custom-stats-popover'
+              classNames={{ root: 'custom-stats-popover' }}
             >
               <div className='flex items-center gap-2 cursor-pointer hover:bg-white px-2 sm:px-3 py-1.5 rounded-full transition-colors group shadow-sm border border-transparent hover:border-amber-100'>
                 <span className='text-sm font-bold text-slate-600 group-hover:text-amber-600 whitespace-nowrap'>
