@@ -1,26 +1,16 @@
 import { useState } from 'react'
-import {
-  LayoutDashboard,
-  Bell,
-  MonitorPlay,
-  ChevronRight,
-  Menu
-} from 'lucide-react'
+import { LayoutDashboard, Megaphone, ChevronRight, Menu } from 'lucide-react'
 import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
-import { Badge, Modal } from 'antd'
+import { Badge } from 'antd'
 
-import ProductionBoardHeader from '@/components/productionBoard/ProductionBoardHeader.tsx'
 import ProductionBoard from '@/components/productionBoard/ProductionBoard.tsx'
-import ProductionBoardFooter from '@/components/productionBoard/ProductionBoardFooter.tsx'
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const [activeMenu, setActiveMenu] = useState('dashboard-overview-kpi')
-
-  const [isModalOpen, setIsModalOpen] = useState(false)
 
   return (
     <>
@@ -72,20 +62,12 @@ export default function Layout() {
             </div>
 
             <div className='flex items-center gap-4 md:gap-6'>
-              <div
-                className='relative cursor-pointer'
-                onClick={() => setIsModalOpen(true)}
-              >
-                <Badge dot status='processing'>
-                  <MonitorPlay
-                    size={20}
-                    className='text-slate-500 hover:text-blue-600 transition-colors'
-                  />
-                </Badge>
-              </div>
+              {/* 現場看板 */}
+              <ProductionBoard />
+              {/* 系統公告 */}
               <div className='relative cursor-pointer'>
                 <Badge dot>
-                  <Bell
+                  <Megaphone
                     size={20}
                     className='text-slate-500 hover:text-blue-600 transition-colors'
                   />
@@ -114,38 +96,6 @@ export default function Layout() {
           </div>
         </main>
       </div>
-
-      <Modal
-        open={isModalOpen}
-        closable
-        style={{
-          width: '100%',
-          top: 0,
-          left: 0,
-          margin: 0
-        }}
-        styles={{
-          wrapper: {
-            width: '100dvw',
-            height: '100dvh'
-          },
-          container: {
-            width: '100dvw',
-            height: '100dvh',
-            overflow: 'hidden',
-            borderRadius: 0
-          },
-          body: {
-            width: '100%',
-            height: 'calc(100% - 100px)'
-          }
-        }}
-        title={<ProductionBoardHeader />}
-        footer={<ProductionBoardFooter />}
-        onCancel={() => setIsModalOpen(false)}
-      >
-        <ProductionBoard />
-      </Modal>
     </>
   )
 }
