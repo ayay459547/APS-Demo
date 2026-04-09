@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { LayoutDashboard, Megaphone, ChevronRight, Menu } from 'lucide-react'
+import { LayoutDashboard, ChevronRight, Menu } from 'lucide-react'
 import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
-import { Badge } from 'antd'
 
 import ProductionBoard from '@/components/productionBoard/ProductionBoard.tsx'
+import Announcemen from '@/components/announcemen/Announcemen.tsx'
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -65,14 +65,8 @@ export default function Layout() {
               {/* 現場看板 */}
               <ProductionBoard />
               {/* 系統公告 */}
-              <div className='relative cursor-pointer'>
-                <Badge dot>
-                  <Megaphone
-                    size={20}
-                    className='text-slate-500 hover:text-blue-600 transition-colors'
-                  />
-                </Badge>
-              </div>
+              <Announcemen />
+
               <div className='h-6 w-px bg-slate-200 hidden sm:block'></div>
               <div className='flex items-center gap-3 cursor-pointer group'>
                 <div className='text-right hidden sm:block'>
