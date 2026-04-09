@@ -32,12 +32,13 @@ export default function ProductionBoardMain() {
   }, [])
 
   const [isHovering, setIsHovering] = useState(false)
-  const handleEnter = () => {
-    setIsHovering(true)
-  }
-  const handleLeave = () => {
-    setIsHovering(false)
-  }
+  const handleEnter = () => setIsHovering(true)
+  const handleLeave = () => setIsHovering(false)
+
+  const isHoveringRef = useRef(false)
+  useEffect(() => {
+    isHoveringRef.current = isHovering
+  }, [isHovering])
 
   // 自動捲動邏輯
   useEffect(() => {
@@ -50,7 +51,7 @@ export default function ProductionBoardMain() {
     const speed = 0.4
 
     const performScroll = () => {
-      if (isHovering) {
+      if (isHoveringRef.current) {
         requestId = requestAnimationFrame(performScroll)
         return
       }
@@ -73,7 +74,7 @@ export default function ProductionBoardMain() {
       clearTimeout(startTimeout)
       cancelAnimationFrame(requestId)
     }
-  }, [loading, isHovering])
+  }, [loading])
 
   return (
     <>
