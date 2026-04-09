@@ -21,7 +21,7 @@ const LineVisionCard: React.FC<{ data: LineData }> = ({ data }) => {
   return (
     <Card
       className={cn(
-        'h-full transition-all duration-500 shadow-sm',
+        'h-full transition-all duration-500 shadow-sm !rounded-[28px] !border-l-[14px]',
         data.status === 'ALARM' && 'ring-4 ring-rose-100',
         cfg.border,
         cfg.animate // 現在 cfg.animate 不會再報錯了

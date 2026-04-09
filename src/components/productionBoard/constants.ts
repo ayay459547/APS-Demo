@@ -11,26 +11,26 @@ export const statusConfig: Record<
   }
 > = {
   RUNNING: {
-    border: 'border-l-emerald-500',
+    border: '!border-l-emerald-500',
     text: 'text-emerald-500',
     label: '生產中',
     statusColor: 'success'
   },
   ALARM: {
-    border: 'border-l-rose-500',
+    border: '!border-l-rose-500',
     text: 'text-rose-500',
     label: '異常',
     animate: 'animate-pulse',
     statusColor: 'error'
   },
   IDLE: {
-    border: 'border-l-amber-500',
+    border: '!border-l-amber-500',
     text: 'text-amber-500',
     label: '待料',
     statusColor: 'warning'
   },
   SETUP: {
-    border: 'border-l-blue-500',
+    border: '!border-l-blue-500',
     text: 'text-blue-500',
     label: '調機',
     statusColor: 'processing'
