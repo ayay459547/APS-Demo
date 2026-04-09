@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Tag } from 'antd'
-import { LayoutList } from 'lucide-react'
+import { Factory } from 'lucide-react'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import dayjs from 'dayjs'
@@ -24,7 +24,7 @@ const ProductionBoardHeader: React.FC = () => {
   }, [])
 
   return (
-    <header className='flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10'>
+    <header className='flex md:items-center justify-between gap-4 relative z-10'>
       <div className='flex items-center gap-4'>
         <div
           className={cn(
@@ -32,9 +32,10 @@ const ProductionBoardHeader: React.FC = () => {
             'bg-indigo-600 shadow-indigo-200'
           )}
         >
-          <LayoutList size={12} className='text-white' />
+          <Factory size={16} className='text-white' />
         </div>
-        <div className='flex flex-col gap-1'>
+
+        <div className='flex flex-col gap-1 hidden sm:block'>
           <div className='flex items-center gap-2'>
             <div className='w-2 h-2 rounded-full bg-emerald-500 animate-pulse' />
             <span
