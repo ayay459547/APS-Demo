@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { Badge } from 'antd'
 import { MonitorPlay } from 'lucide-react'
+
 import ProductionModal from './ProductionModal.tsx'
 import ProductionMain from './ProductionMain.tsx'
 import ProductionHeader from './ProductionHeader.tsx'
 import ProductionFooter from './ProductionFooter.tsx'
+import './ProductionBoard.scss'
 
 const ProductionBoard: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -26,6 +28,7 @@ const ProductionBoard: React.FC = () => {
       <ProductionModal
         open={isModalOpen}
         closable
+        destroyOnHidden
         style={{
           width: '100%',
           top: 0,

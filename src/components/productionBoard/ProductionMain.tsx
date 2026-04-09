@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Row, Col } from 'antd'
 import { Factory } from 'lucide-react'
 import { clsx, type ClassValue } from 'clsx'
@@ -17,96 +17,94 @@ function cn(...inputs: ClassValue[]) {
 // --- 主元件 ---
 export default function ProductionBoardMain() {
   const [loading, setLoading] = useState(true)
-  // const scrollContainerRef = useRef<HTMLElement>(null)
+  const scrollContainerRef = useRef<HTMLElement>(null)
 
   // 初始化
   useEffect(() => {
     let isMounted = true
     const timer = setTimeout(() => {
       if (isMounted) setLoading(false)
-    }, 800)
+    }, 1000)
     return () => {
       isMounted = false
       clearTimeout(timer)
     }
   }, [])
 
+  const [isHovering, setIsHovering] = useState(false)
+  const handleEnter = () => {
+    setIsHovering(true)
+  }
+  const handleLeave = () => {
+    setIsHovering(false)
+  }
+
   // 自動捲動邏輯
-  // useEffect(() => {
-  //   if (loading) return
-  //   const container = scrollContainerRef.current
-  //   if (!container) return
+  useEffect(() => {
+    if (loading) return
+    const container = scrollContainerRef.current
+    if (!container) return
 
-  //   let requestId: number
-  //   let scrollPos = 0
-  //   const speed = 0.4
+    let requestId: number
+    let scrollPos = 0
+    const speed = 0.4
 
-  //   const performScroll = () => {
-  //     scrollPos += speed
-  //     container.scrollTop = scrollPos
-  //     if (scrollPos >= container.scrollHeight - container.clientHeight) {
-  //       setTimeout(() => {
-  //         scrollPos = 0
-  //         container.scrollTo({ top: 0, behavior: 'smooth' })
-  //       }, 3000)
-  //     }
-  //     requestId = requestAnimationFrame(performScroll)
-  //   }
+    const performScroll = () => {
+      if (isHovering) {
+        requestId = requestAnimationFrame(performScroll)
+        return
+      }
+      scrollPos += speed
+      container.scrollTop = scrollPos
+      if (scrollPos >= container.scrollHeight - container.clientHeight) {
+        setTimeout(() => {
+          scrollPos = 0
+          container.scrollTo({ top: 0, behavior: 'smooth' })
+        }, 3000)
+      }
+      requestId = requestAnimationFrame(performScroll)
+    }
 
-  //   const startTimeout = setTimeout(() => {
-  //     requestId = requestAnimationFrame(performScroll)
-  //   }, 2000)
+    const startTimeout = setTimeout(() => {
+      requestId = requestAnimationFrame(performScroll)
+    }, 2000)
 
-  //   return () => {
-  //     clearTimeout(startTimeout)
-  //     cancelAnimationFrame(requestId)
-  //   }
-  // }, [loading])
+    return () => {
+      clearTimeout(startTimeout)
+      cancelAnimationFrame(requestId)
+    }
+  }, [loading, isHovering])
 
   return (
-    <div className='w-full h-full overflow-hidden'>
-      {/* 中間：自動捲動產線區域 */}
-      <main
-        // ref={scrollContainerRef}
-        className='w-full h-full overflow-y-auto no-scrollbar py-2'
-      >
-        <Row gutter={[24, 24]}>
-          {MOCK_LINES.map(line => (
-            <Col key={line.id} xs={24} lg={12} xl={8}>
-              <LineVisionCard data={line} />
-            </Col>
-          ))}
-        </Row>
-      </main>
-
-      <style>{`
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        @keyframes marquee {
-          0% { transform: translateX(40%); }
-          100% { transform: translateX(-160%); }
-        }
-        .animate-marquee {
-          display: inline-block;
-          animation: marquee 45s linear infinite;
-        }
-
-        .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        .ant-progress-inner { background-color: '#f1f5f9' !important; }
-
-        @media (max-width: 1280px) {
-          .text-6xl { font-size: 3rem; }
-        }
-      `}</style>
+    <>
+      <div className='w-full h-full overflow-hidden'>
+        {/* 中間：自動捲動產線區域 */}
+        <main
+          ref={scrollContainerRef}
+          className='w-full h-full overflow-y-auto no-scrollbar py-2'
+        >
+          <Row gutter={[24, 24]}>
+            {MOCK_LINES.map(line => (
+              <Col
+                key={line.id}
+                xs={24}
+                lg={12}
+                xl={8}
+                onMouseEnter={handleEnter}
+                onMouseLeave={handleLeave}
+              >
+                <LineVisionCard data={line} />
+              </Col>
+            ))}
+          </Row>
+        </main>
+      </div>
 
       {/* 全螢幕 Loading */}
       {loading && (
         <div
           className={cn(
-            'fixed inset-0 z-[1000] flex flex-col items-center justify-center transition-colors duration-500',
+            'fixed top-0 left-0 w-dvw h-dvh inset-0 z-[1000] flex flex-col items-center justify-center transition-colors duration-500',
             'bg-white'
           )}
         >
@@ -132,6 +130,6 @@ export default function ProductionBoardMain() {
           </p>
         </div>
       )}
-    </div>
+    </>
   )
 }
