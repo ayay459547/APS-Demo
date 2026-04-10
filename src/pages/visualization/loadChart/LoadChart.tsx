@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import * as echarts from 'echarts'
 import {
   Calendar,
@@ -11,7 +11,8 @@ import {
   Factory,
   Search,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Loader2
 } from 'lucide-react'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
@@ -79,6 +80,11 @@ interface DashboardStats {
   peak: number
 }
 
+// 扁平化列表的型別 (供自製虛擬滾動使用)
+type FlattenedListItem =
+  | { isHeader: true; type: string; count: number; avgLoad: number }
+  | { isHeader: false; machine: MachineSummary }
+
 // --- 設定與常數 ---
 const BASE_MACHINES: BaseMachine[] = [
   { type: 'CNC', name: 'CNC 銑床' },
@@ -94,11 +100,12 @@ const BASE_MACHINES: BaseMachine[] = [
   { type: 'PACK', name: '出貨包裝站' }
 ]
 
-const MACHINES: Machine[] = Array.from({ length: 100 }, (_, i) => {
+// 刻意放大資料量：生成 1000 台設備，測試自製虛擬滾動效能
+const MACHINES: Machine[] = Array.from({ length: 1000 }, (_, i) => {
   const base = BASE_MACHINES[i % BASE_MACHINES.length]
   return {
-    id: `MCH-${String(i + 1).padStart(3, '0')}`,
-    name: `${base.name}-${String(i + 1).padStart(3, '0')}`,
+    id: `MCH-${String(i + 1).padStart(4, '0')}`,
+    name: `${base.name}-${String(i + 1).padStart(4, '0')}`,
     type: base.type
   }
 })
@@ -137,7 +144,8 @@ const generateLoadData = (): Record<string, number[]> => {
     m => (machineAvailableTimes[m.id] = new Date(BASE_DATE.getTime()))
   )
 
-  const TOTAL_WORK_ORDERS = 1500
+  // 大幅增加工單量以符合 1000 台設備的運算
+  const TOTAL_WORK_ORDERS = 8000
 
   for (let wo = 1; wo <= TOTAL_WORK_ORDERS; wo++) {
     const routing = ROUTINGS[Math.floor(Math.random() * ROUTINGS.length)]
@@ -148,6 +156,8 @@ const generateLoadData = (): Record<string, number[]> => {
     routing.steps.forEach(processName => {
       const allowedTypes = PROCESS_MACHINE_MAP[processName]
       const validMachines = MACHINES.filter(m => allowedTypes.includes(m.type))
+
+      if (validMachines.length === 0) return
 
       let selectedMachine = validMachines[0]
       let earliestAvailable = new Date(8640000000000000)
@@ -229,27 +239,63 @@ export default function MachineLoadDashboard() {
     Record<string, number[]>
   >({})
   const [selectedMachineId, setSelectedMachineId] = useState<string>('ALL')
+
+  // Search 狀態與 Debounce
   const [searchQuery, setSearchQuery] = useState<string>('')
+  const [debouncedQuery, setDebouncedQuery] = useState<string>('')
+  const [isSearching, setIsSearching] = useState<boolean>(false)
+
   const [selectedTypeFilter, setSelectedTypeFilter] = useState<string>('ALL')
-  const [isTagsExpanded, setIsTagsExpanded] = useState<boolean>(false) // 新增：控制標籤展開狀態
+  const [isTagsExpanded, setIsTagsExpanded] = useState<boolean>(false)
   const chartRef = useRef<HTMLDivElement>(null)
 
-  // 設定預設顯示的標籤數量 (不含「全廠」)
+  // 自製虛擬滾動相關狀態
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [viewHeight, setViewHeight] = useState<number>(500)
+  const [scrollTop, setScrollTop] = useState<number>(0)
+
   const MAX_VISIBLE_TAGS = 3
 
+  // 初始化資料載入
   useEffect(() => {
     const loadData = async () => {
       setLoading(true)
+      // 故意延遲以顯示巨量數據載入動畫
       setTimeout(() => {
         const loadMap = generateLoadData()
         setDailyLoadByMachine(loadMap)
         setLoading(false)
-      }, 600)
+      }, 1000)
     }
     loadData()
   }, [])
 
-  // 計算機台總覽數據
+  // 實作 Search Debounce (防抖：輸入停止後 300ms 才會觸發過濾計算)
+  useEffect(() => {
+    setIsSearching(searchQuery !== debouncedQuery)
+    const handler = setTimeout(() => {
+      setDebouncedQuery(searchQuery)
+      setIsSearching(false)
+    }, 300)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [searchQuery, debouncedQuery])
+
+  // 監聽虛擬滾動容器高度
+  useEffect(() => {
+    if (!scrollContainerRef.current) return
+    const resizeObserver = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        setViewHeight(entry.contentRect.height)
+      }
+    })
+    resizeObserver.observe(scrollContainerRef.current)
+    return () => resizeObserver.disconnect()
+  }, [])
+
+  // 1. 計算機台總覽數據
   const machineSummaries = useMemo<MachineSummary[]>(() => {
     if (Object.keys(dailyLoadByMachine).length === 0) return []
 
@@ -275,13 +321,12 @@ export default function MachineLoadDashboard() {
     return Array.from(new Set(machineSummaries.map(m => m.type))).sort()
   }, [machineSummaries])
 
-  // 處理搜尋、類型過濾，並將機台「群組化 (Group by Type)」
-  const groupedFilteredMachines = useMemo(() => {
+  // 2. 過濾與分群，並打平為 一維陣列 (Flattened Array)
+  const flattenedList = useMemo<FlattenedListItem[]>(() => {
     let filtered = machineSummaries
 
-    // 1. 文字搜尋過濾
-    if (searchQuery.trim()) {
-      const lowerQuery = searchQuery.toLowerCase()
+    if (debouncedQuery.trim()) {
+      const lowerQuery = debouncedQuery.toLowerCase()
       filtered = filtered.filter(
         m =>
           m.name.toLowerCase().includes(lowerQuery) ||
@@ -290,15 +335,14 @@ export default function MachineLoadDashboard() {
       )
     }
 
-    // 2. 快捷標籤過濾
     if (selectedTypeFilter !== 'ALL') {
       filtered = filtered.filter(m => m.type === selectedTypeFilter)
     }
 
-    // 3. 依機台類型群組化
     const groups: {
       [key: string]: { machines: MachineSummary[]; avgLoad: number }
     } = {}
+
     filtered.forEach(m => {
       if (!groups[m.type]) {
         groups[m.type] = { machines: [], avgLoad: 0 }
@@ -306,21 +350,92 @@ export default function MachineLoadDashboard() {
       groups[m.type].machines.push(m)
     })
 
-    // 計算每個工段群組的平均負載
-    Object.keys(groups).forEach(type => {
-      const group = groups[type]
-      const totalLoad = group.machines.reduce(
-        (sum, m) => sum + m.avgLoadPercent,
-        0
-      )
-      group.avgLoad = Math.round(totalLoad / group.machines.length)
-    })
+    const flatArray: FlattenedListItem[] = []
 
-    // 轉為陣列並依照「群組平均負載」降冪排序
-    return Object.entries(groups)
-      .map(([type, data]) => ({ type, ...data }))
+    Object.entries(groups)
+      .map(([type, data]) => {
+        const totalLoad = data.machines.reduce(
+          (sum, m) => sum + m.avgLoadPercent,
+          0
+        )
+        return {
+          type,
+          avgLoad: Math.round(totalLoad / data.machines.length),
+          machines: data.machines
+        }
+      })
       .sort((a, b) => b.avgLoad - a.avgLoad)
-  }, [machineSummaries, searchQuery, selectedTypeFilter])
+      .forEach(group => {
+        flatArray.push({
+          isHeader: true,
+          type: group.type,
+          count: group.machines.length,
+          avgLoad: group.avgLoad
+        })
+        group.machines.forEach(m => {
+          flatArray.push({
+            isHeader: false,
+            machine: m
+          })
+        })
+      })
+
+    return flatArray
+  }, [machineSummaries, debouncedQuery, selectedTypeFilter])
+
+  // 3. 計算每個元素在虛擬列表中的絕對位置與高度
+  const itemPositions = useMemo(() => {
+    let y = 0
+    return flattenedList.map((item, index) => {
+      const height = item.isHeader ? 42 : 84
+      const top = y
+      y += height
+      return { top, height, item, index }
+    })
+  }, [flattenedList])
+
+  const totalListHeight =
+    itemPositions.length > 0
+      ? itemPositions[itemPositions.length - 1].top +
+        itemPositions[itemPositions.length - 1].height
+      : 0
+
+  // 4. 計算當前可視範圍內的元素 (加上 Overscan 以保證滾動滑順)
+  const visibleItems = useMemo(() => {
+    if (itemPositions.length === 0) return []
+
+    let start = 0
+    let low = 0
+    let high = itemPositions.length - 1
+
+    // 使用二元搜尋快速找到第一個出現的可視元素
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2)
+      if (itemPositions[mid].top === scrollTop) {
+        start = mid
+        break
+      } else if (itemPositions[mid].top < scrollTop) {
+        start = mid
+        low = mid + 1
+      } else {
+        high = mid - 1
+      }
+    }
+
+    let end = start
+    while (
+      end < itemPositions.length &&
+      itemPositions[end].top < scrollTop + viewHeight
+    ) {
+      end++
+    }
+
+    // Overscan: 預渲染上下各 5 個元素，防止快速滾動白畫面
+    start = Math.max(0, start - 5)
+    end = Math.min(itemPositions.length - 1, end + 5)
+
+    return itemPositions.slice(start, end + 1)
+  }, [itemPositions, scrollTop, viewHeight])
 
   // 計算圖表顯示數據
   const chartData = useMemo<ChartDataPoint[]>(() => {
@@ -505,7 +620,7 @@ export default function MachineLoadDashboard() {
               </span>
             </div>
 
-            {/* 搜尋輸入框 */}
+            {/* 搜尋輸入框 (帶 Debounce 指示器) */}
             <div className='relative'>
               <Search
                 size={16}
@@ -516,8 +631,14 @@ export default function MachineLoadDashboard() {
                 placeholder='搜尋代號、名稱或類型...'
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className='w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-slate-700 placeholder:text-slate-400 shadow-inner shadow-slate-50'
+                className='w-full pl-9 pr-9 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-slate-700 placeholder:text-slate-400 shadow-inner shadow-slate-50'
               />
+              {isSearching && (
+                <Loader2
+                  size={16}
+                  className='absolute right-3 top-1/2 -translate-y-1/2 text-blue-500 animate-spin'
+                />
+              )}
             </div>
 
             {/* 機台類型快捷過濾標籤 (換行與展開/收起) */}
@@ -571,16 +692,16 @@ export default function MachineLoadDashboard() {
             </div>
           </div>
 
-          <div className='flex-1 overflow-y-auto custom-scrollbar relative bg-slate-50/50'>
-            {/* All Machines Option */}
-            <div className='p-2'>
+          <div className='flex-1 flex flex-col bg-slate-50/50'>
+            {/* All Machines Option (置頂固定) */}
+            <div className='p-2 shrink-0 border-b border-slate-100 bg-white'>
               <button
                 onClick={() => setSelectedMachineId('ALL')}
                 className={cn(
                   'w-full text-left p-3 rounded-lg border transition-all flex items-center justify-between',
                   selectedMachineId === 'ALL'
                     ? 'bg-blue-50 border-blue-200 shadow-sm'
-                    : 'bg-white border-transparent hover:bg-slate-50 hover:border-slate-200 shadow-sm'
+                    : 'bg-white border-slate-200 hover:bg-slate-50 shadow-sm'
                 )}
               >
                 <div className='font-bold text-slate-700'>全廠綜合負載</div>
@@ -595,92 +716,129 @@ export default function MachineLoadDashboard() {
               </button>
             </div>
 
-            {/* Individual Machines Grouped by Type */}
+            {/* 自製虛擬滾動機台列表 (Virtual Scrolling) */}
             {loading ? (
-              <div className='flex flex-col items-center justify-center py-10 text-slate-400'>
+              <div className='flex-1 flex flex-col items-center justify-center text-slate-400'>
                 <Zap size={24} className='animate-pulse mb-2 text-slate-300' />
-                <p className='text-sm'>載入與演算群組中...</p>
+                <p className='text-sm'>載入與演算 1000 台設備群組中...</p>
               </div>
-            ) : groupedFilteredMachines.length === 0 ? (
-              <div className='flex flex-col items-center justify-center py-10 text-slate-400 gap-2'>
+            ) : flattenedList.length === 0 ? (
+              <div className='flex-1 flex flex-col items-center justify-center text-slate-400 gap-2'>
                 <Search size={24} className='text-slate-300' />
                 <p className='text-sm'>找不到符合的機台</p>
               </div>
             ) : (
-              groupedFilteredMachines.map(group => (
-                <div key={group.type} className='mb-2'>
-                  {/* Sticky 群組表頭：懸浮時帶有模糊特效 */}
-                  <div className='sticky top-0 z-10 bg-white/90 backdrop-blur-sm border-y border-slate-200 px-3 py-1.5 flex justify-between items-center shadow-[0_2px_4px_rgba(0,0,0,0.02)]'>
-                    <span className='text-xs font-bold text-slate-600 tracking-wider flex items-center gap-1.5'>
-                      {group.type}
-                      <span className='bg-slate-200/80 text-slate-500 px-1.5 py-0.5 rounded text-[10px] shadow-inner'>
-                        {group.machines.length}
-                      </span>
-                    </span>
-                    <span
-                      className={cn(
-                        'text-[10px] font-bold tracking-tight',
-                        group.avgLoad >= 85
-                          ? 'text-red-500'
-                          : group.avgLoad >= 60
-                            ? 'text-amber-500'
-                            : 'text-emerald-500'
-                      )}
-                    >
-                      工段均載 {group.avgLoad}%
-                    </span>
-                  </div>
+              <div className='flex-1 overflow-hidden relative'>
+                <div
+                  ref={scrollContainerRef}
+                  style={{ height: '100%', overflowY: 'auto' }}
+                  onScroll={e => setScrollTop(e.currentTarget.scrollTop)}
+                  className='custom-scrollbar absolute inset-0'
+                >
+                  <div
+                    style={{ height: totalListHeight, position: 'relative' }}
+                  >
+                    {visibleItems.map(pos => {
+                      const item = pos.item
 
-                  {/* 群組內的機台卡片 */}
-                  <div className='p-2 space-y-1'>
-                    {group.machines.map(m => (
-                      <button
-                        key={m.id}
-                        onClick={() => setSelectedMachineId(m.id)}
-                        className={cn(
-                          'w-full text-left p-3 rounded-lg border transition-all',
-                          selectedMachineId === m.id
-                            ? 'bg-blue-50 border-blue-200 shadow-sm ring-1 ring-blue-500'
-                            : 'bg-white border-slate-100 hover:border-slate-300 shadow-sm'
-                        )}
-                      >
-                        <div className='flex justify-between items-start mb-1.5'>
-                          <div className='truncate pr-2'>
-                            <div className='font-bold text-slate-800 text-sm truncate'>
-                              {m.name}
-                            </div>
-                            <div className='text-[10px] text-slate-500 font-mono mt-0.5'>
-                              {m.id}
+                      // 如果是分類標題
+                      if (item.isHeader) {
+                        return (
+                          <div
+                            key={`header-${item.type}`}
+                            style={{
+                              position: 'absolute',
+                              top: pos.top,
+                              height: pos.height,
+                              width: '100%'
+                            }}
+                            className='px-2 py-1'
+                          >
+                            <div className='w-full h-full bg-slate-200/60 rounded-md px-3 flex justify-between items-center shadow-inner'>
+                              <span className='text-[11px] font-bold text-slate-600 tracking-wider flex items-center gap-1.5'>
+                                {item.type}
+                                <span className='bg-white text-slate-500 px-1.5 rounded shadow-sm text-[10px]'>
+                                  {item.count}
+                                </span>
+                              </span>
+                              <span
+                                className={cn(
+                                  'text-[10px] font-bold tracking-tight',
+                                  item.avgLoad >= 85
+                                    ? 'text-red-500'
+                                    : item.avgLoad >= 60
+                                      ? 'text-amber-500'
+                                      : 'text-emerald-500'
+                                )}
+                              >
+                                工段均載 {item.avgLoad}%
+                              </span>
                             </div>
                           </div>
-                          <div
+                        )
+                      }
+
+                      // 如果是實體機台卡片
+                      const m = item.machine
+                      return (
+                        <div
+                          key={`machine-${m.id}`}
+                          style={{
+                            position: 'absolute',
+                            top: pos.top,
+                            height: pos.height,
+                            width: '100%'
+                          }}
+                          className='px-2 py-1'
+                        >
+                          <button
+                            onClick={() => setSelectedMachineId(m.id)}
                             className={cn(
-                              'text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap shrink-0',
-                              m.status.bg,
-                              m.status.text
+                              'w-full h-full text-left p-3 rounded-lg border transition-all flex flex-col justify-center',
+                              selectedMachineId === m.id
+                                ? 'bg-blue-50 border-blue-200 shadow-sm ring-1 ring-blue-500'
+                                : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm'
                             )}
                           >
-                            {m.avgLoadPercent}%
-                          </div>
-                        </div>
+                            <div className='flex justify-between items-start mb-1 w-full'>
+                              <div className='truncate pr-2 w-full'>
+                                <div className='font-bold text-slate-800 text-sm truncate'>
+                                  {m.name}
+                                </div>
+                                <div className='text-[10px] text-slate-500 font-mono mt-0.5'>
+                                  {m.id}
+                                </div>
+                              </div>
+                              <div
+                                className={cn(
+                                  'text-[11px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap shrink-0',
+                                  m.status.bg,
+                                  m.status.text
+                                )}
+                              >
+                                {m.avgLoadPercent}%
+                              </div>
+                            </div>
 
-                        {/* Gauge Bar */}
-                        <div className='w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-2'>
-                          <div
-                            className={cn(
-                              'h-full transition-all duration-500',
-                              m.status.color
-                            )}
-                            style={{
-                              width: `${Math.min(m.avgLoadPercent, 100)}%`
-                            }}
-                          ></div>
+                            {/* Gauge Bar */}
+                            <div className='w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-1 shrink-0'>
+                              <div
+                                className={cn(
+                                  'h-full transition-all duration-500',
+                                  m.status.color
+                                )}
+                                style={{
+                                  width: `${Math.min(m.avgLoadPercent, 100)}%`
+                                }}
+                              ></div>
+                            </div>
+                          </button>
                         </div>
-                      </button>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
-              ))
+              </div>
             )}
           </div>
         </aside>
@@ -826,8 +984,8 @@ export default function MachineLoadDashboard() {
       {/* 捲軸自定義樣式 */}
       <style>{`
         .custom-scrollbar::-webkit-scrollbar {
-          height: 4px;
-          width: 4px;
+          height: 6px;
+          width: 6px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
           background: transparent;
