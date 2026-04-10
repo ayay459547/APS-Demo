@@ -86,8 +86,8 @@ const generateCalendarData = (): OrderItem[] => {
   return data
 }
 
-const INITIAL_VISIBLE_COUNT = 8
-const LOAD_MORE_STEP = 8
+const INITIAL_VISIBLE_COUNT = 16
+const LOAD_MORE_STEP = 16
 
 const VisualOrderRush: React.FC = () => {
   const [orders, setOrders] = useState<OrderItem[]>(generateCalendarData())

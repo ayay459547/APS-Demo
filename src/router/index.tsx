@@ -33,16 +33,25 @@ const routes: RouteObject[] = [
     children: [
       { index: true, element: <DashboardContent /> },
 
-      { path: 'o_list', element: <OrderList /> },
-      { path: 'o_rush', element: <OrderRush /> },
-      { path: 'o_visual_rush', element: <VisualOrderRush /> },
+      { path: '/orders/order_manage/o_list', element: <OrderList /> },
+      { path: '/orders/order_manage/o_rush', element: <OrderRush /> },
+      {
+        path: '/orders/order_manage/o_visual_rush',
+        element: <VisualOrderRush />
+      },
 
       { path: 'wo_list', element: <WorkOrderList /> },
       { path: 'wo_split', element: <WorkOrderSplit /> },
       { path: 'wo_merge', element: <WorkOrderMerge /> },
 
-      { path: 'gantt_chart', element: <GanttChart /> },
-      { path: 'load_chart', element: <LoadChart /> },
+      {
+        path: '/planning_board/visualization/gantt_chart',
+        element: <GanttChart />
+      },
+      {
+        path: '/planning_board/visualization/load_chart',
+        element: <LoadChart />
+      },
 
       { path: 'machine_bottleneck', element: <MachineBottleneck /> },
       { path: 'material_bottleneck', element: <MaterialBottleneck /> },
