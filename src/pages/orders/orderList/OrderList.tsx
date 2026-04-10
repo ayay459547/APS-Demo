@@ -30,14 +30,10 @@ import {
   CalendarDays
 } from 'lucide-react'
 import type { ColumnsType, TableProps } from 'antd/es/table'
-import { clsx, type ClassValue } from 'clsx'
-import { twMerge } from 'tailwind-merge'
 
-/**
- * 合併 Tailwind 類名的工具函數
- */
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+// 輕量版 cn 函數，確保預覽環境 100% 可運行
+function cn(...classes: (string | undefined | null | false)[]) {
+  return classes.filter(Boolean).join(' ')
 }
 
 const { RangePicker } = DatePicker
@@ -103,7 +99,7 @@ const generateMockData = (count: number): OrderItem[] => {
     else if (status === 'In Production' || status === 'Delayed')
       progress = Math.floor(Math.random() * 90) + 5
 
-    const date = new Date()
+    const date = new Date('2026-04-10')
     date.setDate(date.getDate() + Math.floor(Math.random() * 60) - 10)
     const deliveryDate = date.toISOString().split('T')[0]
 
@@ -124,7 +120,7 @@ const generateMockData = (count: number): OrderItem[] => {
 
 const allMockData = generateMockData(500)
 
-// --- 子組件：統計卡片 (使用 clsx 優化) ---
+// --- 子組件：統計卡片 ---
 const StatCard: React.FC<StatCardProps> = ({
   title,
   value,
@@ -162,7 +158,7 @@ const StatCard: React.FC<StatCardProps> = ({
   </div>
 )
 
-const OrderList: React.FC = () => {
+export default function OrderList() {
   const [loading, setLoading] = useState<boolean>(true)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
 
@@ -269,6 +265,7 @@ const OrderList: React.FC = () => {
       ),
       ellipsis: true,
       minWidth: 180,
+      sorter: (a, b) => a.customer.localeCompare(b.customer),
       filters: customerFilters,
       filterSearch: true,
       onFilter: (value, record) => record.customer === value
@@ -278,6 +275,15 @@ const OrderList: React.FC = () => {
       dataIndex: 'priority',
       key: 'priority',
       width: 100,
+      sorter: (a, b) => {
+        const weight: Record<PriorityType, number> = {
+          Urgent: 4,
+          High: 3,
+          Medium: 2,
+          Low: 1
+        }
+        return weight[a.priority] - weight[b.priority]
+      },
       filters: [
         { text: '特急', value: 'Urgent' },
         { text: '高', value: 'High' },
@@ -307,6 +313,7 @@ const OrderList: React.FC = () => {
       title: '生產進度',
       key: 'progress',
       width: 140,
+      sorter: (a, b) => a.progress - b.progress,
       render: (_, record) => (
         <div className='w-full'>
           <Progress
@@ -323,6 +330,15 @@ const OrderList: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       width: 110,
+      sorter: (a, b) => {
+        const weight: Record<OrderStatusType, number> = {
+          Delayed: 4,
+          'In Production': 3,
+          Pending: 2,
+          Completed: 1
+        }
+        return weight[a.status] - weight[b.status]
+      },
       filters: [
         { text: '生產中', value: 'In Production' },
         { text: '待排產', value: 'Pending' },
@@ -410,13 +426,10 @@ const OrderList: React.FC = () => {
           placement='bottomRight'
         >
           <Button
-            variant='text'
-            color='default'
+            type='text'
             size='small'
             icon={<MoreVertical size={18} />}
-            classNames={{
-              root: 'text-slate-400 flex items-center justify-center hover:bg-slate-100'
-            }}
+            className='text-slate-400 flex items-center justify-center hover:bg-slate-100'
           />
         </Dropdown>
       )
@@ -429,189 +442,178 @@ const OrderList: React.FC = () => {
   }
 
   return (
-    <div className='px-2 pt-2 pb-8 space-y-4 animate-fade-in relative'>
-      {/* 全域 Loading 遮罩 */}
-      {loading && (
-        <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-[110] flex items-center justify-center rounded-2xl'>
-          <div className='flex flex-col items-center gap-3'>
-            <div className='w-10 h-10 border-4 border-blue-100 border-t-blue-500 rounded-full animate-spin' />
-            <span className='text-xs font-black text-blue-600 tracking-widest uppercase'>
-              Fetching Order Data...
-            </span>
+    <div className='min-h-screen bg-slate-50/50 p-4'>
+      <div className='max-w-[1200px] mx-auto px-2 pt-2 pb-8 space-y-4 animate-fade-in relative'>
+        {/* 全域 Loading 遮罩 */}
+        {loading && (
+          <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-[110] flex items-center justify-center rounded-2xl'>
+            <div className='flex flex-col items-center gap-3'>
+              <div className='w-10 h-10 border-4 border-blue-100 border-t-blue-500 rounded-full animate-spin' />
+              <span className='text-xs font-black text-blue-600 tracking-widest uppercase'>
+                Fetching Order Data...
+              </span>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* 頂部導航列 */}
-      <div className='flex flex-wrap items-center justify-between px-1 gap-y-4 bg-white/50 py-2 rounded-xl sticky top-0 z-20 backdrop-blur-sm'>
-        <div className='flex items-center gap-3'>
-          <div className='bg-blue-600 p-1.5 rounded-lg shadow-blue-200 shadow-lg'>
-            <BarChart3 size={18} className='text-white' />
-          </div>
-          <div className='flex items-center'>
-            <Popover
-              content={statsContent}
-              trigger='click'
-              placement='bottomLeft'
-              classNames={{ root: 'custom-stats-popover' }}
-            >
-              <div className='flex items-center gap-2 cursor-pointer hover:bg-white px-2 sm:px-3 py-1.5 rounded-full transition-all group border border-transparent hover:border-slate-100'>
-                <span className='text-sm font-bold text-slate-600 group-hover:text-blue-600 whitespace-nowrap'>
-                  即時概覽
-                </span>
-                <div className='flex gap-1'>
-                  <Badge
-                    count={stats.pending}
-                    style={{
-                      backgroundColor: '#3b82f6',
-                      fontSize: '10px',
-                      boxShadow: 'none'
-                    }}
-                  />
-                  <Badge
-                    count={stats.delayed}
-                    style={{
-                      backgroundColor: '#f43f5e',
-                      fontSize: '10px',
-                      boxShadow: 'none'
-                    }}
+        {/* 頂部導航列 */}
+        <div className='flex flex-wrap items-center justify-between px-1 gap-y-4 bg-white/50 py-2 rounded-xl sticky top-0 z-20 backdrop-blur-sm'>
+          <div className='flex items-center gap-3'>
+            <div className='bg-blue-600 p-1.5 rounded-lg shadow-blue-200 shadow-lg'>
+              <BarChart3 size={18} className='text-white' />
+            </div>
+            <div className='flex items-center'>
+              <Popover
+                content={statsContent}
+                trigger='click'
+                placement='bottomLeft'
+                rootClassName='custom-stats-popover'
+              >
+                <div className='flex items-center gap-2 cursor-pointer hover:bg-white px-2 sm:px-3 py-1.5 rounded-full transition-all group border border-transparent hover:border-slate-100'>
+                  <span className='text-sm font-bold text-slate-600 group-hover:text-blue-600 whitespace-nowrap'>
+                    即時概覽
+                  </span>
+                  <div className='flex gap-1'>
+                    <Badge
+                      count={stats.pending}
+                      style={{
+                        backgroundColor: '#3b82f6',
+                        fontSize: '10px',
+                        boxShadow: 'none'
+                      }}
+                    />
+                    <Badge
+                      count={stats.delayed}
+                      style={{
+                        backgroundColor: '#f43f5e',
+                        fontSize: '10px',
+                        boxShadow: 'none'
+                      }}
+                    />
+                  </div>
+                  <ChevronDown
+                    size={14}
+                    className='text-slate-400 group-hover:text-blue-600'
                   />
                 </div>
-                <ChevronDown
-                  size={14}
-                  className='text-slate-400 group-hover:text-blue-600'
-                />
-              </div>
-            </Popover>
+              </Popover>
+            </div>
           </div>
-        </div>
 
-        <div className='flex items-center gap-2'>
-          <Tooltip title='導出 Excel 報表'>
+          <div className='flex items-center gap-2'>
+            <Tooltip title='導出 Excel 報表'>
+              <Button
+                icon={<Download size={16} />}
+                className='rounded-xl font-medium h-10 flex items-center justify-center'
+              >
+                <span className='hidden lg:inline ml-1 text-xs'>匯出報表</span>
+              </Button>
+            </Tooltip>
             <Button
-              variant='outlined'
-              color='default'
-              icon={<Download size={16} />}
-              classNames={{
-                root: 'rounded-xl font-medium h-10 flex items-center justify-center'
-              }}
+              type='primary'
+              icon={<Plus size={16} />}
+              className='rounded-xl bg-blue-600 shadow-md shadow-blue-100 font-bold border-none h-10 flex items-center justify-center'
             >
-              <span className='hidden lg:inline ml-1 text-xs'>匯出報表</span>
+              <span className='hidden sm:inline ml-1 text-xs'>建立訂單</span>
             </Button>
-          </Tooltip>
-          <Button
-            variant='solid'
-            color='primary'
-            icon={<Plus size={16} />}
-            classNames={{
-              root: 'rounded-xl bg-blue-600 shadow-md shadow-blue-100 font-bold border-none h-10 flex items-center justify-center'
-            }}
-          >
-            <span className='hidden sm:inline ml-1 text-xs'>建立訂單</span>
-          </Button>
+          </div>
         </div>
-      </div>
 
-      <Card
-        className='shadow-sm border-none rounded-2xl overflow-hidden p-0'
-        styles={{ body: { padding: 0 } }}
-      >
-        <div className='flex flex-col'>
-          {/* 表格工具列 */}
-          <div className='flex flex-wrap items-center justify-between gap-4 py-4 px-4 border-b border-slate-50'>
-            <div className='flex flex-wrap items-center gap-3 flex-1'>
-              <RangePicker
-                classNames={{
-                  root: 'rounded-xl h-10 border-slate-200 w-full sm:w-auto'
+        <Card
+          className='shadow-sm border-none rounded-2xl overflow-hidden p-0'
+          styles={{ body: { padding: 0 } }}
+        >
+          <div className='flex flex-col'>
+            {/* 表格工具列 */}
+            <div className='flex flex-wrap items-center justify-between gap-4 py-4 px-4 border-b border-slate-50'>
+              <div className='flex flex-wrap items-center gap-3 flex-1'>
+                <RangePicker className='rounded-xl h-10 border-slate-200 w-full sm:w-auto' />
+                <div className='text-slate-400 text-[11px] flex items-center gap-1.5 bg-slate-50 px-3 py-2 rounded-lg border border-slate-100'>
+                  <Info size={14} className='text-blue-400' />
+                  <span>提示：點擊各欄位表頭可進行精確篩選或排序</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 批量操作提示 */}
+            {selectedRowKeys.length > 0 && (
+              <div className='mx-4 mt-4 bg-blue-50/50 border border-blue-100 p-3 rounded-xl flex items-center justify-between animate-in slide-in-from-top-2 duration-300'>
+                <div className='flex items-center gap-2 text-blue-700'>
+                  <Zap size={16} className='fill-blue-700' />
+                  <span className='text-sm font-bold text-blue-700'>
+                    已選擇 {selectedRowKeys.length} 筆訂單
+                  </span>
+                </div>
+                <Space>
+                  <Button
+                    type='primary'
+                    size='small'
+                    className='rounded-lg font-bold text-xs'
+                  >
+                    批量排產
+                  </Button>
+                  <Button
+                    danger
+                    size='small'
+                    className='rounded-lg font-bold text-xs'
+                  >
+                    批量取消
+                  </Button>
+                  <Button
+                    type='text'
+                    size='small'
+                    onClick={() => setSelectedRowKeys([])}
+                    className='text-slate-400 text-xs'
+                  >
+                    取消
+                  </Button>
+                </Space>
+              </div>
+            )}
+
+            <div className='overflow-x-auto'>
+              <Table
+                rowSelection={rowSelection}
+                columns={columns}
+                dataSource={allMockData}
+                loading={loading}
+                pagination={{
+                  pageSize: 10,
+                  showSizeChanger: true,
+                  showTotal: total => `共計 ${total} 筆`,
+                  className: 'px-4 pb-4'
                 }}
+                scroll={{ x: 'max-content' }}
+                className='order-manage-table'
               />
-              <div className='text-slate-400 text-[11px] flex items-center gap-1.5 bg-slate-50 px-3 py-2 rounded-lg border border-slate-100'>
-                <Info size={14} className='text-blue-400' />
-                <span>提示：點擊各欄位表頭可進行精確篩選或排序</span>
-              </div>
             </div>
           </div>
+        </Card>
 
-          {/* 批量操作提示 */}
-          {selectedRowKeys.length > 0 && (
-            <div className='mx-4 mt-4 bg-blue-50/50 border border-blue-100 p-3 rounded-xl flex items-center justify-between animate-in slide-in-from-top-2 duration-300'>
-              <div className='flex items-center gap-2 text-blue-700'>
-                <Zap size={16} className='fill-blue-700' />
-                <span className='text-sm font-bold text-blue-700'>
-                  已選擇 {selectedRowKeys.length} 筆訂單
-                </span>
-              </div>
-              <Space>
-                <Button
-                  variant='solid'
-                  color='primary'
-                  size='small'
-                  classNames={{ root: 'rounded-lg font-bold text-xs' }}
-                >
-                  批量排產
-                </Button>
-                <Button
-                  variant='outlined'
-                  color='danger'
-                  size='small'
-                  classNames={{ root: 'rounded-lg font-bold text-xs' }}
-                >
-                  批量取消
-                </Button>
-                <Button
-                  variant='text'
-                  color='default'
-                  size='small'
-                  onClick={() => setSelectedRowKeys([])}
-                  classNames={{ root: 'text-slate-400 text-xs' }}
-                >
-                  取消
-                </Button>
-              </Space>
-            </div>
-          )}
-
-          <div className='overflow-x-auto'>
-            <Table
-              rowSelection={rowSelection}
-              columns={columns}
-              dataSource={allMockData}
-              loading={loading}
-              pagination={{
-                pageSize: 10,
-                showSizeChanger: true,
-                showTotal: total => `共計 ${total} 筆`,
-                className: 'px-4 pb-4'
-              }}
-              scroll={{ x: 'max-content' }}
-              className='order-manage-table'
-            />
-          </div>
-        </div>
-      </Card>
-
-      <style>{`
-        .order-manage-table .ant-table-thead > tr > th {
-          background: #f8fafc !important;
-          color: #64748b !important;
-          font-weight: 700 !important;
-          border-bottom: 1px solid #f1f5f9 !important;
-          white-space: nowrap;
-        }
-        .order-manage-table .ant-table-tbody > tr:hover > td {
-          background: #f1f7ff !important;
-        }
-        .custom-stats-popover .ant-popover-inner {
-          border-radius: 16px !important;
-          padding: 16px !important;
-          box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
-          border: 1px solid #e0e7ff;
-        }
-        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-      `}</style>
+        <style>{`
+          .order-manage-table .ant-table-thead > tr > th {
+            background: #f8fafc !important;
+            color: #64748b !important;
+            font-weight: 700 !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+            white-space: nowrap;
+          }
+          .order-manage-table .ant-table-tbody > tr:hover > td {
+            background: #f1f7ff !important;
+          }
+          .custom-stats-popover .ant-popover-inner {
+            border-radius: 16px !important;
+            padding: 16px !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
+            border: 1px solid #e0e7ff;
+          }
+          .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+        `}</style>
+      </div>
     </div>
   )
 }
-
-export default OrderList

@@ -281,10 +281,10 @@ const VisualOrderRush: React.FC = () => {
 
         {/* 主內容區 */}
         <div className='flex-1 overflow-y-auto p-6 custom-scrollbar'>
-          <div className='max-w-[1400px] mx-auto space-y-6'>
+          <div className='max-w-[1400px] mx-auto !space-y-6'>
             {viewMode === 'calendar' ? (
               <Card
-                className='rounded-[24px] border-none shadow-sm overflow-hidden p-0 bg-white'
+                className='!rounded-[24px] border-none shadow-sm overflow-hidden p-0 bg-white'
                 styles={{ body: { padding: '8px' } }}
               >
                 <Calendar

@@ -23,10 +23,15 @@ import {
   PlayCircle,
   PauseCircle,
   Printer,
-  Activity
+  Activity,
+  Filter
 } from 'lucide-react'
 import type { ColumnsType } from 'antd/es/table'
-import { clsx } from 'clsx'
+
+// 輕量版 cn 函數，確保預覽環境 100% 可運行
+function cn(...classes: (string | undefined | null | false)[]) {
+  return classes.filter(Boolean).join(' ')
+}
 
 const { RangePicker } = DatePicker
 
@@ -114,7 +119,7 @@ const generateWOMockData = (count: number): WorkOrderItem[] => {
 
 const allMockData = generateWOMockData(300)
 
-// --- 子組件：統計卡片 (使用 clsx 優化) ---
+// --- 子組件：統計卡片 ---
 const StatCard: React.FC<StatCardProps> = ({
   title,
   value,
@@ -127,7 +132,7 @@ const StatCard: React.FC<StatCardProps> = ({
   isAlert
 }) => (
   <div
-    className={clsx(
+    className={cn(
       'bg-white rounded-xl p-4 border border-slate-100 shadow-sm flex items-center justify-between transition-all hover:shadow-md',
       isAlert && 'ring-1 ring-rose-100'
     )}
@@ -141,18 +146,18 @@ const StatCard: React.FC<StatCardProps> = ({
         <span className='text-[10px] text-slate-400 font-medium'>{unit}</span>
       </div>
       {trend && (
-        <div className={clsx('mt-1 text-[10px] font-bold', colorClass)}>
+        <div className={cn('mt-1 text-[10px] font-bold', colorClass)}>
           {trend}
         </div>
       )}
     </div>
-    <div className={clsx('p-2 rounded-lg', bgClass)}>
+    <div className={cn('p-2 rounded-lg', bgClass)}>
       <Icon size={18} className={iconColorClass} />
     </div>
   </div>
 )
 
-const WorkOrderList: React.FC = () => {
+export default function WorkOrderList() {
   const [loading, setLoading] = useState<boolean>(true)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
 
@@ -170,6 +175,19 @@ const WorkOrderList: React.FC = () => {
     }),
     []
   )
+
+  // --- 生成篩選選單資料 ---
+  const itemFilters = useMemo(() => {
+    const uniqueItems = Array.from(new Set(allMockData.map(d => d.itemCode)))
+    return uniqueItems.map(code => {
+      const name = allMockData.find(d => d.itemCode === code)?.itemName
+      return { text: `${code} ${name}`, value: code }
+    })
+  }, [])
+
+  const woIdFilters = useMemo(() => {
+    return allMockData.map(d => ({ text: d.woId, value: d.woId }))
+  }, [])
 
   const statsContent = (
     <div className='w-full max-w-[480px] p-1'>
@@ -229,13 +247,21 @@ const WorkOrderList: React.FC = () => {
         <span className='font-mono font-bold text-slate-700'>{text}</span>
       ),
       width: 150,
-      fixed: 'left'
+      fixed: 'left',
+      sorter: (a, b) => a.woId.localeCompare(b.woId),
+      filters: woIdFilters,
+      filterSearch: true,
+      onFilter: (value, record) => record.woId === value
     },
     {
       title: '產品資訊',
       dataIndex: 'itemCode',
       key: 'itemInfo',
       minWidth: 200,
+      sorter: (a, b) => a.itemCode.localeCompare(b.itemCode),
+      filters: itemFilters,
+      filterSearch: true,
+      onFilter: (value, record) => record.itemCode === value,
       render: (code, record) => (
         <div>
           <div className='text-blue-600 font-bold text-xs'>{code}</div>
@@ -249,6 +275,11 @@ const WorkOrderList: React.FC = () => {
       title: '進度 (實際/計畫)',
       key: 'progress',
       width: 180,
+      sorter: (a, b) => {
+        const percentA = a.actualQty / a.plannedQty
+        const percentB = b.actualQty / b.plannedQty
+        return percentA - percentB
+      },
       render: (_, record) => {
         const percent = Math.floor((record.actualQty / record.plannedQty) * 100)
         return (
@@ -276,6 +307,26 @@ const WorkOrderList: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       width: 120,
+      sorter: (a, b) => {
+        const weight: Record<WorkOrderStatus, number> = {
+          Abnormal: 6,
+          'In Progress': 5,
+          Paused: 4,
+          Scheduled: 3,
+          Planned: 2,
+          Completed: 1
+        }
+        return weight[a.status] - weight[b.status]
+      },
+      filters: [
+        { text: '異常 (Abnormal)', value: 'Abnormal' },
+        { text: '生產中 (In Progress)', value: 'In Progress' },
+        { text: '暫停 (Paused)', value: 'Paused' },
+        { text: '已排產 (Scheduled)', value: 'Scheduled' },
+        { text: '計畫中 (Planned)', value: 'Planned' },
+        { text: '已完工 (Completed)', value: 'Completed' }
+      ],
+      onFilter: (value, record) => record.status === value,
       render: (status: WorkOrderStatus) => {
         const statusMap: Record<
           WorkOrderStatus,
@@ -335,19 +386,19 @@ const WorkOrderList: React.FC = () => {
               {
                 key: 'details',
                 label: '報工明細',
-                icon: <FileText size={14} />
+                icon: <FileText size={14} className='text-blue-500' />
               },
               { key: 'stop', label: '強制結案', danger: true }
             ]
           }}
           trigger={['click']}
+          placement='bottomRight'
         >
           <Button
-            variant='text'
-            color='default'
+            type='text'
             size='small'
             icon={<MoreVertical size={18} />}
-            classNames={{ root: 'text-slate-400' }}
+            className='text-slate-400 flex items-center justify-center hover:bg-slate-100'
           />
         </Dropdown>
       )
@@ -355,116 +406,133 @@ const WorkOrderList: React.FC = () => {
   ]
 
   return (
-    <div className='px-2 pt-2 pb-8 space-y-4 animate-fade-in relative'>
-      {/* 全域 Loading 遮罩 */}
-      {loading && (
-        <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-[110] flex items-center justify-center rounded-2xl'>
-          <div className='flex flex-col items-center gap-3'>
-            <div className='w-10 h-10 border-4 border-indigo-100 border-t-indigo-500 rounded-full animate-spin' />
-            <span className='text-xs font-black text-indigo-600 tracking-widest uppercase'>
-              Fetching Orders...
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* 頂部導航列 */}
-      <div className='flex flex-wrap items-center justify-between px-1 gap-y-4 bg-white/50 py-2 rounded-xl sticky top-0 z-20 backdrop-blur-sm'>
-        <div className='flex items-center gap-3'>
-          <div className='bg-indigo-600 p-1.5 rounded-lg shadow-indigo-200 shadow-lg'>
-            <ClipboardCheck size={18} className='text-white' />
-          </div>
-          <Popover
-            content={statsContent}
-            trigger='click'
-            placement='bottomLeft'
-            classNames={{ root: 'custom-stats-popover' }}
-          >
-            <div className='flex items-center gap-2 cursor-pointer hover:bg-white px-3 py-1.5 rounded-full transition-all group border border-transparent hover:border-indigo-100'>
-              <span className='text-sm font-bold text-slate-600 group-hover:text-indigo-600 whitespace-nowrap'>
-                生產執行概覽
+    <div className='min-h-screen bg-slate-50/50 p-4'>
+      <div className='max-w-[1200px] mx-auto px-2 pt-2 pb-8 space-y-4 animate-fade-in relative'>
+        {/* 全域 Loading 遮罩 */}
+        {loading && (
+          <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-[110] flex items-center justify-center rounded-2xl'>
+            <div className='flex flex-col items-center gap-3'>
+              <div className='w-10 h-10 border-4 border-indigo-100 border-t-indigo-500 rounded-full animate-spin' />
+              <span className='text-xs font-black text-indigo-600 tracking-widest uppercase'>
+                Fetching Orders...
               </span>
-              <div className='flex gap-1'>
-                <Badge
-                  count={stats.running}
-                  style={{ backgroundColor: '#1677ff', fontSize: '10px' }}
-                />
-                <Badge
-                  count={stats.abnormal}
-                  style={{ backgroundColor: '#f5222d', fontSize: '10px' }}
+            </div>
+          </div>
+        )}
+
+        {/* 頂部導航列 */}
+        <div className='flex flex-wrap items-center justify-between px-1 gap-y-4 bg-white/50 py-2 rounded-xl sticky top-0 z-20 backdrop-blur-sm'>
+          <div className='flex items-center gap-3'>
+            <div className='bg-indigo-600 p-1.5 rounded-lg shadow-indigo-200 shadow-lg'>
+              <ClipboardCheck size={18} className='text-white' />
+            </div>
+            <Popover
+              content={statsContent}
+              trigger='click'
+              placement='bottomLeft'
+              rootClassName='custom-stats-popover'
+            >
+              <div className='flex items-center gap-2 cursor-pointer hover:bg-white px-3 py-1.5 rounded-full transition-all group border border-transparent hover:border-indigo-100'>
+                <span className='text-sm font-bold text-slate-600 group-hover:text-indigo-600 whitespace-nowrap'>
+                  生產執行概覽
+                </span>
+                <div className='flex gap-1'>
+                  <Badge
+                    count={stats.running}
+                    style={{
+                      backgroundColor: '#1677ff',
+                      fontSize: '10px',
+                      boxShadow: 'none'
+                    }}
+                  />
+                  <Badge
+                    count={stats.abnormal}
+                    style={{
+                      backgroundColor: '#f5222d',
+                      fontSize: '10px',
+                      boxShadow: 'none'
+                    }}
+                  />
+                </div>
+                <ChevronDown
+                  size={14}
+                  className='text-slate-400 group-hover:text-indigo-600'
                 />
               </div>
-              <ChevronDown
-                size={14}
-                className='text-slate-400 group-hover:text-indigo-600'
+            </Popover>
+          </div>
+
+          <div className='flex items-center gap-2'>
+            <Button
+              icon={<Printer size={16} />}
+              className='rounded-xl h-10 font-medium'
+            >
+              <span className='hidden lg:inline ml-1 text-xs'>批次列印</span>
+            </Button>
+            <Button
+              type='primary'
+              icon={<Plus size={16} />}
+              className='rounded-xl bg-indigo-600 h-10 font-bold border-none shadow-md shadow-indigo-200 hover:!bg-indigo-500'
+            >
+              <span className='hidden sm:inline ml-1 text-xs'>手動開單</span>
+            </Button>
+          </div>
+        </div>
+
+        <Card
+          className='shadow-sm border-none rounded-2xl overflow-hidden p-0'
+          styles={{ body: { padding: 0 } }}
+        >
+          <div className='flex flex-col'>
+            <div className='flex flex-wrap items-center justify-between gap-4 py-4 px-4 border-b border-slate-50'>
+              <div className='flex flex-wrap items-center gap-3 flex-1'>
+                <RangePicker className='rounded-xl h-10 border-slate-200 w-full sm:w-auto' />
+                <div className='text-indigo-600 text-[11px] flex items-center gap-1.5 bg-indigo-50 px-3 py-2 rounded-lg border border-indigo-100'>
+                  <Filter size={14} className='text-indigo-500' />
+                  <span>
+                    篩選提示：點擊表頭漏斗，快速過濾出「異常」或指定產品的工單。
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className='overflow-x-auto'>
+              <Table
+                rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
+                columns={columns}
+                dataSource={allMockData}
+                pagination={{
+                  pageSize: 10,
+                  showSizeChanger: true,
+                  showTotal: total => `共 ${total} 筆工單`,
+                  className: 'px-4 pb-4'
+                }}
+                scroll={{ x: 'max-content' }}
+                className='work-order-table'
               />
             </div>
-          </Popover>
-        </div>
+          </div>
+        </Card>
 
-        <div className='flex items-center gap-2'>
-          <Button
-            variant='outlined'
-            color='default'
-            icon={<Printer size={16} />}
-            classNames={{ root: 'rounded-xl h-10 font-medium' }}
-          >
-            <span className='hidden lg:inline ml-1 text-xs'>批次列印</span>
-          </Button>
-          <Button
-            variant='solid'
-            color='primary'
-            icon={<Plus size={16} />}
-            classNames={{
-              root: 'rounded-xl bg-indigo-600 h-10 font-bold border-none'
-            }}
-          >
-            <span className='hidden sm:inline ml-1 text-xs'>手動開單</span>
-          </Button>
-        </div>
+        <style>{`
+          .work-order-table .ant-table-thead > tr > th {
+            background: #f8faff !important;
+            color: #475569 !important;
+            font-weight: 700 !important;
+          }
+          .custom-stats-popover .ant-popover-inner {
+            border-radius: 16px !important;
+            padding: 16px !important;
+            border: 1px solid #e0e7ff;
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.1) !important;
+          }
+          .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+        `}</style>
       </div>
-
-      <Card
-        className='shadow-sm border-none rounded-2xl overflow-hidden p-0'
-        styles={{ body: { padding: 0 } }}
-      >
-        <div className='flex flex-col'>
-          <div className='flex flex-wrap items-center gap-4 py-4 px-4 border-b border-slate-50'>
-            <RangePicker
-              classNames={{ root: 'rounded-xl h-10 border-slate-200' }}
-            />
-            <div className='text-indigo-600 text-[11px] flex items-center gap-1.5 bg-indigo-50 px-3 py-2 rounded-lg border border-indigo-100'>
-              <Activity size={14} />
-              <span>現場動態：{stats.running} 條產線運轉中，良率穩定。</span>
-            </div>
-          </div>
-
-          <div className='overflow-x-auto'>
-            <Table
-              rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
-              columns={columns}
-              dataSource={allMockData}
-              pagination={{
-                pageSize: 10,
-                showSizeChanger: true,
-                showTotal: total => `共 ${total} 筆工單`,
-                className: 'px-4 pb-4'
-              }}
-              scroll={{ x: 'max-content' }}
-              className='work-order-table'
-            />
-          </div>
-        </div>
-      </Card>
-
-      <style>{`
-        .work-order-table .ant-table-thead > tr > th { background: #f8faff !important; color: #475569 !important; font-weight: 700 !important; }
-        .custom-stats-popover .ant-popover-inner { border-radius: 16px !important; padding: 16px !important; border: 1px solid #e0e7ff; }
-        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-      `}</style>
     </div>
   )
 }
-
-export default WorkOrderList
