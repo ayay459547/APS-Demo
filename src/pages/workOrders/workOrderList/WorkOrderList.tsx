@@ -247,7 +247,7 @@ export default function WorkOrderList() {
         <span className='font-mono font-bold text-slate-700'>{text}</span>
       ),
       width: 150,
-      fixed: 'left',
+      fixed: 'left', // --- 固定在左側 ---
       sorter: (a, b) => a.woId.localeCompare(b.woId),
       filters: woIdFilters,
       filterSearch: true,
@@ -379,6 +379,7 @@ export default function WorkOrderList() {
       key: 'action',
       width: 60,
       align: 'center',
+      fixed: 'right', // --- 固定在右側 ---
       render: () => (
         <Dropdown
           menu={{
@@ -498,7 +499,11 @@ export default function WorkOrderList() {
 
             <div className='overflow-x-auto'>
               <Table
-                rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
+                rowSelection={{
+                  selectedRowKeys,
+                  onChange: setSelectedRowKeys,
+                  fixed: 'left' // --- 固定在左側 ---
+                }}
                 columns={columns}
                 dataSource={allMockData}
                 pagination={{
@@ -507,7 +512,7 @@ export default function WorkOrderList() {
                   showTotal: total => `共 ${total} 筆工單`,
                   className: 'px-4 pb-4'
                 }}
-                scroll={{ x: 'max-content' }}
+                scroll={{ x: 1000 }} // --- 明確的 x 軸寬度，確保固定欄位生效 ---
                 className='work-order-table'
               />
             </div>

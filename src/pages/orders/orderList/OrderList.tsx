@@ -30,10 +30,12 @@ import {
   CalendarDays
 } from 'lucide-react'
 import type { ColumnsType, TableProps } from 'antd/es/table'
+import { clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
 
 // 輕量版 cn 函數，確保預覽環境 100% 可運行
 function cn(...classes: (string | undefined | null | false)[]) {
-  return classes.filter(Boolean).join(' ')
+  return twMerge(clsx(classes))
 }
 
 const { RangePicker } = DatePicker
@@ -247,6 +249,7 @@ export default function OrderList() {
       title: '訂單編號',
       dataIndex: 'orderId',
       key: 'orderId',
+      fixed: 'left',
       render: (text: string) => (
         <span className='font-mono font-bold text-blue-600'>{text}</span>
       ),
@@ -394,6 +397,7 @@ export default function OrderList() {
       key: 'action',
       width: 60,
       align: 'center',
+      fixed: 'right', // --- 新增：將操作欄位固定在右側 ---
       render: () => (
         <Dropdown
           menu={{
@@ -438,7 +442,8 @@ export default function OrderList() {
 
   const rowSelection: TableProps<OrderItem>['rowSelection'] = {
     selectedRowKeys,
-    onChange: keys => setSelectedRowKeys(keys)
+    onChange: keys => setSelectedRowKeys(keys),
+    fixed: 'left' // --- 新增：將核取方塊固定在左側 ---
   }
 
   return (
@@ -583,7 +588,9 @@ export default function OrderList() {
                   showTotal: total => `共計 ${total} 筆`,
                   className: 'px-4 pb-4'
                 }}
-                scroll={{ x: 'max-content' }}
+                scroll={{
+                  x: 1000
+                }} /* 新增：設定明確的 x 軸滾動寬度，確保固定欄位完美運作 */
                 className='order-manage-table'
               />
             </div>

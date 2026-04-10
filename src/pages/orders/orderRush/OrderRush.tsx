@@ -241,6 +241,7 @@ export default function App() {
       title: '訂單編號',
       dataIndex: 'orderId',
       key: 'orderId',
+      fixed: 'left',
       render: (text, record) => (
         <Space size={6}>
           <span className='font-mono font-bold text-blue-600'>{text}</span>
@@ -367,6 +368,7 @@ export default function App() {
       key: 'action',
       width: 60,
       align: 'center',
+      fixed: 'right', // --- 新增：將操作欄位固定在右側 ---
       render: (_, record) => (
         <Dropdown
           menu={{
@@ -503,7 +505,11 @@ export default function App() {
 
             <div className='overflow-x-auto'>
               <Table
-                rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
+                rowSelection={{
+                  selectedRowKeys,
+                  onChange: setSelectedRowKeys,
+                  fixed: 'left' // --- 新增：將核取方塊固定在左側 ---
+                }}
                 columns={columns}
                 dataSource={rushMockData}
                 loading={loading}
@@ -513,7 +519,7 @@ export default function App() {
                   showTotal: total => `待處理排程：${total} 筆`,
                   className: 'px-4 pb-4'
                 }}
-                scroll={{ x: 'max-content' }}
+                scroll={{ x: 1000 }} /* 新增：設定明確的 x 軸寬度確保固定生效 */
                 className='order-rush-table'
               />
             </div>
