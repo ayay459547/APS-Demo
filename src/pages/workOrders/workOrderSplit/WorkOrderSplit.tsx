@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import {
   Card,
   Button,
@@ -11,7 +11,6 @@ import {
   Tooltip,
   Empty,
   message,
-  Input,
   Popover
 } from 'antd'
 import {
@@ -26,7 +25,9 @@ import {
   CheckCircle2,
   AlertCircle,
   Sparkles,
-  MousePointer2
+  MousePointer2,
+  Filter,
+  Loader2
 } from 'lucide-react'
 import dayjs from 'dayjs'
 import { clsx, type ClassValue } from 'clsx'
@@ -58,61 +59,140 @@ interface ParentWorkOrder {
 }
 
 const machines = ['CNC-01', 'CNC-05', 'SMT-A2', 'ASM-L1', 'Tst-Z9']
-
-// --- 模擬待拆分工單庫資料 ---
-const mockParentOrders: ParentWorkOrder[] = [
-  {
-    id: 'MO-2026-0422',
-    item: 'IC-7022 M3 Pro Mainboard',
-    totalQty: 1000,
-    originalDeadline: '2026-04-15',
-    status: 'Pending',
-    priority: 'High'
-  },
-  {
-    id: 'MO-2026-0425',
-    item: 'PN-4500 Power Module X1',
-    totalQty: 2500,
-    originalDeadline: '2026-04-18',
-    status: 'Partial',
-    priority: 'Medium'
-  },
-  {
-    id: 'MO-2026-0428',
-    item: 'CH-9921 Aluminum Chassis',
-    totalQty: 500,
-    originalDeadline: '2026-04-20',
-    status: 'Pending',
-    priority: 'Low'
-  },
-  {
-    id: 'MO-2026-0430',
-    item: 'BT-1020 Lithium Battery',
-    totalQty: 8000,
-    originalDeadline: '2026-04-22',
-    status: 'Pending',
-    priority: 'High'
-  },
-  {
-    id: 'MO-2026-0502',
-    item: 'DS-3301 OLED Display',
-    totalQty: 1200,
-    originalDeadline: '2026-04-25',
-    status: 'Partial',
-    priority: 'Medium'
-  }
+const products = [
+  'IC-7022 M3 Pro Mainboard',
+  'PN-4500 Power Module X1',
+  'CH-9921 Aluminum Chassis',
+  'BT-1020 Lithium Battery',
+  'DS-3301 OLED Display',
+  'MT-8812 Micro Motor',
+  'LN-1050 Optical Lens',
+  'CB-2200 Flex Cable Unit'
 ]
 
-const WorkOrderSplit: React.FC = () => {
-  // 修正：預設不選取任何母單
+// --- 模擬海量待拆分工單庫資料 (2000 筆) ---
+const generateMockParentOrders = (count: number): ParentWorkOrder[] => {
+  const statuses: ('Pending' | 'Partial')[] = ['Pending', 'Partial']
+  const priorities: ('High' | 'Medium' | 'Low')[] = ['High', 'Medium', 'Low']
+
+  return Array.from({ length: count }).map((_, i) => {
+    const idNum = i + 1
+    const status = statuses[Math.floor(Math.random() * statuses.length)]
+    const priority = priorities[Math.floor(Math.random() * priorities.length)]
+    const item = products[Math.floor(Math.random() * products.length)]
+
+    // 產生隨機未來日期
+    const date = new Date('2026-04-10')
+    date.setDate(date.getDate() + Math.floor(Math.random() * 30))
+
+    return {
+      id: `MO-2026-${idNum.toString().padStart(4, '0')}`,
+      item,
+      totalQty: Math.floor(Math.random() * 9500) + 500,
+      originalDeadline: date.toISOString().split('T')[0],
+      status,
+      priority
+    }
+  })
+}
+
+const mockParentOrders = generateMockParentOrders(2000)
+
+export default function App() {
   const [selectedParent, setSelectedParent] = useState<ParentWorkOrder | null>(
     null
   )
+
+  // 搜尋與篩選狀態
   const [searchKey, setSearchKey] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [isSearching, setIsSearching] = useState(false)
+  const [statusFilter, setStatusFilter] = useState<
+    'ALL' | 'Pending' | 'Partial'
+  >('ALL')
+
   const [loading, setLoading] = useState(false)
   const [subOrders, setSubOrders] = useState<SubWorkOrder[]>([])
 
-  const handleSelectParent = (order: ParentWorkOrder) => {
+  // 自製虛擬列表狀態
+  const listContainerRef = useRef<HTMLDivElement>(null)
+  const [listHeight, setListHeight] = useState(600)
+  const [scrollTop, setScrollTop] = useState(0)
+
+  const ITEM_HEIGHT = 110 // 預估每個卡片含間距的高度 (98px + 12px padding)
+  const OVERSCAN = 5 // 上下額外渲染的數量，防止滾動白畫面
+
+  // 監聽虛擬列表容器高度
+  useEffect(() => {
+    if (!listContainerRef.current) return
+    const resizeObserver = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        setListHeight(entry.contentRect.height)
+      }
+    })
+    resizeObserver.observe(listContainerRef.current)
+    return () => resizeObserver.disconnect()
+  }, [])
+
+  // 處理滾動更新位置
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    setScrollTop(e.currentTarget.scrollTop)
+  }
+
+  // 搜尋防抖 (Debounce)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchKey)
+      setIsSearching(false)
+      setScrollTop(0) // 搜尋時重置滾動位置
+      if (listContainerRef.current) {
+        listContainerRef.current.scrollTop = 0
+      }
+    }, 300)
+    return () => clearTimeout(handler)
+  }, [searchKey])
+
+  // 執行多維度過濾
+  const filteredOrders = useMemo(() => {
+    let result = mockParentOrders
+
+    // 1. 關鍵字過濾
+    if (debouncedSearch.trim() !== '') {
+      const q = debouncedSearch.toLowerCase()
+      result = result.filter(
+        o => o.id.toLowerCase().includes(q) || o.item.toLowerCase().includes(q)
+      )
+    }
+
+    // 2. 狀態過濾
+    if (statusFilter !== 'ALL') {
+      result = result.filter(o => o.status === statusFilter)
+    }
+
+    return result
+  }, [debouncedSearch, statusFilter])
+
+  // 計算可視範圍內的渲染節點
+  const visibleItems = useMemo(() => {
+    const startIndex = Math.max(
+      0,
+      Math.floor(scrollTop / ITEM_HEIGHT) - OVERSCAN
+    )
+    const endIndex = Math.min(
+      filteredOrders.length - 1,
+      Math.ceil((scrollTop + listHeight) / ITEM_HEIGHT) + OVERSCAN
+    )
+
+    const items = []
+    for (let i = startIndex; i <= endIndex; i++) {
+      if (filteredOrders[i]) {
+        items.push({ index: i, item: filteredOrders[i] })
+      }
+    }
+    return items
+  }, [scrollTop, listHeight, filteredOrders])
+
+  const handleSelectParent = useCallback((order: ParentWorkOrder) => {
     setLoading(true)
     setSelectedParent(order)
     // 切換單子後清空拆分區塊
@@ -120,7 +200,7 @@ const WorkOrderSplit: React.FC = () => {
       setSubOrders([])
       setLoading(false)
     }, 400)
-  }
+  }, [])
 
   const splitQtySum = useMemo(
     () => subOrders.reduce((sum, item) => sum + (item.qty || 0), 0),
@@ -146,16 +226,6 @@ const WorkOrderSplit: React.FC = () => {
     }, 1500)
   }
 
-  const filteredOrders = useMemo(
-    () =>
-      mockParentOrders.filter(
-        o =>
-          o.id.includes(searchKey) ||
-          o.item.toLowerCase().includes(searchKey.toLowerCase())
-      ),
-    [searchKey]
-  )
-
   const addSubOrder = () => {
     if (!selectedParent) return
     if (remainingQty <= 0) {
@@ -177,6 +247,7 @@ const WorkOrderSplit: React.FC = () => {
 
   const removeSubOrder = (id: string) =>
     setSubOrders(subOrders.filter(o => o.id !== id))
+
   const updateQty = (id: string, value: number | null) =>
     setSubOrders(
       subOrders.map(o => (o.id === id ? { ...o, qty: value || 0 } : o))
@@ -202,7 +273,7 @@ const WorkOrderSplit: React.FC = () => {
   )
 
   return (
-    <div className='flex h-full w-full bg-[#f8fafc] overflow-hidden animate-fade-in relative'>
+    <div className='flex h-full min-h-[600px] w-full bg-[#f8fafc] overflow-hidden animate-fade-in relative font-sans'>
       {/* 全畫面 Loading 遮罩 */}
       {loading && (
         <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-[110] flex items-center justify-center animate-in fade-in duration-300'>
@@ -215,92 +286,187 @@ const WorkOrderSplit: React.FC = () => {
         </div>
       )}
 
-      {/* 左欄：側邊清單 */}
-      <aside className='w-80 bg-white border-r border-slate-200 flex flex-col shrink-0 shadow-sm z-30'>
-        <div className='p-5 border-b border-slate-100 bg-slate-50/50'>
+      {/* 左欄：側邊虛擬渲染清單 */}
+      <aside className='w-[340px] bg-white border-r border-slate-200 flex flex-col shrink-0 shadow-[2px_0_8px_rgba(0,0,0,0.02)] z-30'>
+        {/* 頂部固定區域 (標題與過濾器) */}
+        <div className='p-4 border-b border-slate-100 bg-slate-50/50 shrink-0 z-10'>
           <div className='flex items-center justify-between mb-4'>
             <div className='flex items-center gap-2'>
-              <div className='w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center text-white shadow-md shadow-violet-100'>
-                <Scissors size={18} />
+              <div className='w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center text-white shadow-md shadow-violet-200'>
+                <Scissors size={16} />
               </div>
               <span className='font-black text-slate-800 text-sm tracking-tight'>
-                工單拆分工作台
+                待拆分母單 ({mockParentOrders.length})
               </span>
             </div>
             <Badge
               count={filteredOrders.length}
-              style={{ backgroundColor: '#8b5cf6' }}
+              style={{ backgroundColor: '#8b5cf6', boxShadow: 'none' }}
+              overflowCount={9999}
             />
           </div>
-          <Input
-            prefix={<Search size={14} className='text-slate-400' />}
-            placeholder='搜尋母工單編號...'
-            className='rounded-xl h-10 border-slate-200'
-            onChange={e => setSearchKey(e.target.value)}
-          />
+
+          {/* 過濾器與搜尋框 */}
+          <div className='flex flex-col gap-3'>
+            <div className='relative w-full'>
+              <Search
+                size={14}
+                className='absolute left-3 top-1/2 -translate-y-1/2 text-slate-400'
+              />
+              <input
+                type='text'
+                placeholder='搜尋編號、產品名稱...'
+                value={searchKey}
+                onChange={e => {
+                  setSearchKey(e.target.value)
+                  setIsSearching(true)
+                }}
+                className='w-full pl-8 pr-8 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all text-slate-700 placeholder:text-slate-400'
+              />
+              {isSearching && (
+                <Loader2
+                  size={14}
+                  className='absolute right-3 top-1/2 -translate-y-1/2 text-violet-500 animate-spin'
+                />
+              )}
+            </div>
+
+            {/* --- 更新：狀態快捷過濾標籤 (Tags) --- */}
+            <div className='flex items-center gap-1.5 overflow-x-auto pb-1 custom-scrollbar'>
+              <Filter size={14} className='text-slate-400 shrink-0 mr-1' />
+              {[
+                { value: 'ALL', label: '全部' },
+                { value: 'Pending', label: '待拆分' },
+                { value: 'Partial', label: '部分拆分' }
+              ].map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => {
+                    setStatusFilter(opt.value as any)
+                    // 重置滾動條位置
+                    setScrollTop(0)
+                    if (listContainerRef.current)
+                      listContainerRef.current.scrollTop = 0
+                  }}
+                  className={cn(
+                    'whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-bold transition-all border outline-none',
+                    statusFilter === opt.value
+                      ? 'bg-violet-100 text-violet-700 border-violet-200 shadow-sm ring-1 ring-violet-200'
+                      : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50 hover:border-slate-300'
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className='flex-1 overflow-y-auto p-3 custom-scrollbar'>
-          {filteredOrders.map(item => (
-            <div
-              key={item.id}
-              onClick={() => handleSelectParent(item)}
-              className={cn(
-                'group p-4 mb-3 rounded-2xl cursor-pointer transition-all border relative overflow-hidden',
-                selectedParent?.id === item.id
-                  ? 'bg-violet-50 border-violet-200 ring-1 ring-violet-200 shadow-sm'
-                  : 'bg-white border-slate-100 hover:border-violet-200'
-              )}
-            >
-              <div className='flex justify-between items-center mb-1.5'>
-                <Tag
-                  color={item.status === 'Partial' ? 'warning' : 'default'}
-                  className='m-0 text-[9px] rounded-md font-bold px-2'
-                >
-                  {item.status === 'Partial' ? '部分拆分' : '待拆分'}
-                </Tag>
-                <span className='text-[10px] font-mono text-slate-300'>
-                  #{item.id.split('-').pop()}
-                </span>
-              </div>
-              <h4 className='font-bold text-slate-700 text-sm truncate mb-2'>
-                {item.item}
-              </h4>
-              <div className='flex justify-between items-end text-[10px] text-slate-400'>
-                <span>{item.id}</span>
-                <span className='text-slate-800 font-black'>
-                  {item.totalQty.toLocaleString()}{' '}
-                  <span className='font-normal text-slate-400'>PCS</span>
-                </span>
-              </div>
+        {/* 自製虛擬滾動列表區域 */}
+        <div
+          className='flex-1 relative bg-slate-50/30 overflow-y-auto custom-scrollbar'
+          ref={listContainerRef}
+          onScroll={handleScroll}
+        >
+          {filteredOrders.length === 0 ? (
+            <div className='absolute inset-0 flex flex-col items-center justify-center text-slate-400 gap-2'>
+              <Search size={32} className='text-slate-300' />
+              <p className='text-sm'>沒有符合的母工單</p>
             </div>
-          ))}
+          ) : (
+            <div
+              style={{
+                height: filteredOrders.length * ITEM_HEIGHT,
+                position: 'relative'
+              }}
+            >
+              {visibleItems.map(({ index, item }) => {
+                const isSelected = selectedParent?.id === item.id
+
+                return (
+                  <div
+                    key={item.id}
+                    className='px-3 py-1.5'
+                    style={{
+                      position: 'absolute',
+                      top: index * ITEM_HEIGHT,
+                      height: ITEM_HEIGHT,
+                      width: '100%'
+                    }}
+                  >
+                    <div
+                      onClick={() => handleSelectParent(item)}
+                      className={cn(
+                        'group h-full p-4 rounded-2xl cursor-pointer transition-all border relative overflow-hidden flex flex-col justify-between',
+                        isSelected
+                          ? 'bg-violet-50 border-violet-300 shadow-sm ring-1 ring-violet-200'
+                          : 'bg-white border-slate-200 hover:border-violet-300 hover:shadow-sm'
+                      )}
+                    >
+                      <div className='flex justify-between items-start mb-1'>
+                        <Tag
+                          color={
+                            item.status === 'Partial' ? 'warning' : 'default'
+                          }
+                          className='m-0 text-[10px] rounded-md font-bold px-2 border-none'
+                        >
+                          {item.status === 'Partial' ? '部分拆分' : '待拆分'}
+                        </Tag>
+                        <span className='text-[10px] font-mono font-bold text-slate-400 group-hover:text-violet-500 transition-colors'>
+                          {item.id}
+                        </span>
+                      </div>
+                      <h4 className='font-bold text-slate-700 text-sm truncate mb-1'>
+                        {item.item}
+                      </h4>
+                      <div className='flex justify-between items-end text-[10px] text-slate-500'>
+                        <span className='flex items-center gap-1'>
+                          <Clock size={10} className='text-slate-400' />{' '}
+                          {item.originalDeadline}
+                        </span>
+                        <span className='text-slate-800 font-black text-xs'>
+                          {item.totalQty.toLocaleString()}{' '}
+                          <span className='font-normal text-slate-400 text-[9px]'>
+                            PCS
+                          </span>
+                        </span>
+                      </div>
+
+                      {/* 裝飾條 */}
+                      {isSelected && (
+                        <div className='absolute left-0 top-0 bottom-0 w-1 bg-violet-500' />
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       </aside>
 
       {/* 右欄：主工作台 */}
       <main className='flex-1 flex flex-col min-w-0 bg-[#f8fafc] relative'>
         {/* 精簡型 Header */}
-        <header className='h-14 flex items-center justify-end px-8 bg-white border-b border-slate-200 sticky top-0 z-[100] shrink-0'>
+        <header className='h-14 flex items-center justify-end px-8 bg-white border-b border-slate-200 sticky top-0 z-[100] shrink-0 shadow-sm'>
           {selectedParent && (
             <div className='flex items-center gap-3 animate-in fade-in slide-in-from-right-2'>
               <Popover
                 content={aiSuggestionContent}
                 trigger='click'
                 placement='bottomRight'
-                classNames={{ root: 'custom-stats-popover' }}
+                rootClassName='custom-stats-popover'
               >
                 <Button
-                  variant='filled'
-                  color='primary'
+                  type='primary'
                   size='small'
                   icon={<Sparkles size={14} />}
-                  className='rounded-lg h-8 w-8 flex items-center justify-center shadow-none border-none'
+                  className='!rounded-lg !h-8 !w-8 flex items-center justify-center shadow-none bg-violet-100 text-violet-600 hover:!bg-violet-200 border-none'
                 />
               </Popover>
 
-              <div className='flex items-center bg-slate-50 px-3 py-1 rounded-lg border border-slate-100 h-8 whitespace-nowrap'>
-                <span className='text-[9px] text-slate-400 font-black uppercase tracking-tight mr-2'>
+              <div className='flex items-center bg-slate-50 px-3 py-1 rounded-lg border border-slate-200 h-8 whitespace-nowrap shadow-inner'>
+                <span className='text-[9px] text-slate-500 font-black uppercase tracking-tight mr-2'>
                   Split Balance:
                 </span>
                 <span className='text-xs font-black text-slate-800 mr-1'>
@@ -318,13 +484,17 @@ const WorkOrderSplit: React.FC = () => {
               </div>
 
               <Button
-                variant='solid'
-                color='primary'
+                type='primary'
                 size='small'
                 disabled={subOrders.length === 0 || loading}
                 onClick={handleExecuteSplit}
                 icon={<Save size={14} />}
-                className='rounded-lg border-none h-8 px-5 font-bold shadow-sm hover:opacity-90 transition-all text-xs'
+                className={cn(
+                  '!rounded-lg !hover:!bg-violet-500 !border-none !h-8 !px-5 !font-bold shadow-md hover:shadow-lg transition-all !text-xs disabled:shadow-none',
+                  subOrders.length === 0 || loading
+                    ? '!bg-slate-300 !text-slate-500'
+                    : '!bg-violet-600'
+                )}
               >
                 提交排程
               </Button>
@@ -336,25 +506,25 @@ const WorkOrderSplit: React.FC = () => {
         <div className='flex-1 overflow-y-auto p-8 custom-scrollbar'>
           {!selectedParent ? (
             <div className='h-full flex flex-col items-center justify-center text-slate-300 animate-in fade-in zoom-in-95 duration-700'>
-              <div className='w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-6'>
-                <MousePointer2 size={32} className='text-slate-200' />
+              <div className='w-24 h-24 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm border border-slate-100'>
+                <MousePointer2 size={36} className='text-slate-300' />
               </div>
               <h3 className='text-lg font-black text-slate-400 uppercase tracking-widest'>
                 請先選取待拆分母單
               </h3>
-              <p className='text-xs text-slate-300 mt-2'>
+              <p className='text-sm text-slate-400 mt-2 bg-white px-4 py-2 rounded-full shadow-sm border border-slate-100'>
                 點擊左側清單中的工單，即可進入拆分模擬模式
               </p>
             </div>
           ) : (
-            <div className='flex flex-col xl:flex-row gap-10 items-start max-w-[1200px] mx-auto pb-20'>
-              {/* 母單卡片 */}
-              <div className='w-full xl:w-72 shrink-0'>
+            <div className='flex flex-col xl:flex-row gap-8 items-start max-w-[1200px] mx-auto pb-20'>
+              {/* 母單卡片 (Sticky on Desktop) */}
+              <div className='w-full xl:w-72 shrink-0 xl:sticky xl:top-8'>
                 <Card
                   className='rounded-[28px] border-none shadow-xl bg-slate-900 text-white overflow-hidden relative'
                   styles={{ body: { padding: '24px' } }}
                 >
-                  <div className='absolute -bottom-6 -right-6 p-4 opacity-5'>
+                  <div className='absolute -bottom-6 -right-6 p-4 opacity-5 pointer-events-none'>
                     <Layers size={120} />
                   </div>
                   <div className='relative z-10 space-y-6'>
@@ -393,21 +563,21 @@ const WorkOrderSplit: React.FC = () => {
                       </div>
                       <div className='flex justify-between items-center py-1'>
                         <div className='text-center'>
-                          <div className='text-[8px] text-slate-500 font-bold uppercase'>
+                          <div className='text-[8px] text-slate-500 font-bold uppercase tracking-wider'>
                             Assigned
                           </div>
-                          <div className='text-base font-black text-violet-400'>
+                          <div className='text-base font-black text-violet-400 mt-0.5'>
                             {splitQtySum.toLocaleString()}
                           </div>
                         </div>
                         <div className='h-6 w-[1px] bg-white/10' />
                         <div className='text-center'>
-                          <div className='text-[8px] text-slate-500 font-bold uppercase'>
+                          <div className='text-[8px] text-slate-500 font-bold uppercase tracking-wider'>
                             Remaining
                           </div>
                           <div
                             className={cn(
-                              'text-base font-black mt-1',
+                              'text-base font-black mt-0.5',
                               remainingQty === 0
                                 ? 'text-emerald-400'
                                 : 'text-rose-400'
@@ -418,50 +588,58 @@ const WorkOrderSplit: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    <div className='flex items-center gap-2 text-[10px] text-slate-500 font-bold bg-white/5 p-2.5 rounded-xl border border-white/5'>
-                      <Clock size={12} className='text-violet-400' /> Deadline:{' '}
-                      {selectedParent.originalDeadline}
+                    <div className='flex items-center gap-2 text-[10px] text-slate-300 font-bold bg-white/5 p-3 rounded-xl border border-white/5'>
+                      <Clock size={14} className='text-violet-400 shrink-0' />
+                      <span>
+                        Deadline:{' '}
+                        <span className='text-white'>
+                          {selectedParent.originalDeadline}
+                        </span>
+                      </span>
                     </div>
                   </div>
                 </Card>
+
                 <Button
                   block
-                  variant='dashed'
-                  color='primary'
+                  type='dashed'
                   icon={<Plus size={16} />}
                   onClick={addSubOrder}
-                  className='mt-6 !h-12 !rounded-[20px] font-black transition-all bg-white border-2'
+                  className='mt-6 !h-12 !rounded-[20px] font-black transition-all bg-white border-2 border-slate-200 text-violet-600 hover:!border-violet-400 hover:!text-violet-500 shadow-sm'
                 >
                   新增拆分節點
                 </Button>
               </div>
 
-              {/* 子單列表：佈局優化 */}
-              <div className='flex-1 space-y-5 w-full'>
+              {/* 子單列表 */}
+              <div className='flex-1 space-y-4 w-full'>
                 {subOrders.length === 0 ? (
-                  <div className='bg-white border-2 border-dashed border-slate-100 rounded-[28px] p-24 flex flex-col items-center text-slate-300 shadow-sm animate-in zoom-in-95 duration-500'>
+                  <div className='bg-white border-2 border-dashed border-slate-200 rounded-[28px] p-16 xl:p-24 flex flex-col items-center text-slate-300 shadow-sm animate-in zoom-in-95 duration-500'>
                     <Empty
                       image={Empty.PRESENTED_IMAGE_SIMPLE}
                       description={false}
                     />
-                    <p className='mt-4 font-black text-[11px] uppercase tracking-widest text-slate-400'>
+                    <p className='mt-4 font-black text-[12px] uppercase tracking-widest text-slate-400'>
                       目前尚未分配任何子工單
                     </p>
-                    <p className='text-[10px] text-slate-300 mt-1'>
+                    <p className='text-[11px] text-slate-400 mt-1 bg-slate-50 px-3 py-1 rounded-md'>
                       請點擊左側「新增拆分節點」開始進行產能分配
                     </p>
                   </div>
                 ) : (
                   subOrders.map((sub, index) => (
-                    <div key={sub.id}>
+                    <div
+                      key={sub.id}
+                      className='animate-in fade-in slide-in-from-bottom-4 duration-300'
+                    >
                       <Card
-                        className='rounded-[24px] border-none shadow-sm hover:shadow-md transition-all bg-white border-l-[8px] border-l-violet-500 overflow-hidden'
-                        styles={{ body: { padding: '24px' } }}
+                        className='rounded-[24px] border-none shadow-sm hover:shadow-md transition-shadow bg-white border-l-[6px] border-l-violet-500 overflow-hidden'
+                        styles={{ body: { padding: '20px 24px' } }}
                       >
-                        {/* 頁首：Index, Title 與 垃圾桶 (垃圾桶移動到右上方) */}
-                        <div className='flex items-center justify-between mb-6'>
-                          <div className='flex items-center gap-4'>
-                            <div className='w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center text-white font-black text-sm shadow-lg shadow-violet-100 shrink-0'>
+                        {/* 頁首：Index, Title 與 垃圾桶 */}
+                        <div className='flex items-center justify-between mb-5'>
+                          <div className='flex items-center gap-3'>
+                            <div className='w-9 h-9 rounded-xl bg-violet-100 flex items-center justify-center text-violet-700 font-black text-sm shadow-inner shrink-0'>
                               {index + 1}
                             </div>
                             <div className='min-w-0'>
@@ -476,20 +654,20 @@ const WorkOrderSplit: React.FC = () => {
 
                           <Tooltip title='移除此拆分節點'>
                             <Button
-                              variant='text'
-                              color='danger'
-                              icon={<Trash2 size={18} />}
+                              type='text'
+                              danger
+                              icon={<Trash2 size={16} />}
                               onClick={() => removeSubOrder(sub.id)}
-                              className='hover:bg-rose-50 rounded-xl flex items-center justify-center h-10 w-10 transition-colors shrink-0'
+                              className='hover:bg-rose-50 rounded-xl flex items-center justify-center h-9 w-9 transition-colors shrink-0'
                             />
                           </Tooltip>
                         </div>
 
-                        {/* 輸入區：數量、機台、時段 (獨立於下一行) */}
-                        <div className='grid grid-cols-1 md:grid-cols-12 gap-6'>
+                        {/* 輸入區：數量、機台、時段 */}
+                        <div className='grid grid-cols-1 md:grid-cols-12 gap-5'>
                           {/* 數量分配：佔 3/12 */}
                           <div className='md:col-span-3'>
-                            <div className='text-[10px] text-slate-400 font-black uppercase mb-2 flex items-center gap-1.5 tracking-wider'>
+                            <div className='text-[10px] text-slate-500 font-bold uppercase mb-1.5 flex items-center gap-1.5 tracking-wider'>
                               <Layers size={12} className='text-violet-500' />{' '}
                               分配數量
                             </div>
@@ -497,14 +675,14 @@ const WorkOrderSplit: React.FC = () => {
                               min={1}
                               value={sub.qty}
                               onChange={val => updateQty(sub.id, val)}
-                              className='!w-full rounded-lg font-black text-violet-600 h-10 shadow-sm'
+                              className='!w-full rounded-xl font-black text-violet-600 h-10 shadow-sm custom-input-number'
                               controls={false}
                             />
                           </div>
 
                           {/* 機台選擇：佔 3/12 */}
-                          <div className='md:col-span-3'>
-                            <div className='text-[10px] text-slate-400 font-black uppercase mb-2 flex items-center gap-1.5 tracking-wider'>
+                          <div className='md:col-span-4 lg:col-span-3'>
+                            <div className='text-[10px] text-slate-500 font-bold uppercase mb-1.5 flex items-center gap-1.5 tracking-wider'>
                               <Cpu size={12} className='text-violet-500' />{' '}
                               指定機台
                             </div>
@@ -519,8 +697,8 @@ const WorkOrderSplit: React.FC = () => {
                           </div>
 
                           {/* 時段範圍：佔 6/12 */}
-                          <div className='md:col-span-6'>
-                            <div className='text-[10px] text-slate-400 font-black uppercase mb-2 flex items-center gap-1.5 tracking-wider'>
+                          <div className='md:col-span-5 lg:col-span-6'>
+                            <div className='text-[10px] text-slate-500 font-bold uppercase mb-1.5 flex items-center gap-1.5 tracking-wider'>
                               <Clock size={12} className='text-violet-500' />{' '}
                               生產預估時段
                             </div>
@@ -529,9 +707,11 @@ const WorkOrderSplit: React.FC = () => {
                                 dayjs(sub.startDate),
                                 dayjs(sub.endDate)
                               ]}
-                              className='w-full rounded-lg border-slate-200 h-10 shadow-sm'
-                              size='middle'
+                              className='w-full rounded-xl border-slate-200 h-10 shadow-sm custom-range-picker'
                               inputReadOnly
+                              separator={
+                                <span className='text-slate-300 mx-1'>-</span>
+                              }
                             />
                           </div>
                         </div>
@@ -546,21 +726,40 @@ const WorkOrderSplit: React.FC = () => {
       </main>
 
       <style>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-        .ant-input-number:hover, .ant-input-number-focused, .ant-select:not(.ant-select-disabled):hover .ant-select-selector, .ant-picker:hover, .ant-picker-focused {
+        /* 全域滾動條優化 */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar:hover::-webkit-scrollbar-thumb { background: #94a3b8; }
+
+        /* Antd 元件樣式微調 */
+        .ant-input-number.custom-input-number:hover,
+        .ant-input-number.custom-input-number-focused,
+        .custom-range-picker:hover,
+        .custom-range-picker.ant-picker-focused {
            border-color: #8b5cf6 !important;
+           box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1) !important;
         }
         .custom-select-split-compact .ant-select-selector {
-          border-radius: 8px !important;
+          border-radius: 12px !important;
           height: 40px !important;
+          align-items: center;
           font-weight: 700 !important;
+          color: #334155 !important;
         }
-        .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        .custom-select-filter .ant-select-selector {
+           border-radius: 8px !important;
+        }
+        .custom-stats-popover .ant-popover-inner {
+          border-radius: 16px !important;
+          padding: 16px !important;
+          box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.15) !important;
+          border: 1px solid #ede9fe;
+        }
+
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
     </div>
   )
 }
-
-export default WorkOrderSplit
