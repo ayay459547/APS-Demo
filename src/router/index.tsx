@@ -2,11 +2,10 @@ import type { RouteObject } from 'react-router-dom'
 import { useRoutes } from 'react-router-dom'
 
 import Layout from '@/layout/Layout.tsx'
-import DashboardContent from '@/pages/dashboard/DashboardContent.tsx'
 import NotFound from '@/pages/NotFound.tsx'
 
 import type { MenuItem } from './constants.tsx'
-import { MENU_DATA, COMPONENT_MAP } from './constants.tsx'
+import { MENU_DATA, COMPONENT_MAP, dashboardMenuItem } from './constants.tsx'
 
 function generateRoutes(menu: MenuItem[], parentPath = ''): RouteObject[] {
   return menu.flatMap(item => {
@@ -35,7 +34,7 @@ const routes: RouteObject[] = [
     element: <Layout />,
     children: [
       // 儀錶板
-      { index: true, element: <DashboardContent /> },
+      { index: true, element: dashboardMenuItem.element },
       // 系統功能
       ...childrenRoutes,
       // 功能尚未開發

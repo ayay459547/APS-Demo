@@ -1,13 +1,11 @@
 import { useState } from 'react'
-import { LayoutDashboard, ChartLine, X } from 'lucide-react'
+import { ChartLine, X } from 'lucide-react'
 import { clsx } from 'clsx'
 import { useNavigate } from 'react-router-dom'
 import { Menu, ConfigProvider } from 'antd'
 import type { MenuProps } from 'antd'
 
 import { ANT_MENU_ITEMS } from '@/router/constants'
-
-type MenuItem = Required<MenuProps>['items'][number]
 
 interface Props {
   activeMenu: string
@@ -32,16 +30,14 @@ export default function Sidebar({
   const getOpenKeys = (path: string) => {
     const parts = path.split('/')
     const keys: string[] = []
-
     if (parts.length >= 1) keys.push(parts[0])
     if (parts.length >= 2) keys.push(`${parts[0]}/${parts[1]}`)
-
     return keys
   }
 
-  const [openKeys, setOpenKeys] = useState<string[]>([])
+  const [openKeys, setOpenKeys] = useState<MenuProps['openKeys'] | null>(null)
 
-  const derivedOpenKeys = getOpenKeys(activeMenu)
+  const derivedOpenKeys: MenuProps['openKeys'] = getOpenKeys(activeMenu)
 
   // 處理選單點擊
   const handleMenuClick: MenuProps['onClick'] = e => {
@@ -111,7 +107,11 @@ export default function Sidebar({
             inlineCollapsed={!sidebarOpen}
             selectedKeys={[activeMenu]}
             openKeys={
-              sidebarOpen ? (openKeys.length ? openKeys : derivedOpenKeys) : []
+              sidebarOpen
+                ? openKeys !== null
+                  ? openKeys
+                  : derivedOpenKeys
+                : []
             }
             onOpenChange={setOpenKeys}
             onClick={handleMenuClick}

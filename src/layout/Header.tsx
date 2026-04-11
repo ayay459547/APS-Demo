@@ -1,20 +1,70 @@
-import { LayoutDashboard, ChevronRight, Menu } from 'lucide-react'
-// import { Breadcrumb } from 'antd'
+import { ChevronRight, Menu } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import type { BreadcrumbProps } from 'antd'
+import { Breadcrumb } from 'antd'
 
 import ProductionBoard from '@/components/productionBoard/ProductionBoard.tsx'
 import Announcemen from '@/components/announcemen/Announcemen.tsx'
+import { COMPONENT_MAP, dashboardMenuItem } from '@/router/constants.tsx'
 
 interface Props {
+  activeMenu: string
+
   setMobileMenuOpen: (isOpen: boolean) => void
+
   sidebarOpen: boolean
   setSidebarOpen: (isOpen: boolean) => void
 }
 
 const Header: React.FC<Props> = ({
+  activeMenu,
   setMobileMenuOpen,
   sidebarOpen,
   setSidebarOpen
 }) => {
+  const getBreadcrumbItems = (path: string): BreadcrumbProps['items'] => {
+    const parts = path.split('/')
+    const items: BreadcrumbProps['items'] = []
+    // 首頁
+    if (parts.length === 0) {
+      return [
+        {
+          title: <dashboardMenuItem.icon />
+        },
+        {
+          title: dashboardMenuItem.label
+        }
+      ]
+    }
+    // 系統功能
+    const level1Item = COMPONENT_MAP[parts[0]]
+    const level2Item = COMPONENT_MAP[parts[1]]
+    const level3Item = COMPONENT_MAP[parts[2]]
+    if (typeof level1Item === 'object') {
+      const linkTo = `/${level1Item.id}`
+
+      items.push({
+        title: <Link to={linkTo}>{level1Item.label}</Link>
+      })
+    }
+    if (typeof level2Item === 'object') {
+      const linkTo = `/${level1Item.id}/${level2Item.id}`
+      items.push({
+        title: <Link to={linkTo}>{level2Item.label}</Link>
+      })
+    }
+    if (typeof level3Item === 'object') {
+      const linkTo = `/${level1Item.id}/${level2Item.id}/${level3Item.id}`
+      items.push({
+        title: <Link to={linkTo}>{level3Item.label}</Link>
+      })
+    }
+    return items
+  }
+
+  const breadcrumbItems: BreadcrumbProps['items'] =
+    getBreadcrumbItems(activeMenu)
+
   return (
     <header className='h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 md:px-6 flex items-center justify-between z-30 shrink-0'>
       <div className='flex items-center gap-4'>
@@ -32,15 +82,11 @@ const Header: React.FC<Props> = ({
         </button>
 
         {/* 麵包屑導航 */}
-        <div className='hidden sm:flex items-center text-sm font-medium text-slate-500 gap-2'>
-          <LayoutDashboard size={16} className='text-blue-500' />
-          <ChevronRight size={14} className='text-slate-300' />
-          <span>總覽</span>
-          <ChevronRight size={14} className='text-slate-300' />
-          <span className='text-slate-800 font-bold bg-slate-100 px-2 py-0.5 rounded-md'>
-            系統總覽 / KPI 指標
-          </span>
-        </div>
+        <Breadcrumb
+          items={breadcrumbItems}
+          separator={<ChevronRight size={'1rem'} className='mt-0.5' />}
+          className='hidden sm:block'
+        />
       </div>
 
       <div className='flex items-center gap-4 md:gap-6'>

@@ -12,6 +12,7 @@ import { lazy, Suspense } from 'react'
 import type { MenuProps } from 'antd'
 import { Skeleton } from 'antd'
 
+import DashboardContent from '@/pages/dashboard/DashboardContent.tsx'
 import NotFound from '@/pages/NotFound.tsx'
 
 // 訂單與工單 - 訂單管理
@@ -56,7 +57,17 @@ export interface MenuItem {
   children?: MenuItem[]
 }
 
-// --- 系統選單資料結構 ---
+export const dashboardMenuItem: Required<MenuItem> = {
+  id: 'dashboard',
+  icon: LayoutDashboard,
+  label: '總覽',
+  element: <DashboardContent />,
+  children: []
+}
+
+/**
+ * 系統選單資料結構
+ */
 export const MENU_DATA: MenuItem[] = [
   {
     id: 'orders',
@@ -330,9 +341,9 @@ export const COMPONENT_MAP: Record<string, ComponentMapItem> =
 // 動態生成 Ant Design 需要的 items 陣列結構
 export const ANT_MENU_ITEMS: MenuProps['items'] = [
   {
-    key: 'dashboard',
-    icon: <LayoutDashboard size={20} />,
-    label: '總覽'
+    key: dashboardMenuItem.id,
+    icon: <dashboardMenuItem.icon size={20} />,
+    label: dashboardMenuItem.label
   },
   // 將我們自己定義的 MENU_DATA 轉換成 Ant Design 格式
   ...MENU_DATA.map(level1 => {
