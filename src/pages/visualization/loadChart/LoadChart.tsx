@@ -254,7 +254,7 @@ export default function MachineLoadDashboard() {
   const [viewHeight, setViewHeight] = useState<number>(500)
   const [scrollTop, setScrollTop] = useState<number>(0)
 
-  const MAX_VISIBLE_TAGS = 3
+  const MAX_VISIBLE_TAGS = 2
 
   // 初始化資料載入
   useEffect(() => {

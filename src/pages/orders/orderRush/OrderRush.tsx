@@ -413,8 +413,8 @@ export default function App() {
   ]
 
   return (
-    <div className='min-h-screen bg-slate-50/50 p-4'>
-      <div className='max-w-[1200px] mx-auto px-2 pt-2 pb-8 space-y-4 animate-fade-in relative'>
+    <div className='w-full h-full bg-slate-50/50 p-4'>
+      <div className='mx-auto px-2 pt-2 pb-8 space-y-4 animate-fade-in relative'>
         {/* 全域 Loading 遮罩 */}
         {loading && (
           <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-[110] flex items-center justify-center rounded-2xl'>
