@@ -2,6 +2,8 @@ import { useNavigate } from 'react-router-dom'
 import { ShieldCheck, BarChart3, FlaskConical } from 'lucide-react'
 import { clsx } from 'clsx'
 
+import { ordersMenuItem } from '@/router/orders.tsx'
+
 const colorMap = {
   blue: {
     bg: 'bg-blue-50',
@@ -22,11 +24,11 @@ const colorMap = {
 
 const cards = [
   {
-    title: '系統功能維護',
+    title: '基本機料維護',
     desc: '管理產品、製程、區域與機台的基本與進階參數，建立精準的排程基礎模型。',
     action: '進入模組',
     color: 'blue',
-    path: '/o_list',
+    path: `/${ordersMenuItem.id}`,
     icon: <ShieldCheck size={20} />
   },
   {

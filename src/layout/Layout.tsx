@@ -37,6 +37,7 @@ export default function Layout() {
         <main className='flex-1 flex flex-col min-w-0 h-screen overflow-hidden'>
           {/* 頂部導航列 (Header) */}
           <Header
+            activeMenu={activeMenu}
             setMobileMenuOpen={setMobileMenuOpen}
             sidebarOpen={sidebarOpen}
             setSidebarOpen={setSidebarOpen}

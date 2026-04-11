@@ -1,7 +1,10 @@
 import { Settings } from 'lucide-react'
+import { useLocation } from 'react-router-dom'
 
 const NotFound = () => {
-  const activeMenu = 'dashboard-overview-kpi'
+  const location = useLocation()
+
+  const activeMenu = location.pathname.replace(/^\//, '')
 
   return (
     <div className='h-full flex flex-col items-center justify-center text-slate-400 animate-fade-in'>
@@ -10,7 +13,7 @@ const NotFound = () => {
       </div>
       <h2 className='text-xl font-bold text-slate-600 mb-2'>模組開發中</h2>
       <p className='text-sm'>
-        您目前點擊的是 {activeMenu.replace(/-/g, ' > ')}
+        您目前點擊的是 {activeMenu.replace(/\//g, ' > ')}
       </p>
     </div>
   )
