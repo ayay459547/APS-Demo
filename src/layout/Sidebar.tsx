@@ -97,7 +97,7 @@ export default function Sidebar({
                 itemColor: '#475569', // Tailwind slate-600
                 itemBorderRadius: 8,
                 subMenuItemBg: '#ffffff',
-                itemMarginInline: 12
+                itemMarginInline: 8
               }
             }
           }}
