@@ -52,7 +52,7 @@ export interface MenuItem {
   id: string
   label: string
   icon?: ComponentType<any>
-  element?: JSX.Element // 新增 element 屬性
+  element?: JSX.Element
   children?: MenuItem[]
 }
 
@@ -289,14 +289,16 @@ const generateComponentMap = (
 
   const traverse = (items: MenuItem[]) => {
     items.forEach(item => {
-      // 寫入當前節點到 Map
       const hasElement = typeof item.element === 'object'
+
+      // 寫入當前節點到 Map
       map[item.id] = {
         id: item.id,
         label: item.label,
         icon: item.icon || null,
         element: hasElement ? (
           <Suspense
+            key={item.id}
             fallback={
               <div className='p-6'>
                 <Skeleton />
