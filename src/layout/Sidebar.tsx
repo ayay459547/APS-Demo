@@ -4,7 +4,8 @@ import { clsx } from 'clsx'
 import { useNavigate } from 'react-router-dom'
 import { Menu, ConfigProvider } from 'antd'
 import type { MenuProps } from 'antd'
-import { MENU_DATA } from '@/router/constants'
+
+import { ANT_MENU_ITEMS } from '@/router/constants'
 
 type MenuItem = Required<MenuProps>['items'][number]
 
@@ -41,29 +42,6 @@ export default function Sidebar({
   const [openKeys, setOpenKeys] = useState<string[]>([])
 
   const derivedOpenKeys = getOpenKeys(activeMenu)
-
-  // 動態生成 Ant Design 需要的 items 陣列結構
-  const items: MenuItem[] = [
-    {
-      key: 'dashboard',
-      icon: <LayoutDashboard size={20} />,
-      label: '總覽'
-    },
-    // 將我們自己定義的 MENU_DATA 轉換成 Ant Design 格式
-    ...MENU_DATA.map(level1 => ({
-      key: level1.id,
-      icon: <level1.icon size={20} />,
-      label: level1.label,
-      children: level1.children.map(level2 => ({
-        key: `${level1.id}/${level2.id}`,
-        label: level2.label,
-        children: level2.children.map(level3 => ({
-          key: `${level1.id}/${level2.id}/${level3.id}`,
-          label: level3.label
-        }))
-      }))
-    }))
-  ]
 
   // 處理選單點擊
   const handleMenuClick: MenuProps['onClick'] = e => {
@@ -137,7 +115,7 @@ export default function Sidebar({
             }
             onOpenChange={setOpenKeys}
             onClick={handleMenuClick}
-            items={items}
+            items={ANT_MENU_ITEMS}
           />
         </ConfigProvider>
       </div>
