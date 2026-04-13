@@ -13,7 +13,8 @@ export const GanttChart = lazy(
     import('@/pages/planning_analysis/visualization/gantt_chart/GanttChart.tsx')
 )
 export const LoadChart = lazy(
-  () => import('@/pages/visualization/loadChart/LoadChart.tsx')
+  () =>
+    import('@/pages/planning_analysis/visualization/load_chart/LoadChart.tsx')
 )
 
 /** 分析 */
