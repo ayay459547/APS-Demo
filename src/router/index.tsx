@@ -32,7 +32,6 @@ function generateRoutes(menu: MenuItem[], parentPath = ''): RouteObject[] {
 }
 
 const childrenRoutes = generateRoutes(MENU_DATA)
-console.log('childrenRoutes => ', childrenRoutes)
 
 const routes: RouteObject[] = [
   {

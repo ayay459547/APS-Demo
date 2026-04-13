@@ -9,10 +9,10 @@ import {
   Progress,
   Segmented,
   Avatar,
-  message,
   Space,
   Input,
-  Empty // 修正：加入缺失的 Empty 元件
+  Empty,
+  App
 } from 'antd'
 import {
   Zap,
@@ -96,6 +96,8 @@ const VisualOrderRush: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState('')
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT)
+
+  const { message } = App.useApp()
 
   // 執行插單模擬
   const handleRushSimulate = (orderId: string) => {
@@ -573,7 +575,7 @@ const ProductionCard: React.FC<{
             percent={order.progress}
             size='small'
             strokeColor={order.isRush ? '#f59e0b' : '#3b82f6'}
-            trailColor='#f1f5f9'
+            railColor='#f1f5f9'
           />
         </div>
 
