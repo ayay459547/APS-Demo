@@ -1,27 +1,16 @@
 import { AreaChart } from 'lucide-react'
-import { lazy } from 'react'
 
 import type { MenuItem } from './constants.tsx'
-
-const PlanningAnalysis = lazy(
-  () => import('@/pages/planning_analysis/PlanningAnalysis.tsx')
-)
-
-/** 視覺化 */
-const GanttChart = lazy(
-  () => import('@/pages/visualization/ganttChart/GanttChart.tsx')
-)
-const LoadChart = lazy(
-  () => import('@/pages/visualization/loadChart/LoadChart.tsx')
-)
-
-/** 分析 */
-const MachineBottleneck = lazy(
-  () => import('@/pages/analysis/machineBottleneck/MachineBottleneck.tsx')
-)
-const MaterialBottleneck = lazy(
-  () => import('@/pages/analysis/materialBottleneck/MaterialBottleneck.tsx')
-)
+import {
+  PlanningAnalysis,
+  Visualization,
+  GanttChart,
+  LoadChart,
+  Analysis,
+  MachineBottleneck,
+  MaterialBottleneck,
+  Simulation
+} from './planning_analysis.lazy.ts'
 
 export const planningAnalysisMenuItem: MenuItem = {
   id: 'planning_analysis',
@@ -32,6 +21,7 @@ export const planningAnalysisMenuItem: MenuItem = {
     {
       id: 'visualization',
       label: '視覺化',
+      element: <Visualization />,
       children: [
         { id: 'gantt_chart', label: '甘特圖', element: <GanttChart /> },
         { id: 'load_chart', label: '負載圖', element: <LoadChart /> }
@@ -40,6 +30,7 @@ export const planningAnalysisMenuItem: MenuItem = {
     {
       id: 'analysis',
       label: '瓶頸診斷',
+      element: <Analysis />,
       children: [
         {
           id: 'machine_bottleneck',
@@ -56,6 +47,7 @@ export const planningAnalysisMenuItem: MenuItem = {
     {
       id: 'simulation',
       label: '模擬實驗室',
+      element: <Simulation />,
       children: [
         { id: 'whatif', label: '情境模擬' },
         { id: 'compare', label: '方案優劣對比' }
