@@ -33,8 +33,8 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
       className='cursor-default! h-full border-none shadow-sm hover:shadow-xl transition-all duration-500 rounded-3xl group relative overflow-hidden bg-white'
       styles={{ body: { padding: '28px' } }}
     >
-      <div className='absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity'>
-        <Icon size={80} />
+      <div className='absolute bottom-2 right-0 p-4 opacity-[0.02] group-hover:opacity-[0.08] transition-opacity'>
+        <Icon size={60} />
       </div>
 
       <div className='relative z-10'>

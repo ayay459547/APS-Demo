@@ -1,110 +1,17 @@
-import React from 'react'
-import { Card, Typography, Row, Col, Button, Tag, Space } from 'antd'
-import {
-  Box,
-  GitMerge,
-  Route,
-  Cpu,
-  Users,
-  Database,
-  ArrowRight,
-  ClipboardCheck
-} from 'lucide-react'
-import { clsx, type ClassValue } from 'clsx'
-import { twMerge } from 'tailwind-merge'
+import { Typography, Row, Col, Button, Space } from 'antd'
+import { Database, ClipboardCheck } from 'lucide-react'
 
-const { Title, Paragraph, Text } = Typography
+import MDProduct from './md_product/MDProduct.tsx'
+import MDResource from './md_resource/MDResource.tsx'
 
-/**
- * 樣式合併工具函數 (Project Standard)
- */
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
+const { Title, Paragraph } = Typography
 
-// --- 子元件：功能卡片 ---
-interface FeatureCardProps {
-  id: string
-  label: string
-  icon: React.ElementType
-  description: string
-  tag?: string
-  tagColor?: string
-  isNew?: boolean
-}
-
-const FeatureCard: React.FC<FeatureCardProps> = ({
-  label,
-  icon: Icon,
-  description,
-  tag,
-  tagColor = 'blue',
-  isNew
-}) => (
-  <Card
-    hoverable
-    className='h-full border-none shadow-sm hover:shadow-xl transition-all duration-500 rounded-3xl group relative overflow-hidden bg-white'
-    styles={{ body: { padding: '28px' } }}
-  >
-    {/* 背景大圖示裝飾 - 採用 Teal 色系 */}
-    <div className='absolute -bottom-6 -right-6 p-4 opacity-[0.02] group-hover:opacity-[0.06] transition-opacity rotate-12 group-hover:rotate-0 duration-700 text-emerald-600'>
-      <Icon size={140} />
-    </div>
-
-    <div className='relative z-10'>
-      <div className='flex justify-between items-start mb-6'>
-        <div
-          className={cn(
-            'w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-lg',
-            'bg-slate-50 text-slate-600 group-hover:bg-emerald-600 group-hover:text-white group-hover:shadow-emerald-200'
-          )}
-        >
-          <Icon size={24} />
-        </div>
-        {isNew && (
-          <div className='bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest'>
-            Core Data
-          </div>
-        )}
-      </div>
-
-      <Title
-        level={5}
-        className='m-0 mb-2 font-black text-slate-800 tracking-tight flex items-center gap-2'
-      >
-        {label}
-        {tag && (
-          <Tag
-            color={tagColor}
-            className='border-none rounded-md text-[9px] font-bold uppercase px-1.5'
-          >
-            {tag}
-          </Tag>
-        )}
-      </Title>
-
-      <Paragraph className='text-slate-400 text-xs leading-relaxed mb-6 h-10 overflow-hidden line-clamp-2'>
-        {description}
-      </Paragraph>
-
-      <Button
-        variant='text'
-        color='primary'
-        className='p-0 flex items-center gap-2 font-bold text-xs group-hover:gap-3 transition-all text-emerald-600'
-      >
-        管理資料庫 <ArrowRight size={14} />
-      </Button>
-    </div>
-  </Card>
-)
-
-// --- 主元件 ---
 export default function App() {
   return (
-    <div className='min-h-screen bg-[#fcfdff] p-8 lg:p-12 animate-fade-in custom-scrollbar overflow-y-auto'>
+    <div className='min-h-screen bg-[#fcfdff] animate-fade-in custom-scrollbar overflow-y-auto pb-20'>
       {/* Hero Section */}
-      <header className='mx-auto mb-16'>
-        <Space direction='vertical' size={4}>
+      <header className='p-8 lg:px-12 mx-auto'>
+        <Space orientation='vertical' size={4}>
           <div className='flex items-center gap-2 bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full w-fit mb-4 border border-emerald-100 shadow-sm'>
             <Database size={14} className='fill-emerald-600' />
             <span className='text-[10px] font-black uppercase tracking-[0.2em]'>
@@ -121,98 +28,14 @@ export default function App() {
         </Space>
       </header>
 
-      <div className='mx-auto space-y-20 pb-20'>
-        {/* 區塊 1: 產品與結構 - 定義「做什麼」 */}
-        <section>
-          <div className='flex items-center gap-4 mb-8'>
-            <div className='w-1.5 h-8 bg-emerald-600 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.4)]' />
-            <div>
-              <Title
-                level={3}
-                className='m-0 font-black text-slate-800 tracking-tight'
-              >
-                產品與物料結構
-              </Title>
-              <Text className='text-slate-400 text-xs font-bold uppercase tracking-widest'>
-                Product Intelligence
-              </Text>
-            </div>
-          </div>
-          <Row gutter={[24, 24]}>
-            <Col xs={24} md={8}>
-              <FeatureCard
-                id='product_list'
-                label='商品資料管理'
-                icon={Box}
-                description='定義成品、半成品與原料屬性，包含生產前置時間與標準批量設定。'
-                tag='SKU Definition'
-              />
-            </Col>
-            <Col xs={24} md={8}>
-              <FeatureCard
-                id='bom_struct'
-                label='BOM 物料清單'
-                icon={GitMerge}
-                description='多階層 BOM 架構管理，支援版本控管與替代料件邏輯設定。'
-                tag='Structured Data'
-                tagColor='emerald'
-                isNew
-              />
-            </Col>
-            <Col xs={24} md={8}>
-              <FeatureCard
-                id='routing'
-                label='標準製程管理'
-                icon={Route}
-                description='定義標準工序流（Routing），精確配置每一站點的標準工時（Standard Time）。'
-                tag='Process Flow'
-                tagColor='teal'
-              />
-            </Col>
-          </Row>
-        </section>
+      {/* 區塊 1: 產品與結構 - 定義「做什麼」 */}
+      <MDProduct />
 
-        {/* 區塊 2: 生產資源 - 定義「用誰做」 */}
-        <section>
-          <div className='flex items-center gap-4 mb-8'>
-            <div className='w-1.5 h-8 bg-slate-700 rounded-full' />
-            <div>
-              <Title
-                level={3}
-                className='m-0 font-black text-slate-800 tracking-tight'
-              >
-                生產資源建模
-              </Title>
-              <Text className='text-slate-400 text-xs font-bold uppercase tracking-widest'>
-                Resource Capacity
-              </Text>
-            </div>
-          </div>
-          <Row gutter={[24, 24]}>
-            <Col xs={24} md={12}>
-              <FeatureCard
-                id='machine'
-                label='設備資源管理'
-                icon={Cpu}
-                description='機台有限產能參數設定，包含換模換線損失、保養日曆與機台群組定義。'
-                tag='Finite Capacity'
-                tagColor='orange'
-              />
-            </Col>
-            <Col xs={24} md={12}>
-              <FeatureCard
-                id='labor'
-                label='人力資源管理'
-                icon={Users}
-                description='班別配置與技能矩陣（Skill Matrix）管理，將人力作為排程的約束條件。'
-                tag='Human Capital'
-                tagColor='indigo'
-              />
-            </Col>
-          </Row>
-        </section>
+      {/* 區塊 2: 生產資源 - 定義「用誰做」 */}
+      <MDResource />
 
-        {/* 區塊 3: 數據標準與品質 */}
+      {/* 區塊 3: 數據標準與品質 */}
+      <div className='p-8 lg:px-12'>
         <section className='bg-emerald-50/30 p-10 rounded-[40px] border border-emerald-100'>
           <Row gutter={[48, 48]} align='middle'>
             <Col xs={24} lg={10}>
@@ -259,12 +82,10 @@ export default function App() {
                 level={2}
                 className='font-black text-slate-900 tracking-tight mb-6'
               >
-                垃圾進，垃圾出。
-                <br />
                 <span className='text-emerald-600 font-black underline decoration-emerald-200'>
-                  數據品質
+                  資料品質
                 </span>{' '}
-                是排程的關鍵。
+                決定排程品質。
               </Title>
               <Paragraph className='text-slate-500 text-sm leading-relaxed mb-8'>
                 基礎資料模組不只是存儲中心，更是生產規則的審核器。系統會自動偵測

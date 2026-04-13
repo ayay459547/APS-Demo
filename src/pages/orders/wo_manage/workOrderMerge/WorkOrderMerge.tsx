@@ -7,7 +7,7 @@ import {
   Select,
   Badge,
   Divider,
-  message
+  App
 } from 'antd'
 import {
   Merge,
@@ -81,7 +81,7 @@ const generateMockSourceOrders = (count: number): WorkOrder[] => {
 
 const mockSourceOrders = generateMockSourceOrders(2000)
 
-export default function App() {
+const WorkOrderMerge: React.FC = () => {
   const [selectedOrders, setSelectedOrders] = useState<WorkOrder[]>([])
   const [loading, setLoading] = useState(false)
 
@@ -100,6 +100,8 @@ export default function App() {
   const ITEM_HEIGHT = 130 // 每個卡片含間距的高度
   const OVERSCAN = 5 // 上下預留渲染數量
   const MAX_VISIBLE_TAGS = 2 // 預設顯示的標籤數量 (不含「全部」)
+
+  const { message } = App.useApp()
 
   // 監聽虛擬列表高度
   useEffect(() => {
@@ -191,18 +193,18 @@ export default function App() {
   // 加入合併桶
   const addToMerge = useCallback(
     (order: WorkOrder) => {
-      if (selectedOrders.some(o => o.id === order.id)) return
+      setSelectedOrders(prev => {
+        if (prev.some(o => o.id === order.id)) return prev
 
-      if (
-        selectedOrders.length > 0 &&
-        selectedOrders[0].itemCode !== order.itemCode
-      ) {
-        message.error('不同產品代碼的工單無法合併生產')
-        return
-      }
-      setSelectedOrders(prev => [...prev, order])
+        if (prev.length > 0 && prev[0].itemCode !== order.itemCode) {
+          message.error('不同產品代碼的工單無法合併生產')
+          return prev
+        }
+
+        return [...prev, order]
+      })
     },
-    [selectedOrders]
+    [message]
   )
 
   // 從合併桶移除
@@ -624,7 +626,9 @@ export default function App() {
                             <Select
                               defaultValue={machines[0]}
                               className='w-full h-10 custom-select-merge-dark'
-                              popupClassName='custom-select-popup-dark'
+                              classNames={{
+                                popup: { root: 'custom-select-popup-dark' }
+                              }}
                               options={machines.map(m => ({
                                 label: m,
                                 value: m
@@ -697,3 +701,5 @@ export default function App() {
     </div>
   )
 }
+
+export default WorkOrderMerge

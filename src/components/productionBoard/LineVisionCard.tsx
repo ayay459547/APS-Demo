@@ -105,8 +105,8 @@ const LineVisionCard: React.FC<{ data: LineData }> = ({ data }) => {
             <Progress
               percent={progress}
               strokeColor={data.status === 'ALARM' ? '#ef4444' : '#6366f1'}
-              trailColor={'#e2e8f0'}
-              strokeWidth={10}
+              railColor={'#e2e8f0'}
+              size={{ height: 10 }}
               showInfo={false}
               className='mt-6'
             />

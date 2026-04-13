@@ -9,7 +9,7 @@ const { Title, Paragraph } = Typography
 
 export default function OrderModuleOverview() {
   return (
-    <div className='min-h-screen bg-[#f8fafc] animate-fade-in custom-scrollbar overflow-y-auto mb-20'>
+    <div className='min-h-screen bg-[#f8fafc] animate-fade-in custom-scrollbar overflow-y-auto pb-20'>
       {/* Hero Section */}
       <header className='p-8 lg:px-12 mx-auto'>
         <Space orientation='vertical' size={4}>

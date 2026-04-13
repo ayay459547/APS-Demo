@@ -10,7 +10,7 @@ import {
   Badge,
   Tooltip,
   Empty,
-  message,
+  App,
   Popover
 } from 'antd'
 import {
@@ -98,7 +98,7 @@ const generateMockParentOrders = (count: number): ParentWorkOrder[] => {
 
 const mockParentOrders = generateMockParentOrders(2000)
 
-export default function App() {
+const WorkOrderSplit: React.FC = () => {
   const [selectedParent, setSelectedParent] = useState<ParentWorkOrder | null>(
     null
   )
@@ -121,6 +121,8 @@ export default function App() {
 
   const ITEM_HEIGHT = 110 // 預估每個卡片含間距的高度 (98px + 12px padding)
   const OVERSCAN = 5 // 上下額外渲染的數量，防止滾動白畫面
+
+  const { message } = App.useApp()
 
   // 監聽虛擬列表容器高度
   useEffect(() => {
@@ -557,7 +559,7 @@ export default function App() {
                           )}
                           showInfo={false}
                           strokeColor='#8b5cf6'
-                          trailColor='rgba(255,255,255,0.1)'
+                          railColor='rgba(255,255,255,0.1)'
                           size={{ height: 6 }}
                         />
                       </div>
@@ -763,3 +765,5 @@ export default function App() {
     </div>
   )
 }
+
+export default WorkOrderSplit

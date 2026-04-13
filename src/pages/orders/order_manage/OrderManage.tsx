@@ -1,8 +1,8 @@
 import { Typography, Row, Col } from 'antd'
 import { Zap, CalendarDays, ClipboardList } from 'lucide-react'
 
-import { COMPONENT_MAP } from '@/router/constants.tsx'
 import FeatureCard from '@/components/featureCard/FeatureCard.tsx'
+import { COMPONENT_MAP } from '@/router/constants.tsx'
 
 const { Title, Text } = Typography
 
