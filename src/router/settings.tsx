@@ -1,9 +1,7 @@
 import { Settings } from 'lucide-react'
-import { lazy } from 'react'
 
 import type { MenuItem } from './constants.tsx'
-
-const SettingsPage = lazy(() => import('@/pages/settings/Settings.tsx'))
+import { SettingsPage } from './settings.lazy.ts'
 
 export const settingsMenuItem: MenuItem = {
   id: 'settings',
