@@ -1,9 +1,7 @@
 import { AlertTriangle } from 'lucide-react'
-import { lazy } from 'react'
 
 import type { MenuItem } from './constants.tsx'
-
-const Execution = lazy(() => import('@/pages/execution/Execution.tsx'))
+import { Execution } from './execution.lazy.ts'
 
 export const executionMenuItem: MenuItem = {
   id: 'execution',

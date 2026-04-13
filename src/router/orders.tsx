@@ -1,43 +1,19 @@
 import { ListTodo } from 'lucide-react'
-import { lazy } from 'react'
 
 import type { MenuItem } from './constants.tsx'
 
-const Orders = lazy(() => import('@/pages/orders/Orders.tsx'))
-
-/** 訂單管理 */
-const OrderManage = lazy(
-  () => import('@/pages/orders/order_manage/OrderManage.tsx')
-)
-const OrderList = lazy(
-  () => import('@/pages/orders/order_manage/orderList/OrderList.tsx')
-)
-const OrderRush = lazy(
-  () => import('@/pages/orders/order_manage/orderRush/OrderRush.tsx')
-)
-const VisualOrderRush = lazy(
-  () =>
-    import('@/pages/orders/order_manage/visualOrderRush/VisualOrderRush.tsx')
-)
-
-/** 工單管理 */
-const WorkOrderManage = lazy(
-  () => import('@/pages/orders/wo_manage/WorkOrderManage.tsx')
-)
-const WorkOrderList = lazy(
-  () => import('@/pages/orders/wo_manage/workOrderList/WorkOrderList.tsx')
-)
-const WorkOrderSplit = lazy(
-  () => import('@/pages/orders/wo_manage/workOrderSplit/WorkOrderSplit.tsx')
-)
-const WorkOrderMerge = lazy(
-  () => import('@/pages/orders/wo_manage/workOrderMerge/WorkOrderMerge.tsx')
-)
-
-/** 進度追蹤 */
-const ProgressTracking = lazy(
-  () => import('@/pages/orders/progress_tracking/ProgressTracking.tsx')
-)
+import {
+  Orders,
+  OrderManage,
+  OrderList,
+  OrderRush,
+  VisualOrderRush,
+  WorkOrderManage,
+  WorkOrderList,
+  WorkOrderSplit,
+  WorkOrderMerge,
+  ProgressTracking
+} from './orders.lazy.ts'
 
 export const ordersMenuItem: MenuItem = {
   id: 'orders',

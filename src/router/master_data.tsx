@@ -1,9 +1,7 @@
 import { Package } from 'lucide-react'
-import { lazy } from 'react'
 
 import type { MenuItem } from './constants.tsx'
-
-const MasterData = lazy(() => import('@/pages/master_data/MasterData.tsx'))
+import { MasterData } from './master_data.lazy.ts'
 
 export const masterDataMenuItem: MenuItem = {
   id: 'master_data',

@@ -104,7 +104,7 @@ export default function App() {
     <div className='min-h-screen bg-[#fcfdff] p-8 lg:p-12 animate-fade-in custom-scrollbar overflow-y-auto'>
       {/* Hero Section */}
       <header className='mx-auto mb-16'>
-        <Space direction='vertical' size={4}>
+        <Space orientation='vertical' size={4}>
           <div className='flex items-center gap-2 bg-blue-50 text-blue-600 px-3 py-1 rounded-full w-fit mb-4 border border-blue-100 shadow-sm'>
             <LineChart size={14} />
             <span className='text-[10px] font-black uppercase tracking-[0.2em]'>

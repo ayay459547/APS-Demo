@@ -122,7 +122,7 @@ export default function App() {
     <div className='min-h-screen bg-[#fcfdff] p-8 lg:p-12 animate-fade-in custom-scrollbar overflow-y-auto'>
       {/* Hero Section */}
       <header className='mx-auto mb-16'>
-        <Space direction='vertical' size={4}>
+        <Space orientation='vertical' size={4}>
           <div className='flex items-center gap-2 bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg w-fit mb-4 shadow-sm border border-slate-200'>
             <Lock size={14} className='text-indigo-600' />
             <span className='text-[9px] font-black uppercase tracking-[0.25em]'>

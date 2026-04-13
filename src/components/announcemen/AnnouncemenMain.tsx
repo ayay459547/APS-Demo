@@ -29,7 +29,7 @@ const AnnouncemenMain: React.FC = () => {
 
   return (
     <div className='mt-6 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar'>
-      <Space direction='vertical' size={16} className='w-full'>
+      <Space orientation='vertical' size={16} className='w-full'>
         {MOCK_ANNOUNCEMENTS.map(item => (
           <div
             key={item.id}

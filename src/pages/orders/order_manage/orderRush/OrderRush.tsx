@@ -551,7 +551,7 @@ export default function App() {
             </div>
 
             <Steps
-              direction='vertical'
+              orientation='vertical'
               size='small'
               current={1}
               items={[
