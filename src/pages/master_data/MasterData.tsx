@@ -8,7 +8,7 @@ const { Title, Paragraph } = Typography
 
 export default function App() {
   return (
-    <div className='min-h-screen bg-[#fcfdff] animate-fade-in custom-scrollbar overflow-y-auto'>
+    <div className='min-h-screen bg-[#fcfdff] animate-fade-in custom-scrollbar overflow-y-auto pb-20'>
       {/* Hero Section */}
       <header className='p-8 lg:px-12 mx-auto'>
         <Space orientation='vertical' size={4}>
@@ -35,7 +35,7 @@ export default function App() {
       <MDResource />
 
       {/* 區塊 3: 數據標準與品質 */}
-      <div className='p-8 lg:px-12 mb-10'>
+      <div className='p-8 lg:px-12'>
         <section className='bg-emerald-50/30 p-10 rounded-[40px] border border-emerald-100'>
           <Row gutter={[48, 48]} align='middle'>
             <Col xs={24} lg={10}>
