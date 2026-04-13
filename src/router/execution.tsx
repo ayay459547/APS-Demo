@@ -1,7 +1,12 @@
 import { AlertTriangle } from 'lucide-react'
 
 import type { MenuItem } from './constants.tsx'
-import { Execution } from './execution.lazy.ts'
+import {
+  Execution,
+  Operations,
+  Monitoring,
+  Exception
+} from './execution.lazy.ts'
 
 export const executionMenuItem: MenuItem = {
   id: 'execution',
@@ -12,6 +17,7 @@ export const executionMenuItem: MenuItem = {
     {
       id: 'operations',
       label: '現場作業執法', // 這是資料輸入端 (Input)
+      element: <Operations />,
       children: [
         { id: 'reporting', label: '生產報工' },
         { id: 'changeover', label: '換線作業' },
@@ -21,6 +27,7 @@ export const executionMenuItem: MenuItem = {
     {
       id: 'monitoring',
       label: '現場即時監控', // 這是資料輸出端 (Output)
+      element: <Monitoring />,
       children: [
         { id: 'm_status', label: '設備運行狀態' },
         { id: 'w_prog', label: '工單達成進度' },
@@ -31,6 +38,7 @@ export const executionMenuItem: MenuItem = {
     {
       id: 'exception',
       label: '異常調度中心', // 這是決策端 (Action)
+      element: <Exception />,
       children: [
         { id: 'delayed', label: '延誤預警中心' },
         { id: 'breakdown', label: '設備故障報修' },
