@@ -259,12 +259,10 @@ export default function App() {
                 level={2}
                 className='font-black text-slate-900 tracking-tight mb-6'
               >
-                垃圾進，垃圾出。
-                <br />
                 <span className='text-emerald-600 font-black underline decoration-emerald-200'>
-                  數據品質
+                  資料品質
                 </span>{' '}
-                是排程的關鍵。
+                決定排程品質。
               </Title>
               <Paragraph className='text-slate-500 text-sm leading-relaxed mb-8'>
                 基礎資料模組不只是存儲中心，更是生產規則的審核器。系統會自動偵測
