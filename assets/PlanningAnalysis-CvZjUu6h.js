@@ -1,0 +1,9 @@
+import{t as e}from"./jsx-runtime-BcpeqNXf.js";import{t}from"./space-Ug6v8PCB.js";import{n}from"./FeatureCard-CegxJR-d.js";import{t as r}from"./chart-line-D9EPsQtL.js";import i from"./Visualization-mKr5813z.js";import a from"./Analysis-BWaUty36.js";import o from"./Simulation-DXq4s41q.js";var s=e(),{Title:c,Paragraph:l}=n;function u(){return(0,s.jsxs)(`div`,{className:`min-h-screen bg-[#fcfdff] animate-fade-in custom-scrollbar overflow-y-auto pb-20`,children:[(0,s.jsx)(`header`,{className:`p-8 lg:px-12 mx-auto`,children:(0,s.jsxs)(t,{orientation:`vertical`,size:4,children:[(0,s.jsxs)(`div`,{className:`flex items-center gap-2 bg-blue-50 text-blue-600 px-3 py-1 rounded-full w-fit mb-4 border border-blue-100 shadow-sm`,children:[(0,s.jsx)(r,{size:14}),(0,s.jsx)(`p`,{className:`text-[10px] font-black uppercase tracking-[0.2em]`,children:`Diagnostic Intelligence Suite`})]}),(0,s.jsxs)(c,{className:`m-0 font-black text-slate-900 tracking-tighter text-4xl lg:text-5xl`,children:[`排程決策與瓶頸分析 `,(0,s.jsx)(`span`,{className:`text-blue-600`,children:`.`})]}),(0,s.jsx)(l,{className:`text-slate-400 text-base max-w-2xl mt-4 font-medium leading-relaxed`,children:`超越數據展示，實現決策智慧。透過全方位的視覺化視窗與模擬引擎，識別隱藏的瓶頸點並對比最優排程方案。`})]})}),(0,s.jsx)(i,{}),(0,s.jsx)(a,{}),(0,s.jsx)(o,{}),(0,s.jsx)(`style`,{children:`
+        .animate-fade-in { animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+
+        .ant-card { background: white !important; }
+      `})]})}export{u as default};
