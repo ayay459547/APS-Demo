@@ -744,24 +744,20 @@ export default function App() {
                 <Activity size={20} />
               </div>
               <div>
-                <h1 className='text-lg font-black text-slate-800 m-0 tracking-tight uppercase'>
-                  工單進度監控儀表板
-                </h1>
                 <Popover
                   content={statsContent}
                   trigger='click'
                   placement='bottomLeft'
                   rootClassName='custom-stats-popover'
                 >
-                  <div className='flex items-center gap-2 mt-0.5 cursor-pointer hover:bg-slate-50 px-2 py-0.5 rounded-md transition-all group'>
-                    <span className='text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] group-hover:text-indigo-600'>
-                      Production Analytics Metrics
+                  <Button className='flex items-center gap-2 font-bold h-11 px-5 border-none bg-blue-600/5 text-blue-600 hover:bg-blue-600 hover:text-white rounded-2xl transition-all'>
+                    數據概覽
+                    <ChevronDown size={14} />
+                    <span className='flex h-2 w-2 ml-1'>
+                      <span className='animate-ping absolute inline-flex h-2 w-2 rounded-full bg-rose-400 opacity-75'></span>
+                      <span className='relative inline-flex rounded-full h-2 w-2 bg-rose-500'></span>
                     </span>
-                    <ChevronDown
-                      size={12}
-                      className='text-slate-300 group-hover:text-indigo-600'
-                    />
-                  </div>
+                  </Button>
                 </Popover>
               </div>
             </div>

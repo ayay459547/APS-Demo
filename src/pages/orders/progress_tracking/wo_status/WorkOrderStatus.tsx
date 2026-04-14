@@ -32,7 +32,7 @@ import {
   Edit,
   Trash2,
   CalendarDays,
-  LayoutDashboard,
+  ChartGantt,
   X
 } from 'lucide-react'
 import { clsx, type ClassValue } from 'clsx'
@@ -589,16 +589,17 @@ export default function App() {
         {/* 整行懸浮工具列 (霧面玻璃效果) */}
         <header className='sticky top-0 z-[100] w-full px-6 py-4 bg-white/70 backdrop-blur-xl border-b border-slate-200/50 flex items-center justify-between transition-all'>
           <div className='flex items-center gap-3'>
+            <div className='bg-indigo-600 p-2.5 rounded-xl shadow-lg shadow-indigo-200 flex items-center justify-center text-white'>
+              <ChartGantt size={20} />
+            </div>
+
             <Popover
               content={DashboardContent}
               trigger='click'
               placement='bottomLeft'
               overlayClassName='dashboard-popover'
             >
-              <Button
-                icon={<LayoutDashboard size={18} />}
-                className='flex items-center gap-2 font-bold h-11 px-5 border-none bg-blue-600/5 text-blue-600 hover:bg-blue-600 hover:text-white rounded-2xl transition-all'
-              >
+              <Button className='flex items-center gap-2 font-bold h-11 px-5 border-none bg-blue-600/5 text-blue-600 hover:bg-blue-600 hover:text-white rounded-2xl transition-all'>
                 數據概覽
                 <ChevronDown size={14} />
                 {stats.delayed > 0 && (
