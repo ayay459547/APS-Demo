@@ -12,7 +12,9 @@ import {
   WorkOrderList,
   WorkOrderSplit,
   WorkOrderMerge,
-  ProgressTracking
+  ProgressTracking,
+  WorkOrderStatus,
+  WorkOrderProgress
 } from './orders.lazy.ts'
 
 export const ordersMenuItem: MenuItem = {
@@ -50,8 +52,8 @@ export const ordersMenuItem: MenuItem = {
       label: '進度追蹤',
       element: <ProgressTracking />,
       children: [
-        { id: 'wo_status', label: '工單狀態' },
-        { id: 'wo_progress', label: '生產進度' }
+        { id: 'wo_status', label: '工單狀態', element: <WorkOrderStatus /> },
+        { id: 'wo_progress', label: '生產進度', element: <WorkOrderProgress /> }
       ]
     }
   ]

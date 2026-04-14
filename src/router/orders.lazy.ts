@@ -38,3 +38,11 @@ export const WorkOrderMerge = lazy(
 export const ProgressTracking = lazy(
   () => import('@/pages/orders/progress_tracking/ProgressTracking.tsx')
 )
+
+export const WorkOrderStatus = lazy(
+  () => import('@/pages/orders/progress_tracking/wo_status/WorkOrderStatus.tsx')
+)
+export const WorkOrderProgress = lazy(
+  () =>
+    import('@/pages/orders/progress_tracking/wo_progress/WorkOrderProgress.tsx')
+)
