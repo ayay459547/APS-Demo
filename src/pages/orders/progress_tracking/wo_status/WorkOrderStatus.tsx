@@ -32,7 +32,7 @@ import {
   Edit,
   Trash2,
   CalendarDays,
-  ChartGantt,
+  Activity,
   X
 } from 'lucide-react'
 import { clsx, type ClassValue } from 'clsx'
@@ -590,7 +590,7 @@ export default function App() {
         <header className='sticky top-0 z-[100] w-full px-6 py-4 bg-white/70 backdrop-blur-xl border-b border-slate-200/50 flex items-center justify-between transition-all'>
           <div className='flex items-center gap-3'>
             <div className='bg-indigo-600 p-2.5 rounded-xl shadow-lg shadow-indigo-200 flex items-center justify-center text-white'>
-              <ChartGantt size={20} />
+              <Activity size={20} />
             </div>
 
             <Popover

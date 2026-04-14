@@ -20,6 +20,7 @@ import {
   Clock,
   ChevronDown,
   Activity,
+  GanttChart,
   BoxSelect,
   ShieldCheck,
   Cpu,
@@ -741,7 +742,7 @@ export default function App() {
           <div className='max-w-[1600px] mx-auto flex items-center justify-between'>
             <div className='flex items-center gap-4'>
               <div className='bg-indigo-600 p-2.5 rounded-xl shadow-lg shadow-indigo-200 flex items-center justify-center text-white'>
-                <Activity size={20} />
+                <GanttChart size={20} />
               </div>
               <div>
                 <Popover
