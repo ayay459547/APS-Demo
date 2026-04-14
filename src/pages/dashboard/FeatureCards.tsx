@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { ShieldCheck, BarChart3, FlaskConical } from 'lucide-react'
 import { clsx } from 'clsx'
 
-import { ordersMenuItem } from '@/router/orders.tsx'
+import { COMPONENT_MAP } from '@/router/constants.tsx'
 
 const colorMap = {
   blue: {
@@ -22,35 +22,35 @@ const colorMap = {
   }
 }
 
-const cards = [
-  {
-    title: '基本機料維護',
-    desc: '管理產品、製程、區域與機台的基本與進階參數，建立精準的排程基礎模型。',
-    action: '進入模組',
-    color: 'blue',
-    path: `/${ordersMenuItem.id}`,
-    icon: <ShieldCheck size={20} />
-  },
-  {
-    title: '排程圖表分析',
-    desc: '即時視覺化機台負荷、甘特圖排程結果與 KPI 指標，掌握廠區即時動態。',
-    action: '查看報表',
-    color: 'emerald',
-    path: '/gantt_chart',
-    icon: <BarChart3 size={20} />
-  },
-  {
-    title: '排程邏輯測試',
-    desc: '沙盒環境下的排程運算模擬。調整派工規則與權重，預覽並優化排程結果。',
-    action: '開始模擬',
-    color: 'purple',
-    path: '/machine_bottleneck',
-    icon: <FlaskConical size={20} />
-  }
-]
-
 export default function FeatureCards() {
   const navigate = useNavigate()
+
+  const cards = [
+    {
+      title: '基本機料維護',
+      desc: '管理產品、製程、區域與機台的基本與進階參數，建立精準的排程基礎模型。',
+      action: '進入模組',
+      color: 'blue',
+      path: `/${COMPONENT_MAP?.master_data?.url}`,
+      icon: <ShieldCheck size={20} />
+    },
+    {
+      title: '排程圖表分析',
+      desc: '即時視覺化機台負荷、甘特圖排程結果與 KPI 指標，掌握廠區即時動態。',
+      action: '查看報表',
+      color: 'emerald',
+      path: `/${COMPONENT_MAP['planning_analysis']?.url}`,
+      icon: <BarChart3 size={20} />
+    },
+    {
+      title: '排程邏輯測試',
+      desc: '沙盒環境下的排程運算模擬。調整派工規則與權重，預覽並優化排程結果。',
+      action: '開始模擬',
+      color: 'purple',
+      path: `/${COMPONENT_MAP['simulation']?.url}`,
+      icon: <FlaskConical size={20} />
+    }
+  ]
 
   return (
     <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>

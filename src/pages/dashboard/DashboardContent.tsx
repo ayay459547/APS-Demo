@@ -306,7 +306,7 @@ const DashboardContent = () => {
               color='default'
               variant='filled'
               size='large'
-              className='mt-4 w-full'
+              className='mt-4 w-full !text-xs'
             >
               前往警報中心處理
             </Button>
