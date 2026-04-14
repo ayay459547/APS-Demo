@@ -510,7 +510,7 @@ export default function WorkOrderList() {
                   pageSize: 10,
                   showSizeChanger: true,
                   showTotal: total => `共 ${total} 筆工單`,
-                  className: 'px-4 pb-4'
+                  className: '!px-4 pb-4'
                 }}
                 scroll={{ x: 1000 }} // --- 明確的 x 軸寬度，確保固定欄位生效 ---
                 className='work-order-table'

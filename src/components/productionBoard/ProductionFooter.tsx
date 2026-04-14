@@ -48,10 +48,10 @@ const ProductionBoardFooter: React.FC = () => {
           >
             [系統通知] 產線 B-05
             切削刀具磨耗接近臨界值，建議換班後進行預防性更換。
-            <span className={cn('mx-24 opacity-20', 'text-slate-900')}>●</span>
+            <span className={cn('mx-24 opacity-20', 'text-slate-900')}>|</span>
             [物流通知] SMT-A線 元件 C102
             庫存低於安全水位，倉管人員已在備料路徑中。
-            <span className={cn('mx-24 opacity-20', 'text-slate-900')}>●</span>
+            <span className={cn('mx-24 opacity-20', 'text-slate-900')}>|</span>
             [品質通知] 組裝 E-01 站良率連續三小時超過 99.5%，表現優異。
           </div>
         </div>

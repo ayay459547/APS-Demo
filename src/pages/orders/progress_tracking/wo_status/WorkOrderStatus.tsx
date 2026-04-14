@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import {
   Table,
   Tag,
@@ -10,10 +10,10 @@ import {
   Card,
   Popover,
   Tooltip,
-  Space,
   Dropdown
 } from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
+import type { InputRef } from 'antd'
 import {
   Search,
   Download,
@@ -31,19 +31,22 @@ import {
   FileText,
   Edit,
   Trash2,
-  CalendarDays
+  CalendarDays,
+  LayoutDashboard,
+  X
 } from 'lucide-react'
-
-// 引入 clsx 與 tailwind-merge
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import dayjs from 'dayjs'
+import isBetween from 'dayjs/plugin/isBetween'
+
+// 註冊 dayjs 插件
+dayjs.extend(isBetween)
 
 const { RangePicker } = DatePicker
 
-// --- 建立 cn 工具函式 ---
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
+// --- 工具函式 ---
+const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs))
 
 // --- 定義 TypeScript 型別 ---
 export type PriorityType = '特急' | '急單' | '一般'
@@ -65,57 +68,7 @@ export interface WorkOrder {
   abnormalMsg: string | null
 }
 
-// --- 子組件：統計卡片 ---
-interface StatCardProps {
-  title: string
-  value: string | number
-  unit: string
-  icon: React.ElementType
-  colorClass: string
-  bgClass: string
-  iconColorClass: string
-  trend?: string
-  isAlert?: boolean
-}
-
-const StatCard: React.FC<StatCardProps> = ({
-  title,
-  value,
-  unit,
-  icon: Icon,
-  colorClass,
-  bgClass,
-  iconColorClass,
-  trend,
-  isAlert
-}) => (
-  <div
-    className={cn(
-      'bg-white rounded-xl p-4 border border-slate-100 shadow-sm flex items-center justify-between transition-all hover:shadow-md',
-      isAlert && 'ring-1 ring-rose-100 bg-rose-50/10'
-    )}
-  >
-    <div>
-      <p className='text-[12px] text-slate-500 mb-0.5 font-medium'>{title}</p>
-      <div className='flex items-baseline gap-1.5'>
-        <span className='text-xl font-bold text-slate-800 tracking-tight'>
-          {value}
-        </span>
-        <span className='text-[10px] text-slate-400 font-medium'>{unit}</span>
-      </div>
-      {trend && (
-        <div className={cn('mt-1 text-[10px] font-bold', colorClass)}>
-          {trend}
-        </div>
-      )}
-    </div>
-    <div className={cn('p-2.5 rounded-lg', bgClass)}>
-      <Icon size={18} className={iconColorClass} />
-    </div>
-  </div>
-)
-
-// --- 擬真數據產生器 (生成 count 筆) ---
+// --- 模擬數據產生器 ---
 const generateMockData = (count: number): WorkOrder[] => {
   const products = [
     { name: '高階伺服器主機板', code: 'MB-SVR-X99' },
@@ -126,7 +79,7 @@ const generateMockData = (count: number): WorkOrder[] => {
     { name: 'AI 運算加速卡', code: 'GPU-AI-A100' },
     { name: '工業級網路交換器', code: 'SW-IND-24P' }
   ]
-  const priorities: PriorityType[] = ['特急', '急單', '一般', '一般', '一般']
+  const priorities: PriorityType[] = ['特急', '急單', '一般']
   const statuses: StatusType[] = ['進行中', '異常延遲', '已完成', '未開始']
   const operations = [
     'SMT 表面接合',
@@ -137,43 +90,21 @@ const generateMockData = (count: number): WorkOrder[] => {
     '組裝線 A',
     '品質檢驗'
   ]
-  const abnormalMsgs = [
-    '刀具磨損更換，預計延遲 2 小時',
-    '缺料等待中，聯絡供應商',
-    '機台參數異常，校正中',
-    '測試良率偏低，工程師排查中'
-  ]
 
   return Array.from({ length: count }).map((_, idx) => {
     const product = products[Math.floor(Math.random() * products.length)]
     const status = statuses[Math.floor(Math.random() * statuses.length)]
     const priority = priorities[Math.floor(Math.random() * priorities.length)]
     const targetQty = Math.floor(Math.random() * 2000) + 100
+    const progress =
+      status === '已完成'
+        ? 100
+        : status === '未開始'
+          ? 0
+          : Math.floor(Math.random() * 90) + 5
 
-    let progress = 0
-    let completedQty = 0
-    let currentOp = operations[Math.floor(Math.random() * operations.length)]
-    let abnormalMsg: string | null = null
-
-    if (status === '已完成') {
-      progress = 100
-      completedQty = targetQty
-      currentOp = '包裝入庫'
-    } else if (status === '未開始') {
-      progress = 0
-      completedQty = 0
-      currentOp = '等待備料'
-    } else {
-      progress = Math.floor(Math.random() * 99) + 1
-      completedQty = Math.floor(targetQty * (progress / 100))
-      if (status === '異常延遲') {
-        abnormalMsg =
-          abnormalMsgs[Math.floor(Math.random() * abnormalMsgs.length)]
-      }
-    }
-
-    const startDay = Math.max(1, 14 - Math.floor(Math.random() * 10))
-    const endDay = 14 + Math.floor(Math.random() * 15)
+    const randomDayOffset = Math.floor(Math.random() * 30) - 5
+    const baseDate = dayjs().add(randomDayOffset, 'day')
 
     return {
       key: String(idx + 1),
@@ -182,374 +113,414 @@ const generateMockData = (count: number): WorkOrder[] => {
       productName: product.name,
       productCode: product.code,
       targetQty,
-      completedQty,
-      currentOp,
+      completedQty: Math.floor(targetQty * (progress / 100)),
+      currentOp: operations[Math.floor(Math.random() * operations.length)],
       progress,
       status,
-      startDate: `2026-04-${startDay.toString().padStart(2, '0')} 08:00`,
-      estEndDate: `2026-04-${endDay.toString().padStart(2, '0')} 18:00`,
-      abnormalMsg
+      startDate: baseDate.subtract(3, 'day').format('YYYY-MM-DD 08:00'),
+      estEndDate: baseDate.format('YYYY-MM-DD 18:00'),
+      abnormalMsg: status === '異常延遲' ? '缺料：電感組件供應延遲' : null
     }
   })
 }
 
-export default function WorkOrderStatus() {
+// --- 子組件：統計卡片 ---
+interface StatCardProps {
+  label: string
+  value: string | number
+  unit: string
+  color: string
+  icon: React.ElementType
+  alert?: boolean
+}
+
+const StatCard: React.FC<StatCardProps> = ({
+  label,
+  value,
+  unit,
+  color,
+  icon: Icon,
+  alert
+}) => (
+  <div
+    className={cn(
+      'flex items-center justify-between p-4 rounded-xl min-w-[200px] transition-all',
+      alert
+        ? 'bg-rose-50 ring-1 ring-rose-100'
+        : 'bg-white border border-slate-100'
+    )}
+  >
+    <div>
+      <p className='text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1'>
+        {label}
+      </p>
+      <div className='flex items-baseline gap-1'>
+        <span
+          className={cn(
+            'text-xl font-black',
+            alert ? 'text-rose-600' : 'text-slate-800'
+          )}
+        >
+          {value}
+        </span>
+        <span className='text-[10px] text-slate-400 font-medium'>{unit}</span>
+      </div>
+    </div>
+    <div
+      className={cn(
+        'p-2 rounded-lg',
+        alert
+          ? 'bg-rose-100 text-rose-500'
+          : `bg-${color}-100 text-${color}-500`
+      )}
+    >
+      <Icon size={16} />
+    </div>
+  </div>
+)
+
+// --- 子組件：狀態標籤 ---
+interface StatusTagProps {
+  status: StatusType
+  op: string
+}
+
+const StatusTag: React.FC<StatusTagProps> = ({ status, op }) => {
+  const config: Record<StatusType, { color: string; icon: React.ElementType }> =
+    {
+      進行中: { color: 'processing', icon: PlayCircle },
+      異常延遲: { color: 'error', icon: AlertCircle },
+      已完成: { color: 'success', icon: CheckCircle2 },
+      未開始: { color: 'default', icon: Clock }
+    }
+  const { color, icon: Icon } = config[status]
+  return (
+    <div className='flex flex-col gap-1'>
+      <Tag
+        color={color}
+        className='flex items-center gap-1 w-fit m-0 border-0 px-2 py-0.5 rounded-full font-medium'
+      >
+        <Icon size={12} className='inline' /> {status}
+      </Tag>
+      <span className='text-[10px] text-slate-400 font-medium px-1'>{op}</span>
+    </div>
+  )
+}
+
+// --- 主組件 ---
+export default function App() {
   const [loading, setLoading] = useState<boolean>(true)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
+  const searchInputRef = useRef<InputRef>(null)
 
-  // 模擬網路延遲載入效果
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 800)
     return () => clearTimeout(timer)
   }, [])
 
-  // 初始化 1000 筆數據
-  const mockData = useMemo(() => generateMockData(1000), [])
+  const mockData = useMemo(() => generateMockData(500), [])
 
   const stats = useMemo(
     () => ({
       processing: mockData.filter(d => d.status === '進行中').length,
       delayed: mockData.filter(d => d.status === '異常延遲').length,
-      completed: mockData.filter(d => d.status === '已完成').length
+      completed: mockData.filter(d => d.status === '已完成').length,
+      total: mockData.length
     }),
     [mockData]
   )
 
-  // --- Popover KPI 內容 ---
-  const statsContent = (
-    <div className='w-full max-w-[500px] py-1'>
-      <div className='flex items-center gap-2 mb-4 border-b border-slate-100 pb-2.5'>
-        <TrendingUp size={16} className='text-blue-600' />
-        <span className='font-bold text-slate-800'>廠區生產指標詳情</span>
-      </div>
-      <div className='grid grid-cols-2 gap-3'>
-        <StatCard
-          title='執行中工單'
-          value={stats.processing}
-          unit='張'
-          icon={PlayCircle}
-          colorClass='text-blue-600'
-          bgClass='bg-blue-50'
-          iconColorClass='text-blue-500'
-        />
-        <StatCard
-          title='今日預計完工'
-          value={28}
-          unit='張'
-          icon={CheckCircle2}
-          colorClass='text-emerald-600'
-          bgClass='bg-emerald-50'
-          iconColorClass='text-emerald-500'
-          trend='+12% 較昨日'
-        />
-        <StatCard
-          title='異常延遲風險'
-          value={stats.delayed}
-          unit='張'
-          icon={AlertCircle}
-          colorClass='text-rose-600'
-          bgClass='bg-rose-50'
-          iconColorClass='text-rose-500'
-          isAlert={true}
-          trend='需立即排查'
-        />
-        <StatCard
-          title='平均達交率'
-          value={'94.5'}
-          unit='%'
-          icon={ClipboardList}
-          colorClass='text-purple-600'
-          bgClass='bg-purple-50'
-          iconColorClass='text-purple-500'
-          trend='近 30 日'
-        />
-      </div>
-      <div className='mt-4 bg-slate-50 p-2.5 rounded-lg text-[11px] text-slate-400 flex items-start gap-2'>
-        <Info size={14} className='shrink-0 mt-0.5' />
-        <span>數據每 5 分鐘自動更新，當前顯示為 MES 系統即時計算結果。</span>
-      </div>
-    </div>
-  )
-
-  // --- 表頭客製化搜尋過濾器 (字串) ---
-  const getColumnSearchProps = (
-    dataIndex: keyof WorkOrder,
-    placeholder: string
-  ) => ({
+  // --- 搜尋過濾邏輯 ---
+  const getSearchProps = (dataIndex: keyof WorkOrder, title: string) => ({
     filterDropdown: ({
       setSelectedKeys,
       selectedKeys,
       confirm,
       clearFilters
     }: any) => (
-      <div className='p-2' onKeyDown={e => e.stopPropagation()}>
+      <div
+        className='p-3 w-64 shadow-2xl border border-slate-100 rounded-2xl bg-white'
+        onKeyDown={e => e.stopPropagation()}
+      >
         <Input
-          placeholder={placeholder}
+          ref={searchInputRef}
+          placeholder={`搜尋 ${title}...`}
           value={selectedKeys[0]}
           onChange={e =>
             setSelectedKeys(e.target.value ? [e.target.value] : [])
           }
           onPressEnter={() => confirm()}
-          classNames={{ root: '!mb-2 block rounded-lg border-slate-200' }}
+          className='!mb-3 rounded-lg'
         />
-        <Space>
+        <div className='flex justify-end gap-2'>
           <Button
-            type='primary'
-            onClick={() => confirm()}
-            icon={<Search size={14} />}
+            type='text'
             size='small'
-            className='w-20 bg-blue-600 flex items-center justify-center text-xs'
-          >
-            搜尋
-          </Button>
-          <Button
             onClick={() => {
-              if (typeof clearFilters === 'function') {
-                clearFilters()
-              }
+              clearFilters?.()
               confirm()
             }}
-            size='small'
-            className='w-20 flex items-center justify-center text-xs'
+            className='text-xs text-slate-400'
           >
             重置
           </Button>
-        </Space>
+          <Button
+            type='primary'
+            size='small'
+            onClick={() => confirm()}
+            className='text-xs rounded-lg px-4'
+          >
+            篩選
+          </Button>
+        </div>
       </div>
     ),
     filterIcon: (filtered: boolean) => (
       <Search
         size={14}
-        className={filtered ? 'text-blue-600' : 'text-slate-400'}
+        className={filtered ? 'text-blue-500' : 'text-slate-300'}
       />
     ),
-    onFilter: (value: any, record: WorkOrder) => {
-      // 支援多欄位搜尋 (例如搜產品名或品號)
-      if (dataIndex === 'productName') {
-        return (
-          record.productName
-            .toLowerCase()
-            .includes((value as string).toLowerCase()) ||
-          record.productCode
-            .toLowerCase()
-            .includes((value as string).toLowerCase())
-        )
-      }
-
-      const recordValue = record[dataIndex]
-      // TypeScript 可能 null 的檢查
-      if (recordValue === null || recordValue === undefined) {
-        return false
-      }
-      return recordValue
+    onFilter: (value: any, record: WorkOrder): boolean => {
+      const targetValue = record[dataIndex]
+      if (targetValue === null || targetValue === undefined) return false
+      return targetValue
         .toString()
         .toLowerCase()
         .includes((value as string).toLowerCase())
+    },
+    onFilterDropdownOpenChange: (visible: boolean) => {
+      if (visible) setTimeout(() => searchInputRef.current?.select(), 100)
     }
   })
 
-  // --- 表頭客製化日期區間過濾器 ---
-  const getDateRangeFilterProps = () => ({
+  // --- 日期區間過濾邏輯 ---
+  const getDateFilterProps = (dataIndex: keyof WorkOrder, title: string) => ({
     filterDropdown: ({
       setSelectedKeys,
       selectedKeys,
       confirm,
       clearFilters
     }: any) => (
-      <div className='p-2' onKeyDown={e => e.stopPropagation()}>
+      <div
+        className='p-3 w-72 shadow-2xl border border-slate-100 rounded-2xl bg-white'
+        onKeyDown={e => e.stopPropagation()}
+      >
+        <div className='mb-3 font-bold text-slate-700 flex items-center gap-2'>
+          <CalendarDays size={14} className='text-blue-500' />
+          篩選{title}
+        </div>
         <RangePicker
           value={selectedKeys[0]}
           onChange={dates => setSelectedKeys(dates ? [dates] : [])}
-          className='!mb-2 !flex rounded-lg border-slate-200'
+          className='!mb-3 w-full rounded-lg'
+          allowClear
         />
-        <Space>
+        <div className='flex justify-end gap-2'>
           <Button
-            type='primary'
-            onClick={() => confirm()}
-            icon={<Search size={14} />}
+            type='text'
             size='small'
-            className='w-20 bg-blue-600 flex items-center justify-center text-xs'
-          >
-            篩選
-          </Button>
-          <Button
             onClick={() => {
-              if (typeof clearFilters === 'function') {
-                clearFilters()
-              }
+              clearFilters?.()
               confirm()
             }}
-            size='small'
-            className='w-20 flex items-center justify-center text-xs'
+            className='text-xs text-slate-400'
           >
             重置
           </Button>
-        </Space>
+          <Button
+            type='primary'
+            size='small'
+            onClick={() => confirm()}
+            className='text-xs rounded-lg px-4'
+          >
+            確定
+          </Button>
+        </div>
       </div>
     ),
     filterIcon: (filtered: boolean) => (
       <CalendarDays
         size={14}
-        className={filtered ? 'text-blue-600' : 'text-slate-400'}
+        className={filtered ? 'text-blue-500' : 'text-slate-300'}
       />
     ),
-    onFilter: (value: any, record: WorkOrder) => {
+    onFilter: (value: any, record: WorkOrder): boolean => {
       if (!value || value.length !== 2) return true
-      const recordDate = new Date(record.estEndDate).getTime()
-      const start = value[0].startOf('day').valueOf()
-      const end = value[1].endOf('day').valueOf()
-      return recordDate >= start && recordDate <= end
+      const [start, end] = value
+      const dateString = record[dataIndex] as string
+      if (!dateString) return false
+      const recordDate = dayjs(dateString)
+      return recordDate.isBetween(
+        start.startOf('day'),
+        end.endOf('day'),
+        null,
+        '[]'
+      )
     }
   })
 
-  // --- Ant Design Table 欄位定義 ---
+  // --- KPI 概覽內容 ---
+  const DashboardContent = (
+    <div className='p-2 space-y-4'>
+      <div className='flex items-center gap-2 mb-2 pb-2 border-b border-slate-100'>
+        <TrendingUp size={16} className='text-blue-600' />
+        <span className='font-bold text-slate-700'>生產效率指標</span>
+      </div>
+      <div className='grid grid-cols-2 gap-3'>
+        <StatCard
+          label='執行中'
+          value={stats.processing}
+          unit='張'
+          color='blue'
+          icon={PlayCircle}
+        />
+        <StatCard
+          label='已完工'
+          value={stats.completed}
+          unit='張'
+          color='emerald'
+          icon={CheckCircle2}
+        />
+        <StatCard
+          label='異常預警'
+          value={stats.delayed}
+          unit='張'
+          color='rose'
+          icon={AlertCircle}
+          alert
+        />
+        <StatCard
+          label='總工單'
+          value={stats.total}
+          unit='張'
+          color='indigo'
+          icon={ClipboardList}
+        />
+      </div>
+      <div className='bg-blue-50/50 p-3 rounded-xl text-[11px] text-blue-600 flex items-start gap-2'>
+        <Info size={14} className='mt-0.5 shrink-0' />
+        <span>當前系統負載穩定，平均達交率 96.4%。</span>
+      </div>
+    </div>
+  )
+
   const columns: ColumnsType<WorkOrder> = [
     {
-      title: '工單資訊',
+      title: '工單 ID',
       dataIndex: 'woId',
       key: 'woId',
-      width: 200,
-      fixed: 'left',
-      sorter: (a, b) => a.woId.localeCompare(b.woId),
-      ...getColumnSearchProps('woId', '搜尋工單編號'),
-      render: (text: string, record: WorkOrder) => (
-        <div className='flex flex-col'>
-          <div className='flex items-center gap-2'>
-            <span className='font-semibold text-blue-600 hover:text-blue-800 cursor-pointer transition-colors'>
-              {text}
-            </span>
-            {record.priority === '特急' && (
-              <Tag
-                color='error'
-                className='m-0 border-0 text-xs font-bold px-1.5'
-              >
-                特急
-              </Tag>
-            )}
-            {record.priority === '急單' && (
-              <Tag color='warning' className='m-0 border-0 text-xs px-1.5'>
-                急單
-              </Tag>
-            )}
-          </div>
-          <span className='text-[11px] text-slate-400 mt-1'>
-            {record.startDate.split(' ')[0]} 立帳
-          </span>
-        </div>
-      )
-    },
-    {
-      title: '產品名稱 / 品號',
-      dataIndex: 'productName',
-      key: 'productName',
-      width: 220,
-      sorter: (a, b) => a.productName.localeCompare(b.productName),
-      ...getColumnSearchProps('productName', '搜尋品名或品號'),
-      render: (text: string, record: WorkOrder) => (
-        <div className='flex flex-col'>
-          <span className='text-slate-700 font-medium'>{text}</span>
-          <span className='text-[11px] text-slate-400 font-mono mt-0.5'>
-            {record.productCode}
-          </span>
-        </div>
-      )
-    },
-    {
-      title: '當前狀態 / 工序',
-      key: 'status',
       width: 160,
+      fixed: 'left',
+      ...getSearchProps('woId', '工單編號'),
+      render: (text: string, record: WorkOrder) => (
+        <div className='flex flex-col group'>
+          <span className='font-bold text-blue-600 group-hover:underline cursor-pointer'>
+            {text}
+          </span>
+          <span className='text-[10px] text-slate-400 font-mono'>
+            {record.startDate.split(' ')[0]} 建立
+          </span>
+        </div>
+      )
+    },
+    {
+      title: '優先級',
+      dataIndex: 'priority',
+      width: 100,
+      filters: [
+        { text: '特急', value: '特急' },
+        { text: '急單', value: '急單' },
+        { text: '一般', value: '一般' }
+      ],
+      onFilter: (v, r): boolean => r.priority === v,
+      render: (p: PriorityType) => (
+        <Tag
+          color={p === '特急' ? 'error' : p === '急單' ? 'warning' : 'default'}
+          className='rounded-md border-0 font-bold px-2 m-0'
+        >
+          {p}
+        </Tag>
+      )
+    },
+    {
+      title: '產品與規格',
+      dataIndex: 'productName',
+      width: 240,
+      ...getSearchProps('productName', '產品名稱'),
+      render: (name: string, r: WorkOrder) => (
+        <div className='flex flex-col'>
+          <span
+            className='text-slate-700 font-semibold truncate max-w-[200px]'
+            title={name}
+          >
+            {name}
+          </span>
+          <span className='text-[11px] text-slate-400 font-mono'>
+            {r.productCode}
+          </span>
+        </div>
+      )
+    },
+    {
+      title: '狀態',
+      dataIndex: 'status',
+      width: 140,
       filters: [
         { text: '進行中', value: '進行中' },
-        { text: '異常延遲', value: '異常延遲' },
-        { text: '已完成', value: '已完成' },
-        { text: '未開始', value: '未開始' }
+        { text: '異常', value: '異常延遲' },
+        { text: '完成', value: '已完成' }
       ],
-      onFilter: (value, record) => record.status === (value as StatusType),
-      render: (_, record: WorkOrder) => {
-        let tagColor = 'default'
-        let Icon = Clock
-        if (record.status === '進行中') {
-          tagColor = 'processing'
-          Icon = PlayCircle
-        }
-        if (record.status === '異常延遲') {
-          tagColor = 'error'
-          Icon = AlertCircle
-        }
-        if (record.status === '已完成') {
-          tagColor = 'success'
-          Icon = CheckCircle2
-        }
-        return (
-          <div className='flex flex-col items-start gap-1.5'>
-            <Tag
-              color={tagColor}
-              className='!flex !items-center !gap-1 py-0.5 px-2 rounded-md border-0 m-0'
-            >
-              <Icon size={12} className='inline-block' />
-              <span className='font-medium'>{record.status}</span>
-            </Tag>
-            <span className='text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded'>
-              {record.currentOp}
-            </span>
-          </div>
-        )
-      }
+      onFilter: (v, r): boolean => r.status === v,
+      render: (s: StatusType, r: WorkOrder) => (
+        <StatusTag status={s} op={r.currentOp} />
+      )
     },
     {
-      title: '生產進度',
-      key: 'progress',
-      width: 240,
+      title: '進度回報',
+      dataIndex: 'progress',
+      width: 200,
       sorter: (a, b) => a.progress - b.progress,
-      render: (_, record: WorkOrder) => (
-        <div className='flex flex-col gap-1 w-full pr-4'>
-          <div className='flex justify-between text-[11px] mb-0.5'>
+      render: (p: number, r: WorkOrder) => (
+        <div className='flex flex-col gap-1 pr-4'>
+          <div className='flex justify-between text-[10px] font-bold'>
             <span className='text-slate-400'>
-              已產:{' '}
-              <strong className='text-slate-600'>{record.completedQty}</strong>{' '}
-              / {record.targetQty}
+              {r.completedQty} / {r.targetQty}
             </span>
-            <span className='font-bold text-slate-700'>{record.progress}%</span>
+            <span className='text-slate-700'>{p}%</span>
           </div>
           <Progress
-            percent={record.progress}
-            showInfo={false}
+            percent={p}
             size='small'
-            status={
-              record.status === '異常延遲'
-                ? 'exception'
-                : record.progress === 100
-                  ? 'success'
-                  : 'active'
-            }
-            strokeColor={record.status === '進行中' ? '#3b82f6' : undefined}
+            showInfo={false}
+            status={r.status === '異常延遲' ? 'exception' : 'active'}
+            strokeColor={r.status === '進行中' ? '#3b82f6' : undefined}
           />
-          {record.abnormalMsg && (
-            <div className='flex items-center gap-1 text-[10px] text-red-500 mt-0.5'>
-              <AlertCircle size={10} className='flex-shrink-0' />
-              <span className='truncate' title={record.abnormalMsg}>
-                {record.abnormalMsg}
-              </span>
-            </div>
+          {r.abnormalMsg && (
+            <span
+              className='text-[9px] text-rose-500 truncate font-medium'
+              title={r.abnormalMsg}
+            >
+              {r.abnormalMsg}
+            </span>
           )}
         </div>
       )
     },
     {
-      title: '預計完工時間',
+      title: '預計交期',
       dataIndex: 'estEndDate',
-      key: 'estEndDate',
-      width: 160,
+      width: 140,
       sorter: (a, b) =>
-        new Date(a.estEndDate).getTime() - new Date(b.estEndDate).getTime(),
-      ...getDateRangeFilterProps(),
-      render: (text: string) => (
+        dayjs(a.estEndDate).valueOf() - dayjs(b.estEndDate).valueOf(),
+      ...getDateFilterProps('estEndDate', '交期範圍'),
+      render: (d: string) => (
         <div className='flex flex-col'>
           <span className='text-slate-600 font-medium'>
-            {text.split(' ')[0]}
+            {dayjs(d).format('YYYY-MM-DD')}
           </span>
-          <span className='text-slate-400 text-[11px]'>
-            {text.split(' ')[1]}
+          <span className='text-slate-400 text-[10px] font-mono'>
+            {dayjs(d).format('HH:mm')}
           </span>
         </div>
       )
@@ -557,56 +528,40 @@ export default function WorkOrderStatus() {
     {
       title: '操作',
       key: 'action',
-      width: 60,
+      width: 70,
       fixed: 'right',
       align: 'center',
       render: () => (
         <Dropdown
           menu={{
             items: [
+              { key: '1', label: '詳細日誌', icon: <FileText size={14} /> },
+              { key: '2', label: '編輯參數', icon: <Edit size={14} /> },
+              { key: '3', type: 'divider' },
               {
-                key: 'details',
-                label: '工單詳情',
-                icon: <FileText size={14} className='text-blue-500' />
-              },
-              {
-                key: 'edit',
-                label: '修改參數',
-                icon: <Edit size={14} className='text-slate-500' />
-              },
-              {
-                key: 'schedule',
-                label: '優先級調整',
-                icon: <CalendarDays size={14} className='text-indigo-500' />
-              },
-              { key: 'divider', type: 'divider' },
-              {
-                key: 'delete',
-                label: '暫停 / 取消',
+                key: '4',
+                label: '暫停工單',
                 danger: true,
                 icon: <Trash2 size={14} />
               }
             ]
           }}
           trigger={['click']}
-          placement='bottomRight'
         >
           <Button
             type='text'
             size='small'
-            icon={<MoreVertical size={18} />}
-            className='text-slate-400 hover:bg-slate-100 flex items-center justify-center'
+            icon={<MoreVertical size={16} className='text-slate-400' />}
           />
         </Dropdown>
       )
     }
   ]
 
-  // --- 列表核取狀態 ---
   const rowSelection: TableProps<WorkOrder>['rowSelection'] = {
     selectedRowKeys,
-    onChange: keys => setSelectedRowKeys(keys),
-    fixed: 'left' // 將核取方塊固定在左側
+    onChange: setSelectedRowKeys,
+    columnWidth: 48
   }
 
   return (
@@ -614,172 +569,118 @@ export default function WorkOrderStatus() {
       theme={{
         token: {
           colorPrimary: '#3b82f6',
-          borderRadius: 8,
-          fontFamily: 'Inter, "Noto Sans TC", sans-serif'
+          borderRadius: 12,
+          borderRadiusSM: 4
+        },
+        components: {
+          Table: {
+            headerBg: '#ffffff',
+            headerColor: '#94a3b8',
+            headerSplitColor: 'transparent',
+            rowHoverBg: '#f8fafc'
+          },
+          Checkbox: {
+            borderRadiusSM: 4
+          }
         }
       }}
     >
-      {/* 為了發揮 sticky 效用，外層容器允許原生滾動 */}
-      <div className='w-full min-h-screen bg-[#f8fafc] font-sans pb-16'>
-        <div className='mx-auto px-4 sm:px-6 pt-4 space-y-4 relative animate-fade-in'>
-          {/* 全域 Loading 遮罩 */}
-          {loading && (
-            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-[110] flex items-center justify-center rounded-2xl'>
-              <div className='flex flex-col items-center gap-3'>
-                <div className='w-10 h-10 border-4 border-blue-100 border-t-blue-500 rounded-full animate-spin' />
-                <span className='text-xs font-black text-blue-600 tracking-widest uppercase'>
-                  Fetching WorkOrder...
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* 上方區塊完美懸浮與防穿透遮罩 (Mask Wrapper) */}
-          <div className='sticky top-0 z-40 -mt-4 pt-4 pb-3 -mx-4 px-4 sm:-mx-6 sm:px-6 bg-[#f8fafc]/95 backdrop-blur-md'>
-            <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/90 shadow-sm border border-slate-200/80 px-5 py-3 rounded-2xl transition-all'>
-              <div className='flex flex-wrap items-center gap-3'>
-                {/* 使用 Icon 代替文字標題以節省空間 */}
-                <Tooltip title='工單狀態：即時監控廠區執行進度'>
-                  <div className='bg-gradient-to-br from-blue-500 to-blue-600 text-white p-2 rounded-xl shadow-sm shadow-blue-200 flex items-center justify-center'>
-                    <ClipboardList size={20} />
-                  </div>
-                </Tooltip>
-
-                {/* 完美融合於 Title 旁的極簡 KPI 膠囊 */}
-                <Popover
-                  content={statsContent}
-                  trigger='click'
-                  placement='bottomLeft'
-                  rootClassName='custom-stats-popover'
-                >
-                  <div className='flex items-center gap-2 bg-white border border-slate-200 shadow-sm px-2.5 py-1.5 rounded-full cursor-pointer hover:border-blue-300 hover:shadow transition-all group'>
-                    <TrendingUp size={14} className='text-blue-600' />
-                    <span className='text-xs font-bold text-slate-600 group-hover:text-blue-600'>
-                      KPI 總覽
-                    </span>
-                    <div className='h-3 w-[1px] bg-slate-200 mx-0.5'></div>
-                    <span className='text-[11px] font-bold text-rose-600 flex items-center gap-1.5'>
-                      <span className='relative flex h-1.5 w-1.5'>
-                        <span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75'></span>
-                        <span className='relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500'></span>
-                      </span>
-                      {stats.delayed} 筆異常
-                    </span>
-                    <ChevronDown
-                      size={14}
-                      className='text-slate-400 group-hover:text-blue-500 ml-0.5 transition-colors'
-                    />
-                  </div>
-                </Popover>
-              </div>
-
-              <div className='flex items-center gap-3'>
-                <Tooltip title='導出 Excel 報表'>
-                  <Button
-                    icon={<Download size={16} />}
-                    className='font-medium h-9 border-slate-300 text-slate-600 rounded-xl flex items-center justify-center'
-                  >
-                    <span className='hidden lg:inline ml-1 text-xs'>匯出</span>
-                  </Button>
-                </Tooltip>
-                <Button
-                  type='primary'
-                  icon={<Plus size={16} />}
-                  className='bg-blue-600 shadow-sm shadow-blue-200 font-bold h-9 rounded-xl border-none flex items-center justify-center'
-                >
-                  <span className='hidden sm:inline ml-1 text-xs'>
-                    新增工單
+      <div className='w-full h-full bg-[#f8fafc] font-sans'>
+        {/* 整行懸浮工具列 (霧面玻璃效果) */}
+        <header className='sticky top-0 z-[100] w-full px-6 py-4 bg-white/70 backdrop-blur-xl border-b border-slate-200/50 flex items-center justify-between transition-all'>
+          <div className='flex items-center gap-3'>
+            <Popover
+              content={DashboardContent}
+              trigger='click'
+              placement='bottomLeft'
+              overlayClassName='dashboard-popover'
+            >
+              <Button
+                icon={<LayoutDashboard size={18} />}
+                className='flex items-center gap-2 font-bold h-11 px-5 border-none bg-blue-600/5 text-blue-600 hover:bg-blue-600 hover:text-white rounded-2xl transition-all'
+              >
+                數據概覽
+                <ChevronDown size={14} />
+                {stats.delayed > 0 && (
+                  <span className='flex h-2 w-2 ml-1'>
+                    <span className='animate-ping absolute inline-flex h-2 w-2 rounded-full bg-rose-400 opacity-75'></span>
+                    <span className='relative inline-flex rounded-full h-2 w-2 bg-rose-500'></span>
                   </span>
-                </Button>
-              </div>
-            </div>
+                )}
+              </Button>
+            </Popover>
+
+            <div className='h-6 w-[1px] bg-slate-200 mx-2'></div>
+
+            <Tooltip title='導出 Excel'>
+              <Button
+                type='text'
+                className='text-slate-400 hover:text-slate-600'
+                icon={<Download size={20} />}
+              />
+            </Tooltip>
           </div>
 
-          {/* 核心內容區 (Card 容器包覆表格，移除獨立過濾器區塊) */}
+          <div className='flex items-center gap-3'>
+            <Button
+              type='primary'
+              icon={<Plus size={18} />}
+              className='h-11 px-6 rounded-2xl font-bold bg-blue-600 shadow-xl shadow-blue-200 border-none flex items-center gap-2 hover:scale-[1.02] active:scale-95 transition-all'
+            >
+              建立新工單
+            </Button>
+          </div>
+        </header>
+
+        <div className='p-4 lg:p-6'>
           <Card
-            className='shadow-sm border-slate-200 rounded-2xl overflow-hidden relative z-10'
+            className='max-w-[1400px] mx-auto shadow-xl shadow-slate-200/50 border-none rounded-[28px] overflow-hidden bg-white'
             styles={{ body: { padding: 0 } }}
           >
-            {/* 批量操作列 (當有勾選時顯示) */}
+            {/* 批量操作浮動條 (當有選取時) */}
             {selectedRowKeys.length > 0 && (
-              <div className='mx-4 my-4 bg-blue-50/50 border border-blue-100 p-3 rounded-xl flex items-center justify-between animate-in slide-in-from-top-2 duration-300'>
-                <div className='flex items-center gap-2 text-blue-700'>
-                  <Zap size={16} className='fill-blue-700' />
-                  <span className='text-sm font-bold text-blue-700'>
-                    已選擇 {selectedRowKeys.length} 筆工單
+              <div className='mx-6 mt-6 p-3 bg-slate-900 rounded-2xl flex items-center justify-between animate-in slide-in-from-top-4 duration-300'>
+                <div className='flex items-center gap-3 text-white px-2'>
+                  <Zap size={16} className='text-yellow-400 fill-yellow-400' />
+                  <span className='text-sm font-bold tracking-tight'>
+                    已選取 {selectedRowKeys.length} 筆生產任務
                   </span>
                 </div>
-                <Space>
+                <div className='flex gap-2'>
                   <Button
-                    type='primary'
                     size='small'
-                    className='rounded-lg font-bold text-xs'
+                    className='rounded-xl border-none font-bold bg-white text-slate-900'
                   >
-                    批量派工
+                    批量下發
                   </Button>
                   <Button
-                    danger
                     size='small'
-                    className='rounded-lg font-bold text-xs'
-                  >
-                    批量暫停
-                  </Button>
-                  <Button
                     type='text'
-                    size='small'
                     onClick={() => setSelectedRowKeys([])}
-                    className='text-slate-400 text-xs hover:bg-slate-200/50'
+                    className='text-white/50 hover:text-white'
                   >
-                    取消
+                    <X size={16} />
                   </Button>
-                </Space>
+                </div>
               </div>
             )}
 
-            {/* 表格區域 */}
-            <div className='overflow-x-auto pt-2'>
+            <div className='p-4'>
               <Table<WorkOrder>
                 rowSelection={rowSelection}
                 columns={columns}
                 dataSource={mockData}
                 loading={loading}
-                scroll={{ x: 1000 }} // 移除 Y 軸限制，讓外層視窗捲動，發揮 sticky 懸浮效果
+                scroll={{ x: 1200 }}
                 pagination={{
-                  defaultPageSize: 20, // 更新：單頁顯示 20 筆資料
+                  pageSize: 12,
                   showSizeChanger: true,
-                  pageSizeOptions: ['20', '50', '100'],
-                  showTotal: total => `共計 ${total} 筆`,
-                  className: 'px-4 py-3 border-t border-slate-100 m-0'
+                  className: 'mt-4 !px-4 pb-2'
                 }}
-                className='order-manage-table'
+                className='aps-monitor-table'
               />
             </div>
           </Card>
-
-          {/* 注入 SaaS 風格的客製化 CSS */}
-          <style>{`
-            .order-manage-table .ant-table-thead > tr > th {
-              background: #f8fafc !important;
-              color: #64748b !important;
-              font-weight: 700 !important;
-              border-bottom: 1px solid #f1f5f9 !important;
-              white-space: nowrap;
-            }
-            .order-manage-table .ant-table-tbody > tr:hover > td {
-              background: #f1f7ff !important;
-            }
-            .custom-stats-popover .ant-popover-inner {
-              border-radius: 16px !important;
-              padding: 16px !important;
-              box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
-              border: 1px solid #e0e7ff;
-            }
-            .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-            @keyframes fadeIn {
-              from { opacity: 0; transform: translateY(10px); }
-              to { opacity: 1; transform: translateY(0); }
-            }
-          `}</style>
         </div>
       </div>
     </ConfigProvider>

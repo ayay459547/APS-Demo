@@ -517,7 +517,7 @@ export default function App() {
                   pageSize: 10,
                   showSizeChanger: true,
                   showTotal: total => `待處理排程：${total} 筆`,
-                  className: 'px-4 pb-4'
+                  className: '!px-4 pb-4'
                 }}
                 scroll={{ x: 1000 }} /* 新增：設定明確的 x 軸寬度確保固定生效 */
                 className='order-rush-table'

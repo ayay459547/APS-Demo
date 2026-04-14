@@ -586,7 +586,7 @@ export default function OrderList() {
                   pageSize: 10,
                   showSizeChanger: true,
                   showTotal: total => `共計 ${total} 筆`,
-                  className: 'px-4 pb-4'
+                  className: '!px-4 pb-4'
                 }}
                 scroll={{
                   x: 1000

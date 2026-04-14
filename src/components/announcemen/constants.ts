@@ -1,37 +1,59 @@
-import type { Announcement } from './types'
+import type { AnnouncementType, AnnouncementLevel, Announcement } from './types'
 
-export const MOCK_ANNOUNCEMENTS: Announcement[] = [
-  {
-    id: '1',
-    type: 'Safety',
-    title: '全廠勞安演習通知',
-    content:
-      '明日上午 10:00 將進行消防演習，請各產線班組維持機台在安全待機狀態。',
-    time: '2026-04-09 14:00',
-    isNew: true
-  },
-  {
-    id: '2',
-    type: 'Maintenance',
-    title: 'CNC-B區 高壓冷卻系統維護',
-    content: '本週五晚班將針對 CNC 005-008 號機進行濾網更換，預計停機 2 小時。',
-    time: '2026-04-09 11:30',
-    isNew: true
-  },
-  {
-    id: '3',
-    type: 'System',
-    title: 'APS 系統版本更新通知 v3.1',
-    content: '本次更新優化了甘特圖渲染效能，並新增了現場報工防錯機制。',
-    time: '2026-04-08 17:20',
-    isNew: false
-  },
-  {
-    id: '4',
-    type: 'Info',
-    title: 'Q1 生產達標激勵獎金公佈',
-    content: '恭喜 SMT A 線連三個月良率突破 99.8%，獎勵金將隨本月薪資發放。',
-    time: '2026-04-08 09:00',
-    isNew: false
-  }
+const titles = [
+  '全廠勞安演習通知',
+  '設備預防保養計畫',
+  'APS 系統更新',
+  '產線效率提升公告',
+  '品質異常通報',
+  '物料短缺預警',
+  '緊急插單通知',
+  'OEE 改善專案啟動'
 ]
+
+const contents = [
+  '請相關單位配合執行，確保生產安全與穩定。',
+  '本次作業預計影響產能，請提前調整排程。',
+  '已優化系統效能與資料同步機制。',
+  '請現場主管加強巡檢與品質控管。',
+  '已偵測到異常數據，請立即處理。',
+  '倉儲與採購單位請加速補料。',
+  '請優先處理此訂單，避免延誤交期。',
+  '改善計畫將於本週開始執行。'
+]
+
+const types: AnnouncementType[] = [
+  'Safety',
+  'Maintenance',
+  'System',
+  'Info',
+  'Production',
+  'Quality'
+]
+
+const levels: AnnouncementLevel[] = ['normal', 'important', 'critical']
+
+export const generateMockAnnouncements = (count = 10): Announcement[] => {
+  return Array.from({ length: count }).map((_, i) => {
+    const type = types[i % types.length]
+    const level = levels[Math.floor(Math.random() * levels.length)]
+
+    const date = new Date('2026-04-01')
+    date.setDate(date.getDate() + Math.floor(Math.random() * 10))
+    date.setHours(Math.floor(Math.random() * 24))
+    date.setMinutes(Math.floor(Math.random() * 60))
+
+    return {
+      id: String(i + 1),
+      type,
+      level,
+      title: titles[i % titles.length],
+      content: contents[Math.floor(Math.random() * contents.length)],
+      time: date.toISOString().replace('T', ' ').slice(0, 16),
+      isNew: Math.random() > 0.6
+    }
+  })
+}
+
+// --- 公告模組型別與模擬數據 ---
+export const MOCK_ANNOUNCEMENTS: Announcement[] = generateMockAnnouncements()

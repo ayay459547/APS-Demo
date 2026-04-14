@@ -18,34 +18,31 @@ import {
   Download,
   AlertCircle,
   Clock,
-  PlayCircle,
-  TrendingUp,
   ChevronDown,
   Activity,
   BoxSelect,
   ShieldCheck,
   Cpu,
-  Filter,
   FileText,
-  Edit,
-  Trash2,
-  CalendarDays,
+  PlayCircle,
   Info,
   Plus,
-  MoreVertical
+  MoreVertical,
+  RefreshCw,
+  Settings
 } from 'lucide-react'
 import dayjs from 'dayjs'
-
-// 引入 clsx 與 tailwind-merge
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
-// --- 建立 cn 工具函式 ---
+/**
+ * 樣式合併工具函數 (Project Standard)
+ */
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// --- 定義 TypeScript 型別 ---
+// --- TypeScript 型別定義 ---
 export type PriorityType = '特急' | '急單' | '一般'
 export type StatusType = '進行中' | '異常延遲' | '已完成' | '未開始'
 export type StepStatusType = 'wait' | 'process' | 'finish' | 'error'
@@ -76,6 +73,90 @@ export interface WorkOrderProgressType {
   startDate: string
   currentStepName: string
   routings: RoutingStep[]
+}
+
+// --- 擬真數據產生器 ---
+const generateProgressData = (count: number): WorkOrderProgressType[] => {
+  const products = [
+    {
+      name: '高階伺服器主機板',
+      code: 'MB-SVR-X99',
+      steps: ['SMT 貼片', 'DIP 插件', 'PCBA 測試', '包裝入庫']
+    },
+    {
+      name: '工控主機外殼',
+      code: 'CHAS-IND-01',
+      steps: ['CNC 切削', '表面拋光', '陽極處理', '品檢入庫']
+    },
+    {
+      name: 'AI 運算加速卡',
+      code: 'GPU-AI-A100',
+      steps: ['SMT', '晶片打線', '組裝', '燒機', '包裝']
+    }
+  ]
+  const priorities: PriorityType[] = ['特急', '急單', '一般', '一般']
+  const statuses: StatusType[] = ['進行中', '進行中', '異常延遲', '已完成']
+
+  return Array.from({ length: count }).map((_, idx) => {
+    const product = products[Math.floor(Math.random() * products.length)]
+    const status = statuses[Math.floor(Math.random() * statuses.length)]
+    const targetQty = Math.floor(Math.random() * 1000) + 200
+    const startDateStr = `2026-04-${String(Math.max(1, 14 - Math.floor(Math.random() * 5))).padStart(2, '0')} 08:00`
+
+    let currentTimeline = dayjs(startDateStr).valueOf()
+    const routings: RoutingStep[] = product.steps.map((stepName, stepIdx) => {
+      let stepStatus: StepStatusType = status === '已完成' ? 'finish' : 'wait'
+      let completed = status === '已完成' ? targetQty : 0
+
+      if (status !== '已完成') {
+        if (stepIdx === 0) {
+          stepStatus = 'finish'
+          completed = targetQty - 2
+        } else if (stepIdx === 1) {
+          stepStatus = status === '異常延遲' ? 'error' : 'process'
+          completed = Math.floor(targetQty * 0.5)
+        }
+      }
+
+      const durationHours = Math.floor(Math.random() * 12) + 6
+      const startTime = currentTimeline
+      const endTime = startTime + durationHours * 3600000
+      currentTimeline = endTime + 4 * 3600000
+
+      return {
+        id: `STP-${idx}-${stepIdx}`,
+        stepName,
+        status: stepStatus,
+        targetQty,
+        completedQty: completed,
+        wipQty: stepStatus === 'process' ? Math.floor(targetQty * 0.2) : 0,
+        defectQty: Math.floor(Math.random() * 8),
+        machine: `EQ-${String(Math.floor(Math.random() * 20) + 1).padStart(3, '0')}`,
+        startTime,
+        endTime
+      }
+    })
+
+    const currentStep =
+      routings.find(r => r.status === 'process' || r.status === 'error') ||
+      (status === '已完成' ? routings[routings.length - 1] : routings[0])
+
+    return {
+      key: String(idx + 1),
+      woId: `WO-2604${(idx + 1).toString().padStart(4, '0')}`,
+      priority: priorities[Math.floor(Math.random() * priorities.length)],
+      productName: product.name,
+      productCode: product.code,
+      targetQty,
+      totalCompletedQty:
+        status === '已完成' ? targetQty : Math.floor(targetQty * 0.4),
+      yieldRate: 98 + Math.random() * 1.5,
+      status,
+      startDate: startDateStr,
+      currentStepName: currentStep.stepName,
+      routings
+    }
+  })
 }
 
 // --- 子組件：統計卡片 ---
@@ -126,180 +207,26 @@ const StatCard: React.FC<{
   </div>
 )
 
-// --- 擬真數據產生器 ---
-const generateProgressData = (count: number): WorkOrderProgressType[] => {
-  const products = [
-    {
-      name: '高階伺服器主機板',
-      code: 'MB-SVR-X99',
-      defaultSteps: ['SMT 表面接合', 'DIP 插件', 'PCBA 測試', '包裝入庫']
-    },
-    {
-      name: '工控主機外殼',
-      code: 'CHAS-IND-01',
-      defaultSteps: ['CNC 切削', '表面拋光', '陽極處理', '品檢入庫']
-    },
-    {
-      name: 'AI 運算加速卡',
-      code: 'GPU-AI-A100',
-      defaultSteps: [
-        'SMT 表面接合',
-        '晶片打線',
-        '散熱模組組裝',
-        '燒機測試',
-        '出貨包裝'
-      ]
-    }
-  ]
-  const priorities: PriorityType[] = ['特急', '急單', '一般', '一般']
-  const statuses: StatusType[] = [
-    '進行中',
-    '進行中',
-    '進行中',
-    '異常延遲',
-    '已完成'
-  ]
-
-  return Array.from({ length: count }).map((_, idx) => {
-    const product = products[Math.floor(Math.random() * products.length)]
-    const status = statuses[Math.floor(Math.random() * statuses.length)]
-    const targetQty = Math.floor(Math.random() * 1000) + 200
-    const startDateStr = `2026-04-${String(Math.max(1, 14 - Math.floor(Math.random() * 5))).padStart(2, '0')} 08:00`
-
-    let totalCompleted = 0
-    let totalDefect = 0
-    let currentStepName = ''
-
-    let prevStepStatus: StepStatusType = 'finish'
-    let currentTimeline = dayjs(startDateStr).valueOf()
-
-    const routings: RoutingStep[] = product.defaultSteps.map(
-      (stepName, stepIdx) => {
-        let stepStatus: StepStatusType = 'wait'
-        let completed = 0
-        let wip = 0
-        let defect = 0
-
-        if (status === '已完成') {
-          stepStatus = 'finish'
-          completed = targetQty
-        } else {
-          const rand = Math.random()
-          if (stepIdx === 0 || rand > 0.6) {
-            stepStatus = 'finish'
-            completed = targetQty - Math.floor(Math.random() * 5)
-            defect = targetQty - completed
-          } else if (rand > 0.2) {
-            stepStatus =
-              status === '異常延遲' && rand > 0.4 ? 'error' : 'process'
-            completed = Math.floor(targetQty * 0.4)
-            wip = Math.floor(targetQty * 0.3)
-            defect = Math.floor(Math.random() * 10)
-            currentStepName = stepName
-          } else {
-            stepStatus = 'wait'
-          }
-        }
-
-        if (
-          stepIdx > 0 &&
-          prevStepStatus !== 'finish' &&
-          prevStepStatus !== 'process'
-        ) {
-          stepStatus = 'wait'
-          completed = 0
-          wip = 0
-          defect = 0
-        }
-
-        prevStepStatus = stepStatus
-        totalDefect += defect
-
-        // 模擬工序耗時 (小時)
-        const durationHours = Math.floor(Math.random() * 24) + 6 // 拉長一點視覺效果更好
-        const stepStartTime = currentTimeline
-        const stepEndTime = currentTimeline + durationHours * 60 * 60 * 1000
-
-        // 下一站點加上間隔時間
-        currentTimeline =
-          stepEndTime + Math.floor(Math.random() * 12) * 60 * 60 * 1000
-
-        return {
-          id: `STP-${idx}-${stepIdx}`,
-          stepName,
-          status: stepStatus,
-          targetQty,
-          completedQty: completed,
-          wipQty: wip,
-          defectQty: defect,
-          machine: `EQ-${String(Math.floor(Math.random() * 20) + 1).padStart(3, '0')}`,
-          startTime: stepStartTime,
-          endTime: stepEndTime
-        }
-      }
-    )
-
-    const lastFinishStep = [...routings]
-      .reverse()
-      .find(r => r.status === 'finish')
-    if (lastFinishStep) totalCompleted = lastFinishStep.completedQty
-    if (!currentStepName)
-      currentStepName = lastFinishStep ? '即將入庫' : product.defaultSteps[0]
-    if (status === '已完成') currentStepName = '已完工入庫'
-
-    const yieldRate =
-      targetQty > 0
-        ? Number((((targetQty - totalDefect) / targetQty) * 100).toFixed(1))
-        : 100
-
-    return {
-      key: String(idx + 1),
-      woId: `WO-202604${(idx + 1).toString().padStart(4, '0')}`,
-      priority: priorities[Math.floor(Math.random() * priorities.length)],
-      productName: product.name,
-      productCode: product.code,
-      targetQty,
-      totalCompletedQty: totalCompleted,
-      yieldRate: Math.min(100, Math.max(0, yieldRate)),
-      status,
-      startDate: startDateStr,
-      currentStepName,
-      routings
-    }
-  })
-}
-
-export default function WorkOrderProgress() {
+// --- 主元件 ---
+export default function App() {
   const [loading, setLoading] = useState<boolean>(true)
-  const [searchText, setSearchText] = useState<string>('')
+  const data = useMemo(() => generateProgressData(300), [])
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 600)
+    const timer = setTimeout(() => setLoading(false), 800)
     return () => clearTimeout(timer)
   }, [])
 
-  const mockData = useMemo(() => generateProgressData(200), [])
-
-  const filteredData = useMemo(() => {
-    if (!searchText) return mockData
-    const lower = searchText.toLowerCase()
-    return mockData.filter(
-      d =>
-        d.woId.toLowerCase().includes(lower) ||
-        d.productName.toLowerCase().includes(lower) ||
-        d.productCode.toLowerCase().includes(lower)
-    )
-  }, [mockData, searchText])
-
-  const stats = useMemo(() => {
-    const totalYields = mockData.reduce((acc, curr) => acc + curr.yieldRate, 0)
-    return {
-      avgYield: (totalYields / mockData.length).toFixed(1),
-      processing: mockData.filter(d => d.status === '進行中').length,
-      errors: mockData.filter(d => d.routings.some(r => r.status === 'error'))
-        .length
-    }
-  }, [mockData])
+  const stats = useMemo(
+    () => ({
+      avgYield: (
+        data.reduce((acc, c) => acc + c.yieldRate, 0) / (data.length || 1)
+      ).toFixed(2),
+      processing: data.filter(d => d.status === '進行中').length,
+      errors: data.filter(d => d.status === '異常延遲').length
+    }),
+    [data]
+  )
 
   // --- Popover KPI ---
   const statsContent = (
@@ -591,37 +518,77 @@ export default function WorkOrderProgress() {
     )
   }
 
-  // --- Ant Design Table 欄位定義 ---
+  // --- 表格欄位定義 (整合 Filter 與良率修正) ---
   const columns: ColumnsType<WorkOrderProgressType> = [
     {
-      title: '工單號碼',
+      title: '工單編號',
       dataIndex: 'woId',
       key: 'woId',
-      width: 180,
+      width: 150,
       fixed: 'left',
-      sorter: (a, b) => a.woId.localeCompare(b.woId),
-      render: (text: string, record: WorkOrderProgressType) => (
-        <div className='flex flex-col'>
-          <div className='flex items-center gap-2'>
-            <span className='font-semibold text-blue-600 hover:text-blue-800 cursor-pointer'>
-              {text}
-            </span>
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters
+      }) => (
+        <div className='p-3 bg-white rounded-xl shadow-2xl border border-slate-100 w-64'>
+          <Input
+            placeholder='搜尋單號...'
+            prefix={<Search size={14} className='text-slate-400' />}
+            value={selectedKeys[0]}
+            onChange={e =>
+              setSelectedKeys(e.target.value ? [e.target.value] : [])
+            }
+            onPressEnter={() => confirm()}
+            className='mb-3 rounded-lg h-9 border-slate-200'
+          />
+          <div className='flex justify-between'>
+            <Button
+              size='small'
+              type='text'
+              onClick={() => clearFilters && clearFilters()}
+              className='text-[10px] font-bold text-slate-400'
+            >
+              重置
+            </Button>
+            <Button
+              size='small'
+              type='primary'
+              onClick={() => confirm()}
+              className='text-[10px] font-bold px-4 text-white border-none bg-blue-600'
+            >
+              篩選
+            </Button>
           </div>
-          <div className='flex gap-1 mt-1'>
+        </div>
+      ),
+      filterIcon: filtered => (
+        <Search
+          size={14}
+          className={filtered ? 'text-blue-500' : 'text-slate-400'}
+        />
+      ),
+      render: (text, record) => (
+        <div className='flex flex-col'>
+          <span className='font-bold text-blue-600 hover:underline cursor-pointer tracking-tight'>
+            {text}
+          </span>
+          <div className='mt-1 flex gap-1'>
             {record.priority === '特急' && (
               <Tag
-                color='error'
-                className='m-0 border-0 text-[10px] font-bold px-1 pb-0.5 leading-none'
+                color='volcano'
+                className='m-0 border-none text-[9px] font-black rounded-md px-1.5 leading-5 uppercase'
               >
-                特急
+                Urgent
               </Tag>
             )}
             {record.priority === '急單' && (
               <Tag
-                color='warning'
-                className='m-0 border-0 text-[10px] px-1 pb-0.5 leading-none'
+                color='orange'
+                className='m-0 border-none text-[9px] font-black rounded-md px-1.5 leading-5 uppercase'
               >
-                急單
+                Rush
               </Tag>
             )}
           </div>
@@ -629,120 +596,111 @@ export default function WorkOrderProgress() {
       )
     },
     {
-      title: '生產產品',
+      title: '產品資訊',
       dataIndex: 'productName',
-      key: 'productName',
+      key: 'product',
       width: 200,
-      render: (text: string, record: WorkOrderProgressType) => (
+      render: (text, record) => (
         <div className='flex flex-col'>
-          <span className='text-slate-700 font-medium text-sm'>{text}</span>
-          <span className='text-[11px] text-slate-400 font-mono mt-0.5'>
+          <span className='font-bold text-slate-700 text-sm truncate max-w-[160px]'>
+            {text}
+          </span>
+          <span className='text-[10px] font-mono font-bold text-slate-400 tracking-tighter uppercase'>
             {record.productCode}
           </span>
         </div>
       )
     },
     {
-      title: '當前所在工序',
-      key: 'currentStep',
-      width: 160,
-      render: (_, record: WorkOrderProgressType) => {
-        const isError = record.routings.some(r => r.status === 'error')
-        return (
-          <div className='flex items-center gap-2'>
-            <Badge
-              status={
-                isError
-                  ? 'error'
-                  : record.status === '已完成'
-                    ? 'success'
-                    : 'processing'
-              }
-            />
-            <span
-              className={cn(
-                'text-xs font-bold px-2 py-1 rounded-md border',
-                isError
-                  ? 'bg-rose-50 text-rose-600 border-rose-200'
-                  : record.status === '已完成'
-                    ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
-                    : 'bg-blue-50 text-blue-700 border-blue-200'
-              )}
-            >
-              {record.currentStepName}
-            </span>
-          </div>
-        )
-      }
+      title: '狀態',
+      dataIndex: 'status',
+      key: 'status',
+      width: 140,
+      filters: [
+        { text: '進行中', value: '進行中' },
+        { text: '異常延遲', value: '異常延遲' },
+        { text: '已完成', value: '已完成' }
+      ],
+      onFilter: (value, record) => record.status === value,
+      render: (status, record) => (
+        <div className='flex items-center gap-2'>
+          <Badge
+            status={
+              status === '異常延遲'
+                ? 'error'
+                : status === '已完成'
+                  ? 'success'
+                  : 'processing'
+            }
+          />
+          <span
+            className={cn(
+              'text-xs font-bold px-2 py-1 rounded-md border',
+              status === '異常延遲'
+                ? 'bg-rose-50 border-rose-100 text-rose-600'
+                : status === '已完成'
+                  ? 'bg-emerald-50 border-emerald-100 text-emerald-600'
+                  : 'bg-blue-50 border-blue-100 text-blue-600'
+            )}
+          >
+            {record.currentStepName}
+          </span>
+        </div>
+      )
     },
     {
-      title: '整體進度 (總產出)',
-      key: 'overallProgress',
-      width: 220,
-      sorter: (a, b) =>
-        a.totalCompletedQty / a.targetQty - b.totalCompletedQty / b.targetQty,
-      render: (_, record: WorkOrderProgressType) => {
-        const percent = Math.floor(
+      title: '總體進度',
+      key: 'totalProgress',
+      width: 180,
+      render: (_, record) => {
+        const percent = Math.round(
           (record.totalCompletedQty / record.targetQty) * 100
         )
         return (
-          <div className='flex flex-col gap-1 w-full pr-4'>
-            <div className='flex justify-between text-[11px] mb-0.5'>
-              <span className='text-slate-400'>
-                已產:{' '}
-                <strong className='text-slate-600'>
-                  {record.totalCompletedQty}
-                </strong>{' '}
-                / {record.targetQty}
+          <div className='w-full pr-4'>
+            <div className='flex justify-between text-[10px] font-black mb-1'>
+              <span className='text-slate-400 uppercase tracking-tighter'>
+                {record.totalCompletedQty} / {record.targetQty} PCS
               </span>
-              <span className='font-bold text-slate-700'>{percent}%</span>
+              <span className='text-slate-700'>{percent}%</span>
             </div>
             <Progress
               percent={percent}
-              showInfo={false}
               size='small'
+              showInfo={false}
               strokeColor={percent === 100 ? '#10b981' : '#3b82f6'}
-              className='m-0'
             />
           </div>
         )
       }
     },
     {
-      title: '直通良率 (FPY)',
-      key: 'yieldRate',
-      width: 140,
+      title: '直通良率', // 修正：精確至小數點兩位
+      dataIndex: 'yieldRate',
+      key: 'yield',
+      width: 120,
       sorter: (a, b) => a.yieldRate - b.yieldRate,
-      render: (_, record: WorkOrderProgressType) => {
-        let color = 'text-emerald-600 bg-emerald-50 border-emerald-200'
-        if (record.yieldRate < 95)
-          color = 'text-rose-600 bg-rose-50 border-rose-200'
-        else if (record.yieldRate < 98)
-          color = 'text-amber-600 bg-amber-50 border-amber-200'
-
-        return (
-          <Tooltip title='目標良率: 98%'>
-            <div
-              className={cn(
-                'inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded border',
-                color
-              )}
-            >
-              <ShieldCheck size={12} />
-              {record.yieldRate}%
-            </div>
-          </Tooltip>
-        )
-      }
+      render: rate => (
+        <div
+          className={cn(
+            'inline-flex items-center gap-1.5 font-black text-xs px-2.5 py-0.5 rounded-full border shadow-sm',
+            rate > 99
+              ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+              : 'bg-amber-50 text-amber-600 border-amber-100'
+          )}
+        >
+          <ShieldCheck size={12} /> {rate.toFixed(2)}%
+        </div>
+      )
     },
     {
-      title: '開工日',
+      title: '開工日期',
       dataIndex: 'startDate',
       key: 'startDate',
-      width: 120,
-      render: (text: string) => (
-        <span className='text-slate-600 text-xs font-medium'>
-          {text.split(' ')[0]}
+      width: 130,
+      render: date => (
+        <span className='text-slate-500 font-mono text-[11px] font-bold'>
+          {date.split(' ')[0]}
         </span>
       )
     },
@@ -756,28 +714,8 @@ export default function WorkOrderProgress() {
         <Dropdown
           menu={{
             items: [
-              {
-                key: 'details',
-                label: '工單詳情',
-                icon: <FileText size={14} className='text-blue-500' />
-              },
-              {
-                key: 'edit',
-                label: '修改參數',
-                icon: <Edit size={14} className='text-slate-500' />
-              },
-              {
-                key: 'schedule',
-                label: '優先級調整',
-                icon: <CalendarDays size={14} className='text-indigo-500' />
-              },
-              { key: 'divider', type: 'divider' },
-              {
-                key: 'delete',
-                label: '暫停 / 取消',
-                danger: true,
-                icon: <Trash2 size={14} />
-              }
+              { key: '1', label: '工單詳情', icon: <FileText size={14} /> },
+              { key: '2', label: '報工紀錄', icon: <Activity size={14} /> }
             ]
           }}
           trigger={['click']}
@@ -786,8 +724,7 @@ export default function WorkOrderProgress() {
           <Button
             type='text'
             size='small'
-            icon={<MoreVertical size={18} />}
-            className='text-slate-400 hover:bg-slate-100 flex items-center justify-center'
+            icon={<MoreVertical size={18} className='text-slate-400' />}
           />
         </Dropdown>
       )
@@ -796,176 +733,99 @@ export default function WorkOrderProgress() {
 
   return (
     <ConfigProvider
-      theme={{
-        token: {
-          colorPrimary: '#3b82f6',
-          borderRadius: 8,
-          fontFamily: 'Inter, "Noto Sans TC", sans-serif'
-        }
-      }}
+      theme={{ token: { colorPrimary: '#3b82f6', borderRadius: 12 } }}
     >
-      <div className='w-full h-full bg-[#f8fafc] font-sans pb-16'>
-        <div className='mx-auto px-4 sm:px-6 pt-4 space-y-4 relative animate-fade-in'>
-          {loading && (
-            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-[110] flex items-center justify-center rounded-2xl'>
-              <div className='flex flex-col items-center gap-3'>
-                <div className='w-10 h-10 border-4 border-blue-100 border-t-blue-500 rounded-full animate-spin' />
-                <span className='text-xs font-black text-blue-600 tracking-widest uppercase'>
-                  Loading Routings...
-                </span>
+      <div className='w-full h-full bg-[#f8fafc] font-sans pb-10'>
+        {/* Header Section */}
+        <header className='sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200 shadow-sm px-6 py-4'>
+          <div className='max-w-[1600px] mx-auto flex items-center justify-between'>
+            <div className='flex items-center gap-4'>
+              <div className='bg-indigo-600 p-2.5 rounded-xl shadow-lg shadow-indigo-200 flex items-center justify-center text-white'>
+                <Activity size={20} />
               </div>
-            </div>
-          )}
-
-          {/* 上方區塊完美懸浮與防穿透遮罩 */}
-          <div className='sticky top-0 z-40 -mt-4 pt-4 pb-3 -mx-4 px-4 sm:-mx-6 sm:px-6 bg-[#f8fafc]/95 backdrop-blur-md'>
-            <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/90 shadow-sm border border-slate-200/80 px-5 py-3 rounded-2xl transition-all'>
-              <div className='flex flex-wrap items-center gap-3'>
-                <Tooltip title='生產進度：追蹤各工單在不同工序站點的即時狀況'>
-                  <div className='bg-gradient-to-br from-indigo-500 to-indigo-600 text-white p-2 rounded-xl shadow-sm shadow-indigo-200 flex items-center justify-center'>
-                    <Activity size={20} />
-                  </div>
-                </Tooltip>
-
+              <div>
+                <h1 className='text-lg font-black text-slate-800 m-0 tracking-tight uppercase'>
+                  工單進度監控儀表板
+                </h1>
                 <Popover
                   content={statsContent}
                   trigger='click'
                   placement='bottomLeft'
                   rootClassName='custom-stats-popover'
                 >
-                  <div className='flex items-center gap-2 bg-white border border-slate-200 shadow-sm px-2.5 py-1.5 rounded-full cursor-pointer hover:border-indigo-300 hover:shadow transition-all group'>
-                    <TrendingUp size={14} className='text-indigo-600' />
-                    <span className='text-xs font-bold text-slate-600 group-hover:text-indigo-600'>
-                      製程 KPI
-                    </span>
-                    <div className='h-3 w-[1px] bg-slate-200 mx-0.5'></div>
-                    <span className='text-[11px] font-bold text-rose-600 flex items-center gap-1.5'>
-                      <span className='relative flex h-1.5 w-1.5'>
-                        <span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75'></span>
-                        <span className='relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500'></span>
-                      </span>
-                      {stats.errors} 站點異常
+                  <div className='flex items-center gap-2 mt-0.5 cursor-pointer hover:bg-slate-50 px-2 py-0.5 rounded-md transition-all group'>
+                    <span className='text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] group-hover:text-indigo-600'>
+                      Production Analytics Metrics
                     </span>
                     <ChevronDown
-                      size={14}
-                      className='text-slate-400 group-hover:text-indigo-500 ml-0.5 transition-colors'
+                      size={12}
+                      className='text-slate-300 group-hover:text-indigo-600'
                     />
                   </div>
                 </Popover>
               </div>
-
-              <div className='flex items-center gap-3'>
-                <Button
-                  icon={<Download size={16} />}
-                  className='font-medium h-9 border-slate-300 text-slate-600 rounded-xl flex items-center justify-center'
-                >
-                  <span className='hidden lg:inline ml-1 text-xs'>
-                    匯出進度
-                  </span>
-                </Button>
-                <Button
-                  type='primary'
-                  icon={<Plus size={16} />}
-                  className='bg-blue-600 shadow-sm shadow-blue-200 font-bold h-9 rounded-xl border-none flex items-center justify-center'
-                >
-                  <span className='hidden sm:inline ml-1 text-xs'>
-                    新增工單
-                  </span>
-                </Button>
-              </div>
             </div>
-          </div>
-
-          {/* 核心內容區 */}
-          <Card
-            className='shadow-sm border-slate-200 rounded-2xl overflow-hidden relative z-10'
-            styles={{ body: { padding: 0 } }}
-          >
-            <div className='p-4 border-b border-slate-50 flex flex-wrap items-center justify-between gap-4'>
-              <div className='flex flex-wrap items-center gap-3 flex-1'>
-                <Input
-                  placeholder='搜尋工單 / 品號'
-                  prefix={<Search size={16} className='text-slate-400' />}
-                  className='w-full sm:w-64 rounded-xl border-slate-200 h-9'
-                  value={searchText}
-                  onChange={e => setSearchText(e.target.value)}
-                  allowClear
+            <div className='flex items-center gap-3'>
+              <Tooltip title='同步報工數據'>
+                <Button
+                  variant='text'
+                  icon={<RefreshCw size={16} className='text-slate-400' />}
+                  className='rounded-xl h-10 w-10 flex items-center justify-center'
                 />
-                <div className='text-slate-400 text-[11px] hidden md:flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100'>
-                  <Info size={14} className='text-indigo-400' />
-                  <span>
-                    提示：點擊列表左側的{' '}
-                    <b className='font-mono text-slate-500'>+</b>{' '}
-                    展開查看完整工序的甘特圖 (Gantt Chart) 與良率細節
-                  </span>
-                </div>
-              </div>
+              </Tooltip>
               <Button
-                icon={<Filter size={16} />}
-                type='text'
-                className='text-slate-500 hover:bg-slate-100 h-9 font-medium text-xs'
+                icon={<Download size={16} />}
+                className='rounded-xl h-10 border-slate-200 font-black text-xs px-4'
               >
-                進階篩選
+                匯出報表
+              </Button>
+              <Button
+                type='primary'
+                icon={<Plus size={16} />}
+                className='rounded-xl bg-blue-600 shadow-md shadow-blue-100 font-black text-xs border-none h-10 px-6 text-white'
+              >
+                新增工單
               </Button>
             </div>
+          </div>
+        </header>
 
-            <div className='overflow-x-auto pt-1'>
-              <Table<WorkOrderProgressType>
-                columns={columns}
-                dataSource={filteredData}
-                loading={loading}
-                expandable={{
-                  expandedRowRender,
-                  expandRowByClick: true,
-                  columnWidth: 48
-                }}
-                scroll={{ x: 1000 }}
-                pagination={{
-                  defaultPageSize: 20,
-                  showSizeChanger: true,
-                  pageSizeOptions: ['20', '50', '100'],
-                  showTotal: total => `共計 ${total} 筆`,
-                  className: 'px-4 py-3 border-t border-slate-100 m-0'
-                }}
-                className='progress-manage-table'
-              />
+        <main className='max-w-[1600px] mx-auto p-6'>
+          <Card
+            className='shadow-sm border-none rounded-[32px] overflow-hidden'
+            styles={{ body: { padding: 0 } }}
+          >
+            <div className='bg-slate-50/50 p-5 border-b border-slate-100 flex items-center justify-between'>
+              <div className='flex items-center gap-3 text-slate-500 text-[11px] font-black uppercase tracking-widest'>
+                <Settings size={14} />
+                工單追蹤清單展示 (300 筆數據項目)
+              </div>
+              <div className='flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm'>
+                <Info size={14} className='text-blue-500' />
+                <span className='text-[10px] text-slate-400 font-bold uppercase tracking-tight'>
+                  提示：點擊列表列可展開查看「強化型」工序甘特圖
+                </span>
+              </div>
             </div>
-          </Card>
 
-          <style>{`
-            .progress-manage-table .ant-table-thead > tr > th {
-              background: #f8fafc !important;
-              color: #64748b !important;
-              font-weight: 700 !important;
-              border-bottom: 1px solid #f1f5f9 !important;
-              white-space: nowrap;
-            }
-            .progress-manage-table .ant-table-tbody > tr:hover > td {
-              background: #f8fafc !important;
-              cursor: pointer;
-            }
-            .progress-manage-table .ant-table-expanded-row > td,
-            .progress-manage-table .ant-table-expanded-row:hover > td {
-              background: #f8fafc !important;
-              padding: 0 !important;
-            }
-            .custom-stats-popover .ant-popover-inner {
-              border-radius: 16px !important;
-              padding: 16px !important;
-              box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
-              border: 1px solid #e0e7ff;
-            }
-            .custom-scrollbar::-webkit-scrollbar { height: 8px; width: 8px; }
-            .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-            .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-            .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-            .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-            @keyframes fadeIn {
-              from { opacity: 0; transform: translateY(10px); }
-              to { opacity: 1; transform: translateY(0); }
-            }
-          `}</style>
-        </div>
+            <Table<WorkOrderProgressType>
+              columns={columns}
+              dataSource={data}
+              loading={loading}
+              expandable={{
+                expandedRowRender,
+                expandRowByClick: true,
+                columnWidth: 48
+              }}
+              scroll={{ x: 1300 }}
+              pagination={{
+                pageSize: 15,
+                showSizeChanger: true,
+                className: '!px-8 py-5 m-0 border-t border-slate-50'
+              }}
+            />
+          </Card>
+        </main>
       </div>
     </ConfigProvider>
   )
