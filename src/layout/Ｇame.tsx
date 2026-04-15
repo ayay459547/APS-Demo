@@ -363,37 +363,27 @@ const DinoGame: React.FC<{
         />
         {gameState !== 'PLAYING' && (
           <div className='absolute inset-0 bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center z-50 animate-in fade-in duration-300'>
-            <div
+            <Button
+              type='primary'
+              size='large'
               className={cn(
-                'w-16 h-16 rounded-2xl flex items-center justify-center mb-4 shadow-lg transition-colors',
+                '!w-16 !h-16 rounded-2xl flex items-center justify-center mb-4 shadow-lg transition-colors',
                 gameState === 'START' ? 'bg-blue-600' : 'bg-slate-800'
               )}
+              onClick={() => setGameState('PLAYING')}
             >
               {gameState === 'START' ? (
                 <Play size={32} className='text-white ml-1' />
               ) : (
                 <RotateCcw size={32} className='text-white' />
               )}
-            </div>
+            </Button>
             <Title
               level={3}
               className='!m-0 !font-black !tracking-tighter uppercase'
             >
               {gameState === 'START' ? 'System Ready' : 'Game Over'}
             </Title>
-            <Button
-              type='primary'
-              size='large'
-              className={cn(
-                'h-12 px-10 mt-4 rounded-xl font-black border-none shadow-lg transition-transform hover:scale-105',
-                gameState === 'START'
-                  ? 'bg-blue-600 shadow-blue-100'
-                  : 'bg-slate-800 shadow-slate-200'
-              )}
-              onClick={() => setGameState('PLAYING')}
-            >
-              {gameState === 'START' ? 'INITIALIZE' : 'RETRY MISSION'}
-            </Button>
           </div>
         )}
       </Card>
@@ -506,7 +496,7 @@ const DinoGame: React.FC<{
 }
 
 // --- 主介面 (彩蛋模式) ---
-export default function App() {
+export default function Game() {
   const [isModalVisible, setIsModalVisible] = useState(false)
 
   // 運用惰性初始化狀態，直接從 localStorage 讀取值，避免在 useEffect 中 setState
@@ -561,18 +551,15 @@ export default function App() {
         }
       }}
     >
-      <div className='flex items-center justify-center p-8 bg-slate-50/50 min-h-[100px]'>
+      <div className='flex items-center justify-center p-6 bg-slate-50/50 min-h-[60px]'>
         {/* 只有一個低調的 Copyright 按鈕 */}
         <Button
           type='text'
           size='small'
-          className='text-slate-400 hover:text-blue-500 font-medium tracking-tight text-xs transition-all flex items-center gap-1 group'
+          className='text-slate-400 hover:text-blue-500 font-medium tracking-tight text-xs transition-all flex items-center'
           onClick={() => setIsModalVisible(true)}
         >
-          <span className='opacity-40 group-hover:opacity-100 transition-opacity'>
-            ©
-          </span>
-          Copyright (c) 2026
+          Copyright © 2026
         </Button>
 
         {/* 遊戲視窗 Modal */}
