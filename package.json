@@ -20,6 +20,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.2.2",
     "antd": "^6.3.5",
+    "axios": "^1.15.0",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.20",
     "echarts": "^6.0.0",
