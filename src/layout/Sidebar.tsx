@@ -6,6 +6,7 @@ import { Menu, ConfigProvider } from 'antd'
 import type { MenuProps } from 'antd'
 
 import { ANT_MENU_ITEMS } from '@/router/constants'
+import Game from '@/layout/Ｇame.tsx'
 
 interface Props {
   activeMenu: string
@@ -121,15 +122,7 @@ export default function Sidebar({
       </div>
 
       {/* 底部資訊 */}
-      {sidebarOpen && (
-        <div className='p-2 border-t border-slate-100 shrink-0'>
-          <div className='flex justify-center items-center bg-slate-50 p-2 rounded-xl border border-slate-100'>
-            <p className='text-xs text-slate-400 font-medium truncate'>
-              Copyright (c) 2026
-            </p>
-          </div>
-        </div>
-      )}
+      {sidebarOpen && <Game />}
     </aside>
   )
 }
