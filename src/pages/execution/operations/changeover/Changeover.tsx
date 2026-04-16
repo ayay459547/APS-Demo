@@ -32,7 +32,6 @@ import {
   Timer,
   UserCircle2,
   CheckCircle2,
-  XCircle,
   AlertTriangle,
   ArrowRight,
   Wrench,
@@ -858,14 +857,8 @@ export default function ChangeoverManagement() {
             open={isHmiModalVisible}
             onCancel={() => setIsHmiModalVisible(false)}
             footer={null} // 隱藏預設 Footer，改用自訂大型按鈕
-            className='custom-hmi-modal top-10'
+            className='custom-hmi-modal'
             width={640}
-            closeIcon={
-              <XCircle
-                size={24}
-                className='text-slate-300 hover:text-slate-500'
-              />
-            }
           >
             {/* 工單切換資訊面板 */}
             <div className='mt-4 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-100 relative overflow-hidden'>
@@ -1002,14 +995,8 @@ export default function ChangeoverManagement() {
               className:
                 'rounded-xl font-bold text-slate-500 border-slate-200 h-10 px-6 hover:bg-slate-50'
             }}
-            className='custom-edit-modal top-10'
+            className='custom-edit-modal'
             width={640}
-            closeIcon={
-              <XCircle
-                size={20}
-                className='text-slate-400 hover:text-slate-600'
-              />
-            }
           >
             <Form form={addForm} layout='vertical' className='mt-4 mb-0'>
               <div className='grid grid-cols-2 gap-x-6 gap-y-2'>

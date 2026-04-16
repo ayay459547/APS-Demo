@@ -31,7 +31,6 @@ import {
   Users,
   CheckCircle2,
   AlertCircle,
-  XCircle,
   Link,
   Link2Off,
   Cable,
@@ -852,14 +851,8 @@ export default function SystemIntegration() {
               className:
                 'rounded-xl font-bold text-slate-500 border-slate-200 h-10 px-6 hover:bg-slate-50'
             }}
-            className='custom-edit-modal top-10'
+            className='custom-edit-modal'
             width={600}
-            closeIcon={
-              <XCircle
-                size={20}
-                className='text-slate-400 hover:text-slate-600'
-              />
-            }
           >
             <Form
               form={addForm}
@@ -992,14 +985,8 @@ export default function SystemIntegration() {
               className:
                 'rounded-xl font-bold text-slate-500 border-slate-200 h-10 px-6 hover:bg-slate-50'
             }}
-            className='custom-edit-modal top-10'
+            className='custom-edit-modal'
             width={600}
-            closeIcon={
-              <XCircle
-                size={20}
-                className='text-slate-400 hover:text-slate-600'
-              />
-            }
           >
             <Form form={configForm} layout='vertical' className='mt-4 mb-0'>
               <Form.Item
@@ -1119,14 +1106,8 @@ export default function SystemIntegration() {
             open={isLogModalVisible}
             footer={null}
             onCancel={() => setIsLogModalVisible(false)}
-            className='custom-edit-modal top-10'
+            className='custom-edit-modal'
             width={520}
-            closeIcon={
-              <XCircle
-                size={20}
-                className='text-slate-400 hover:text-slate-600'
-              />
-            }
           >
             {/* 加大左側 Padding (pl-8) 解決 Timeline 文字被切斷的問題 */}
             <div className='mt-6 pl-8 pr-4 h-[300px] overflow-y-auto custom-scrollbar'>

@@ -1064,14 +1064,8 @@ export default function RoleManager() {
               className:
                 'rounded-xl font-bold text-slate-500 border-slate-200 h-10 px-6 hover:bg-slate-50'
             }}
-            className='custom-edit-modal top-20'
+            className='custom-edit-modal'
             width={500}
-            closeIcon={
-              <XCircle
-                size={20}
-                className='text-slate-400 hover:text-slate-600'
-              />
-            }
           >
             <Form form={editForm} layout='vertical' className='mt-6 mb-2'>
               <Form.Item
@@ -1148,14 +1142,8 @@ export default function RoleManager() {
               className:
                 'rounded-xl font-bold text-slate-500 border-slate-200 h-10 px-6 hover:bg-slate-50'
             }}
-            className='custom-edit-modal top-20'
+            className='custom-edit-modal'
             width={500}
-            closeIcon={
-              <XCircle
-                size={20}
-                className='text-slate-400 hover:text-slate-600'
-              />
-            }
           >
             <Form
               form={addForm}
@@ -1237,15 +1225,9 @@ export default function RoleManager() {
               className:
                 'rounded-xl font-bold text-slate-500 border-slate-200 h-10 px-6 hover:bg-slate-50'
             }}
-            className='custom-edit-modal top-10'
+            className='custom-edit-modal'
             width={680}
             style={{ maxWidth: '95%' }}
-            closeIcon={
-              <XCircle
-                size={20}
-                className='text-slate-400 hover:text-slate-600'
-              />
-            }
           >
             <Form form={permissionForm} layout='vertical' className='mt-4 mb-0'>
               <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2'>

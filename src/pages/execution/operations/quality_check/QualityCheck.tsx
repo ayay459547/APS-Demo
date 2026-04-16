@@ -821,14 +821,8 @@ export default function QualityInspection() {
             open={isRecordModalVisible}
             footer={null}
             onCancel={() => setIsRecordModalVisible(false)}
-            className='custom-edit-modal top-10'
+            className='custom-edit-modal'
             width={640}
-            closeIcon={
-              <XCircle
-                size={20}
-                className='text-slate-400 hover:text-slate-600 absolute top-6 right-6 z-10'
-              />
-            }
           >
             <div className='mt-2 flex flex-col gap-6'>
               {/* Summary Header */}
@@ -994,14 +988,8 @@ export default function QualityInspection() {
             open={isHmiModalVisible}
             onCancel={() => setIsHmiModalVisible(false)}
             footer={null}
-            className='custom-hmi-modal top-6'
+            className='custom-hmi-modal'
             width={800}
-            closeIcon={
-              <XCircle
-                size={24}
-                className='text-slate-300 hover:text-slate-500 absolute top-6 right-6 z-10'
-              />
-            }
           >
             <div className='flex items-center gap-3 text-slate-800 border-b border-slate-100 pb-4 mb-4'>
               <div className='bg-indigo-600 p-2.5 rounded-xl shadow-md shadow-indigo-200'>
@@ -1246,14 +1234,8 @@ export default function QualityInspection() {
               className:
                 'rounded-xl font-bold text-slate-500 border-slate-200 h-10 px-6 hover:bg-slate-50'
             }}
-            className='custom-edit-modal top-10'
+            className='custom-edit-modal'
             width={640}
-            closeIcon={
-              <XCircle
-                size={20}
-                className='text-slate-400 hover:text-slate-600'
-              />
-            }
           >
             <Form
               form={addForm}
