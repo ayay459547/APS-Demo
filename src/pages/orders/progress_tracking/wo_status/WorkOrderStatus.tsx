@@ -10,7 +10,9 @@ import {
   Card,
   Popover,
   Tooltip,
-  Dropdown
+  Dropdown,
+  Badge,
+  Space
 } from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
 import type { InputRef } from 'antd'
@@ -32,8 +34,7 @@ import {
   Edit,
   Trash2,
   CalendarDays,
-  Activity,
-  X
+  Activity
 } from 'lucide-react'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
@@ -144,20 +145,20 @@ const StatCard: React.FC<StatCardProps> = ({
 }) => (
   <div
     className={cn(
-      'flex items-center justify-between p-4 rounded-xl min-w-[200px] transition-all',
+      'flex items-center justify-between p-3.5 rounded-xl transition-all hover:shadow-md cursor-default min-w-[160px]',
       alert
-        ? 'bg-rose-50 ring-1 ring-rose-100'
-        : 'bg-white border border-slate-100'
+        ? 'bg-rose-50/30 ring-1 ring-rose-100 border border-transparent'
+        : 'bg-white border border-slate-100 shadow-sm'
     )}
   >
     <div>
-      <p className='text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1'>
+      <p className='text-slate-500 text-[11px] font-bold tracking-wide mb-0.5'>
         {label}
       </p>
       <div className='flex items-baseline gap-1'>
         <span
           className={cn(
-            'text-xl font-black',
+            'text-xl font-black tracking-tight',
             alert ? 'text-rose-600' : 'text-slate-800'
           )}
         >
@@ -170,11 +171,11 @@ const StatCard: React.FC<StatCardProps> = ({
       className={cn(
         'p-2 rounded-lg',
         alert
-          ? 'bg-rose-100 text-rose-500'
-          : `bg-${color}-100 text-${color}-500`
+          ? 'bg-rose-100/80 text-rose-500'
+          : `bg-${color}-50 text-${color}-500`
       )}
     >
-      <Icon size={16} />
+      <Icon size={18} />
     </div>
   </div>
 )
@@ -208,7 +209,7 @@ const StatusTag: React.FC<StatusTagProps> = ({ status, op }) => {
 }
 
 // --- 主組件 ---
-export default function App() {
+export default function WorkOrderStatus() {
   const [loading, setLoading] = useState<boolean>(true)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const searchInputRef = useRef<InputRef>(null)
@@ -268,7 +269,7 @@ export default function App() {
             type='primary'
             size='small'
             onClick={() => confirm()}
-            className='text-xs rounded-lg px-4'
+            className='text-xs rounded-lg px-4 bg-blue-600'
           >
             篩選
           </Button>
@@ -332,7 +333,7 @@ export default function App() {
             type='primary'
             size='small'
             onClick={() => confirm()}
-            className='text-xs rounded-lg px-4'
+            className='text-xs rounded-lg px-4 bg-blue-600'
           >
             確定
           </Button>
@@ -362,10 +363,10 @@ export default function App() {
 
   // --- KPI 概覽內容 ---
   const DashboardContent = (
-    <div className='p-2 space-y-4'>
-      <div className='flex items-center gap-2 mb-2 pb-2 border-b border-slate-100'>
+    <div className='w-full max-w-[420px] py-1'>
+      <div className='flex items-center gap-2 mb-4 border-b border-slate-100 pb-2.5'>
         <TrendingUp size={16} className='text-blue-600' />
-        <span className='font-bold text-slate-700'>生產效率指標</span>
+        <span className='font-bold text-slate-800'>生產效率指標</span>
       </div>
       <div className='grid grid-cols-2 gap-3'>
         <StatCard
@@ -398,9 +399,9 @@ export default function App() {
           icon={ClipboardList}
         />
       </div>
-      <div className='bg-blue-50/50 p-3 rounded-xl text-[11px] text-blue-600 flex items-start gap-2'>
-        <Info size={14} className='mt-0.5 shrink-0' />
-        <span>當前系統負載穩定，平均達交率 96.4%。</span>
+      <div className='mt-4 bg-slate-50 p-2.5 rounded-lg text-[11px] text-slate-500 flex items-start gap-2'>
+        <Info size={14} className='mt-0.5 shrink-0 text-blue-500' />
+        <span>當前系統負載穩定，平均達交率 96.4%，所有機台運轉正常。</span>
       </div>
     </div>
   )
@@ -437,7 +438,7 @@ export default function App() {
       render: (p: PriorityType) => (
         <Tag
           color={p === '特急' ? 'error' : p === '急單' ? 'warning' : 'default'}
-          className='rounded-md border-0 font-bold px-2 m-0'
+          className='rounded-full border-0 font-bold px-3 m-0'
         >
           {p}
         </Tag>
@@ -535,8 +536,16 @@ export default function App() {
         <Dropdown
           menu={{
             items: [
-              { key: '1', label: '詳細日誌', icon: <FileText size={14} /> },
-              { key: '2', label: '編輯參數', icon: <Edit size={14} /> },
+              {
+                key: '1',
+                label: '詳細日誌',
+                icon: <FileText size={14} className='text-blue-500' />
+              },
+              {
+                key: '2',
+                label: '編輯參數',
+                icon: <Edit size={14} className='text-slate-500' />
+              },
               { key: '3', type: 'divider' },
               {
                 key: '4',
@@ -547,11 +556,13 @@ export default function App() {
             ]
           }}
           trigger={['click']}
+          placement='bottomRight'
         >
           <Button
             type='text'
             size='small'
-            icon={<MoreVertical size={16} className='text-slate-400' />}
+            icon={<MoreVertical size={18} />}
+            className='text-slate-400 flex items-center justify-center hover:bg-slate-100'
           />
         </Dropdown>
       )
@@ -561,7 +572,8 @@ export default function App() {
   const rowSelection: TableProps<WorkOrder>['rowSelection'] = {
     selectedRowKeys,
     onChange: setSelectedRowKeys,
-    columnWidth: 48
+    columnWidth: 48,
+    fixed: 'left'
   }
 
   return (
@@ -585,84 +597,115 @@ export default function App() {
         }
       }}
     >
-      <div className='w-full h-full bg-[#f8fafc] font-sans'>
-        {/* 整行懸浮工具列 (霧面玻璃效果) */}
-        <header className='sticky top-0 z-[100] w-full px-6 py-4 bg-white/70 backdrop-blur-xl border-b border-slate-200/50 flex items-center justify-between transition-all'>
-          <div className='flex items-center gap-3'>
-            <div className='bg-indigo-600 p-2.5 rounded-xl shadow-lg shadow-indigo-200 flex items-center justify-center text-white'>
-              <Activity size={20} />
+      <div className='w-full h-full bg-slate-50/50 p-4 font-sans'>
+        <div className='mx-auto px-2 pt-2 pb-8 space-y-4 animate-fade-in relative'>
+          {/* 全域 Loading 遮罩同步帶入 */}
+          {loading && (
+            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-[110] flex items-center justify-center rounded-2xl'>
+              <div className='flex flex-col items-center gap-3'>
+                <div className='w-10 h-10 border-4 border-blue-100 border-t-blue-500 rounded-full animate-spin' />
+                <span className='text-xs font-black text-blue-600 tracking-widest uppercase'>
+                  Syncing Work Orders...
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* 神級改版：玻璃透視頂部導航列 (Design Tokens) */}
+          <div className='flex flex-wrap items-center justify-between px-1 gap-y-4 bg-white/50 py-2 rounded-xl sticky top-0 z-20 backdrop-blur-sm'>
+            <div className='flex items-center gap-3'>
+              <div className='bg-blue-600 p-1.5 rounded-lg shadow-blue-200 shadow-lg'>
+                <Activity size={18} className='text-white' />
+              </div>
+              <div className='flex items-center'>
+                <Popover
+                  content={DashboardContent}
+                  trigger='click'
+                  placement='bottomLeft'
+                  rootClassName='custom-stats-popover'
+                >
+                  <div className='flex items-center gap-2 cursor-pointer hover:bg-white px-2 sm:px-3 py-1.5 rounded-full transition-all group border border-transparent hover:border-slate-100'>
+                    <span className='text-sm font-bold text-slate-600 group-hover:text-blue-600 whitespace-nowrap'>
+                      數據概覽
+                    </span>
+                    <div className='flex gap-1'>
+                      <Badge
+                        count={stats.processing}
+                        style={{
+                          backgroundColor: '#3b82f6',
+                          fontSize: '10px',
+                          boxShadow: 'none'
+                        }}
+                      />
+                      <Badge
+                        count={stats.delayed}
+                        style={{
+                          backgroundColor: '#f43f5e',
+                          fontSize: '10px',
+                          boxShadow: 'none'
+                        }}
+                      />
+                    </div>
+                    <ChevronDown
+                      size={14}
+                      className='text-slate-400 group-hover:text-blue-600'
+                    />
+                  </div>
+                </Popover>
+              </div>
             </div>
 
-            <Popover
-              content={DashboardContent}
-              trigger='click'
-              placement='bottomLeft'
-              overlayClassName='dashboard-popover'
-            >
-              <Button className='flex items-center gap-2 font-bold h-11 px-5 border-none bg-blue-600/5 text-blue-600 hover:bg-blue-600 hover:text-white rounded-2xl transition-all'>
-                數據概覽
-                <ChevronDown size={14} />
-                {stats.delayed > 0 && (
-                  <span className='flex h-2 w-2 ml-1'>
-                    <span className='animate-ping absolute inline-flex h-2 w-2 rounded-full bg-rose-400 opacity-75'></span>
-                    <span className='relative inline-flex rounded-full h-2 w-2 bg-rose-500'></span>
+            <div className='flex items-center gap-2'>
+              <Tooltip title='導出 Excel 報表'>
+                <Button
+                  icon={<Download size={16} />}
+                  className='rounded-xl font-medium h-10 flex items-center justify-center'
+                >
+                  <span className='hidden lg:inline ml-1 text-xs'>
+                    匯出報表
                   </span>
-                )}
-              </Button>
-            </Popover>
-
-            <div className='h-6 w-[1px] bg-slate-200 mx-2'></div>
-
-            <Tooltip title='導出 Excel'>
+                </Button>
+              </Tooltip>
               <Button
-                type='text'
-                className='text-slate-400 hover:text-slate-600'
-                icon={<Download size={20} />}
-              />
-            </Tooltip>
+                type='primary'
+                icon={<Plus size={16} />}
+                className='rounded-xl bg-blue-600 shadow-md shadow-blue-100 font-bold border-none h-10 flex items-center justify-center'
+              >
+                <span className='hidden sm:inline ml-1 text-xs'>建立工單</span>
+              </Button>
+            </div>
           </div>
 
-          <div className='flex items-center gap-3'>
-            <Button
-              type='primary'
-              icon={<Plus size={18} />}
-              className='h-11 px-6 rounded-2xl font-bold bg-blue-600 shadow-xl shadow-blue-200 border-none flex items-center gap-2 hover:scale-[1.02] active:scale-95 transition-all'
-            >
-              建立新工單
-            </Button>
-          </div>
-        </header>
-
-        <div className='p-4 lg:p-6'>
           <Card
-            className='max-w-[1400px] mx-auto shadow-xl shadow-slate-200/50 border-none rounded-[28px] overflow-hidden bg-white'
+            className='shadow-xl shadow-slate-200/50 border-none rounded-[28px] overflow-hidden bg-white'
             styles={{ body: { padding: 0 } }}
           >
             {/* 批量操作浮動條 (當有選取時) */}
             {selectedRowKeys.length > 0 && (
-              <div className='mx-6 mt-6 p-3 bg-slate-900 rounded-2xl flex items-center justify-between animate-in slide-in-from-top-4 duration-300'>
-                <div className='flex items-center gap-3 text-white px-2'>
-                  <Zap size={16} className='text-yellow-400 fill-yellow-400' />
-                  <span className='text-sm font-bold tracking-tight'>
+              <div className='mx-4 mt-4 bg-blue-50/50 border border-blue-100 p-3 rounded-xl flex items-center justify-between animate-in slide-in-from-top-2 duration-300'>
+                <div className='flex items-center gap-2 text-blue-700'>
+                  <Zap size={16} className='fill-blue-700' />
+                  <span className='text-sm font-bold text-blue-700'>
                     已選取 {selectedRowKeys.length} 筆生產任務
                   </span>
                 </div>
-                <div className='flex gap-2'>
+                <Space>
                   <Button
+                    type='primary'
                     size='small'
-                    className='rounded-xl border-none font-bold bg-white text-slate-900'
+                    className='rounded-lg font-bold text-xs bg-blue-600'
                   >
                     批量下發
                   </Button>
                   <Button
-                    size='small'
                     type='text'
+                    size='small'
                     onClick={() => setSelectedRowKeys([])}
-                    className='text-white/50 hover:text-white'
+                    className='text-slate-400 text-xs hover:text-slate-600'
                   >
-                    <X size={16} />
+                    取消
                   </Button>
-                </div>
+                </Space>
               </div>
             )}
 
@@ -671,10 +714,10 @@ export default function App() {
                 rowSelection={rowSelection}
                 columns={columns}
                 dataSource={mockData}
-                loading={loading}
+                loading={false} // Loading 改由上方的全域遮罩接管，避免雙層 Loading 視覺衝突
                 scroll={{ x: 1200 }}
                 pagination={{
-                  pageSize: 12,
+                  pageSize: 10,
                   showSizeChanger: true,
                   className: 'mt-4 !px-4 pb-2'
                 }}
@@ -682,6 +725,30 @@ export default function App() {
               />
             </div>
           </Card>
+
+          <style>{`
+            .aps-monitor-table .ant-table-thead > tr > th {
+              background: #f8fafc !important;
+              color: #64748b !important;
+              font-weight: 700 !important;
+              border-bottom: 1px solid #f1f5f9 !important;
+              white-space: nowrap;
+            }
+            .aps-monitor-table .ant-table-tbody > tr:hover > td {
+              background: #f1f7ff !important;
+            }
+            .custom-stats-popover .ant-popover-inner {
+              border-radius: 16px !important;
+              padding: 16px !important;
+              box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
+              border: 1px solid #e0e7ff;
+            }
+            .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+            @keyframes fadeIn {
+              from { opacity: 0; transform: translateY(10px); }
+              to { opacity: 1; transform: translateY(0); }
+            }
+          `}</style>
         </div>
       </div>
     </ConfigProvider>

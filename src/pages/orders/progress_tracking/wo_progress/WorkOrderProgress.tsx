@@ -184,14 +184,21 @@ const StatCard: React.FC<{
 }) => (
   <div
     className={cn(
-      'bg-white rounded-xl p-4 border border-slate-100 shadow-sm flex items-center justify-between transition-all hover:shadow-md',
-      isAlert && 'ring-1 ring-rose-100 bg-rose-50/10'
+      'bg-white rounded-xl p-3.5 border border-slate-100 shadow-sm flex items-center justify-between transition-all hover:shadow-md cursor-default min-w-[160px]',
+      isAlert && 'ring-1 ring-rose-100 bg-rose-50/30 border-transparent'
     )}
   >
     <div>
-      <p className='text-[12px] text-slate-500 mb-0.5 font-medium'>{title}</p>
-      <div className='flex items-baseline gap-1.5'>
-        <span className='text-xl font-bold text-slate-800 tracking-tight'>
+      <p className='text-slate-500 text-[11px] font-bold tracking-wide mb-0.5'>
+        {title}
+      </p>
+      <div className='flex items-baseline gap-1'>
+        <span
+          className={cn(
+            'text-xl font-black tracking-tight',
+            isAlert ? 'text-rose-600' : 'text-slate-800'
+          )}
+        >
           {value}
         </span>
         <span className='text-[10px] text-slate-400 font-medium'>{unit}</span>
@@ -202,7 +209,7 @@ const StatCard: React.FC<{
         </div>
       )}
     </div>
-    <div className={cn('p-2.5 rounded-lg', bgClass)}>
+    <div className={cn('p-2 rounded-lg', bgClass)}>
       <Icon size={18} className={iconColorClass} />
     </div>
   </div>
@@ -231,7 +238,7 @@ export default function App() {
 
   // --- Popover KPI ---
   const statsContent = (
-    <div className='w-full max-w-[500px] py-1'>
+    <div className='w-full max-w-[480px] py-1'>
       <div className='flex items-center gap-2 mb-4 border-b border-slate-100 pb-2.5'>
         <Activity size={16} className='text-indigo-600' />
         <span className='font-bold text-slate-800'>廠區製程即時指標</span>
@@ -262,7 +269,7 @@ export default function App() {
           unit='站'
           icon={AlertCircle}
           colorClass='text-rose-600'
-          bgClass='bg-rose-50'
+          bgClass='bg-rose-100/80'
           iconColorClass='text-rose-500'
           isAlert={true}
           trend='含設備與品質異常'
@@ -715,8 +722,16 @@ export default function App() {
         <Dropdown
           menu={{
             items: [
-              { key: '1', label: '工單詳情', icon: <FileText size={14} /> },
-              { key: '2', label: '報工紀錄', icon: <Activity size={14} /> }
+              {
+                key: '1',
+                label: '工單詳情',
+                icon: <FileText size={14} className='text-blue-500' />
+              },
+              {
+                key: '2',
+                label: '報工紀錄',
+                icon: <Activity size={14} className='text-slate-500' />
+              }
             ]
           }}
           trigger={['click']}
@@ -725,7 +740,8 @@ export default function App() {
           <Button
             type='text'
             size='small'
-            icon={<MoreVertical size={18} className='text-slate-400' />}
+            icon={<MoreVertical size={18} />}
+            className='text-slate-400 flex items-center justify-center hover:bg-slate-100'
           />
         </Dropdown>
       )
@@ -734,62 +750,110 @@ export default function App() {
 
   return (
     <ConfigProvider
-      theme={{ token: { colorPrimary: '#3b82f6', borderRadius: 12 } }}
+      theme={{
+        token: {
+          colorPrimary: '#3b82f6',
+          borderRadius: 12,
+          borderRadiusSM: 4
+        },
+        components: {
+          Table: {
+            headerBg: '#ffffff',
+            headerColor: '#94a3b8',
+            headerSplitColor: 'transparent',
+            rowHoverBg: '#f8fafc'
+          }
+        }
+      }}
     >
-      <div className='w-full h-full bg-[#f8fafc] font-sans pb-10'>
-        {/* Header Section */}
-        <header className='sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200 shadow-sm px-6 py-4'>
-          <div className='max-w-[1600px] mx-auto flex items-center justify-between'>
-            <div className='flex items-center gap-4'>
-              <div className='bg-indigo-600 p-2.5 rounded-xl shadow-lg shadow-indigo-200 flex items-center justify-center text-white'>
-                <GanttChart size={20} />
+      <div className='w-full h-full bg-slate-50/50 p-4 font-sans'>
+        <div className='mx-auto px-2 pt-2 pb-8 space-y-4 animate-fade-in relative'>
+          {/* 全域 Loading 遮罩同步帶入 */}
+          {loading && (
+            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-[110] flex items-center justify-center rounded-2xl'>
+              <div className='flex flex-col items-center gap-3'>
+                <div className='w-10 h-10 border-4 border-blue-100 border-t-blue-500 rounded-full animate-spin' />
+                <span className='text-xs font-black text-blue-600 tracking-widest uppercase'>
+                  Syncing Routing Data...
+                </span>
               </div>
-              <div>
+            </div>
+          )}
+
+          {/* 神級改版：玻璃透視頂部導航列 (Design Tokens) */}
+          <div className='flex flex-wrap items-center justify-between px-1 gap-y-4 bg-white/50 py-2 rounded-xl sticky top-0 z-20 backdrop-blur-sm'>
+            <div className='flex items-center gap-3'>
+              <div className='bg-blue-600 p-1.5 rounded-lg shadow-blue-200 shadow-lg'>
+                <GanttChart size={18} className='text-white' />
+              </div>
+              <div className='flex items-center'>
                 <Popover
                   content={statsContent}
                   trigger='click'
                   placement='bottomLeft'
                   rootClassName='custom-stats-popover'
                 >
-                  <Button className='flex items-center gap-2 font-bold h-11 px-5 border-none bg-blue-600/5 text-blue-600 hover:bg-blue-600 hover:text-white rounded-2xl transition-all'>
-                    數據概覽
-                    <ChevronDown size={14} />
-                    <span className='flex h-2 w-2 ml-1'>
-                      <span className='animate-ping absolute inline-flex h-2 w-2 rounded-full bg-rose-400 opacity-75'></span>
-                      <span className='relative inline-flex rounded-full h-2 w-2 bg-rose-500'></span>
+                  <div className='flex items-center gap-2 cursor-pointer hover:bg-white px-2 sm:px-3 py-1.5 rounded-full transition-all group border border-transparent hover:border-slate-100'>
+                    <span className='text-sm font-bold text-slate-600 group-hover:text-blue-600 whitespace-nowrap'>
+                      廠區數據概覽
                     </span>
-                  </Button>
+                    <div className='flex gap-1'>
+                      <Badge
+                        count={stats.processing}
+                        style={{
+                          backgroundColor: '#3b82f6',
+                          fontSize: '10px',
+                          boxShadow: 'none'
+                        }}
+                      />
+                      <Badge
+                        count={stats.errors}
+                        style={{
+                          backgroundColor: '#f43f5e',
+                          fontSize: '10px',
+                          boxShadow: 'none'
+                        }}
+                      />
+                    </div>
+                    <ChevronDown
+                      size={14}
+                      className='text-slate-400 group-hover:text-blue-600'
+                    />
+                  </div>
                 </Popover>
               </div>
             </div>
-            <div className='flex items-center gap-3'>
+
+            <div className='flex items-center gap-2'>
               <Tooltip title='同步報工數據'>
                 <Button
-                  variant='text'
-                  icon={<RefreshCw size={16} className='text-slate-400' />}
-                  className='rounded-xl h-10 w-10 flex items-center justify-center'
+                  type='text'
+                  icon={<RefreshCw size={16} />}
+                  className='text-slate-400 hover:bg-slate-100 rounded-xl font-medium h-10 w-10 flex items-center justify-center'
                 />
               </Tooltip>
-              <Button
-                icon={<Download size={16} />}
-                className='rounded-xl h-10 border-slate-200 font-black text-xs px-4'
-              >
-                匯出報表
-              </Button>
+              <Tooltip title='導出 Excel 報表'>
+                <Button
+                  icon={<Download size={16} />}
+                  className='rounded-xl font-medium h-10 flex items-center justify-center'
+                >
+                  <span className='hidden lg:inline ml-1 text-xs'>
+                    匯出報表
+                  </span>
+                </Button>
+              </Tooltip>
               <Button
                 type='primary'
                 icon={<Plus size={16} />}
-                className='rounded-xl bg-blue-600 shadow-md shadow-blue-100 font-black text-xs border-none h-10 px-6 text-white'
+                className='rounded-xl bg-blue-600 shadow-md shadow-blue-100 font-bold border-none h-10 flex items-center justify-center'
               >
-                新增工單
+                <span className='hidden sm:inline ml-1 text-xs'>新增工單</span>
               </Button>
             </div>
           </div>
-        </header>
 
-        <main className='max-w-[1600px] mx-auto p-6'>
           <Card
-            className='shadow-sm border-none rounded-[32px] overflow-hidden'
+            className='shadow-xl shadow-slate-200/50 border-none rounded-[32px] overflow-hidden bg-white'
             styles={{ body: { padding: 0 } }}
           >
             <div className='bg-slate-50/50 p-5 border-b border-slate-100 flex items-center justify-between'>
@@ -805,24 +869,56 @@ export default function App() {
               </div>
             </div>
 
-            <Table<WorkOrderProgressType>
-              columns={columns}
-              dataSource={data}
-              loading={loading}
-              expandable={{
-                expandedRowRender,
-                expandRowByClick: true,
-                columnWidth: 48
-              }}
-              scroll={{ x: 1300 }}
-              pagination={{
-                pageSize: 15,
-                showSizeChanger: true,
-                className: '!px-8 py-5 m-0 border-t border-slate-50'
-              }}
-            />
+            <div className='p-4 pt-0'>
+              <Table<WorkOrderProgressType>
+                columns={columns}
+                dataSource={data}
+                loading={false} // Loading 改由上方的全域遮罩接管
+                expandable={{
+                  expandedRowRender,
+                  expandRowByClick: true,
+                  columnWidth: 48
+                }}
+                scroll={{ x: 1300 }}
+                pagination={{
+                  pageSize: 10,
+                  showSizeChanger: true,
+                  className: 'mt-4 !px-4 pb-2'
+                }}
+                className='aps-monitor-table'
+              />
+            </div>
           </Card>
-        </main>
+
+          <style>{`
+            .aps-monitor-table .ant-table-thead > tr > th {
+              background: #ffffff !important;
+              color: #64748b !important;
+              font-weight: 700 !important;
+              border-bottom: 1px solid #f1f5f9 !important;
+              white-space: nowrap;
+              padding-top: 20px !important;
+            }
+            .aps-monitor-table .ant-table-tbody > tr:hover > td {
+              background: #f1f7ff !important;
+            }
+            .custom-stats-popover .ant-popover-inner {
+              border-radius: 16px !important;
+              padding: 16px !important;
+              box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
+              border: 1px solid #e0e7ff;
+            }
+            .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+            @keyframes fadeIn {
+              from { opacity: 0; transform: translateY(10px); }
+              to { opacity: 1; transform: translateY(0); }
+            }
+            /* 隱藏展開行的 hover 背景色以保持甘特圖乾淨 */
+            .aps-monitor-table .ant-table-expanded-row:hover > td {
+              background: #f8fafc !important;
+            }
+          `}</style>
+        </div>
       </div>
     </ConfigProvider>
   )
