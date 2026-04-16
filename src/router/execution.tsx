@@ -4,7 +4,14 @@ import type { MenuItem } from './constants.tsx'
 import {
   Execution,
   Operations,
+  Reporting,
+  Changeover,
+  QualityCheck,
   Monitoring,
+  MachineStatus,
+  WorkOrderProgress,
+  WIPFlow,
+  MaterialReadiness,
   Exception
 } from './execution.lazy.ts'
 
@@ -19,9 +26,9 @@ export const executionMenuItem: MenuItem = {
       label: '現場作業執法', // 這是資料輸入端 (Input)
       element: <Operations />,
       children: [
-        { id: 'reporting', label: '生產報工' },
-        { id: 'changeover', label: '換線作業' },
-        { id: 'quality_check', label: '首末檢/巡檢' } // 新增：確保閉環管理
+        { id: 'reporting', label: '生產報工', element: <Reporting /> },
+        { id: 'changeover', label: '換線作業', element: <Changeover /> },
+        { id: 'quality_check', label: '首末檢/巡檢', element: <QualityCheck /> }
       ]
     },
     {
@@ -29,10 +36,14 @@ export const executionMenuItem: MenuItem = {
       label: '現場即時監控', // 這是資料輸出端 (Output)
       element: <Monitoring />,
       children: [
-        { id: 'm_status', label: '設備運行狀態' },
-        { id: 'w_prog', label: '工單達成進度' },
-        { id: 'wip_flow', label: '在製品(WIP)追蹤' },
-        { id: 'material_readiness', label: '齊料即時分析' } // 將物料整合至此
+        { id: 'm_status', label: '設備運行狀態', element: <MachineStatus /> },
+        { id: 'w_prog', label: '工單達成進度', element: <WorkOrderProgress /> },
+        { id: 'wip_flow', label: '在製品(WIP)追蹤', element: <WIPFlow /> },
+        {
+          id: 'material_readiness',
+          label: '齊料即時分析',
+          element: <MaterialReadiness />
+        }
       ]
     },
     {
