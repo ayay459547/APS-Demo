@@ -891,17 +891,6 @@ export default function App() {
           </Card>
 
           <style>{`
-            .aps-monitor-table .ant-table-thead > tr > th {
-              background: #ffffff !important;
-              color: #64748b !important;
-              font-weight: 700 !important;
-              border-bottom: 1px solid #f1f5f9 !important;
-              white-space: nowrap;
-              padding-top: 20px !important;
-            }
-            .aps-monitor-table .ant-table-tbody > tr:hover > td {
-              background: #f1f7ff !important;
-            }
             .custom-stats-popover .ant-popover-inner {
               border-radius: 16px !important;
               padding: 16px !important;

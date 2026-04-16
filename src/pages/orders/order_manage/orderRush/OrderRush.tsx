@@ -273,7 +273,7 @@ export default function App() {
       title: '優先級',
       dataIndex: 'priority',
       key: 'priority',
-      width: 110,
+      width: 130,
       filters: [
         { text: '特急 (Urgent)', value: 'Urgent' },
         { text: '高 (High)', value: 'High' },
@@ -592,15 +592,6 @@ export default function App() {
         </Modal>
 
         <style>{`
-          .order-rush-table .ant-table-thead > tr > th {
-            background: #fdfaf6 !important;
-            color: #92400e !important;
-            font-weight: 700 !important;
-            border-bottom: 1px solid #fef3c7 !important;
-          }
-          .order-rush-table .ant-table-tbody > tr:hover > td {
-            background: #fffbeb !important;
-          }
           .custom-stats-popover .ant-popover-inner {
             border-radius: 16px !important;
             padding: 16px !important;

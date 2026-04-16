@@ -520,11 +520,6 @@ export default function WorkOrderList() {
         </Card>
 
         <style>{`
-          .work-order-table .ant-table-thead > tr > th {
-            background: #f8faff !important;
-            color: #475569 !important;
-            font-weight: 700 !important;
-          }
           .custom-stats-popover .ant-popover-inner {
             border-radius: 16px !important;
             padding: 16px !important;
