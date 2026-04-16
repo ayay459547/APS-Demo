@@ -1,0 +1,10 @@
+import{t as e}from"./jsx-runtime-BcpeqNXf.js";import{f as t}from"./constants-ByrEdGfR.js";import{t as n}from"./space-CrWVrQTo.js";import{t as r}from"./sparkles-Wctxe6_T.js";import i from"./OrderManage-DStxInpO.js";import a from"./WorkOrderManage-Cq_RrP4F.js";import o from"./ProgressTracking-Cq_GkNQW.js";var s=e(),{Title:c,Paragraph:l}=t;function u(){return(0,s.jsxs)(`div`,{className:`min-h-screen bg-[#f8fafc] animate-fade-in custom-scrollbar overflow-y-auto pb-20`,children:[(0,s.jsx)(`header`,{className:`p-8 lg:px-12 mx-auto`,children:(0,s.jsxs)(n,{orientation:`vertical`,size:4,children:[(0,s.jsxs)(`div`,{className:`flex items-center gap-2 bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full w-fit mb-4 border border-indigo-100`,children:[(0,s.jsx)(r,{size:14,className:`fill-indigo-600`}),(0,s.jsx)(`span`,{className:`text-[10px] font-black uppercase tracking-[0.2em]`,children:`APS Core Engine`})]}),(0,s.jsxs)(c,{className:`m-0 font-black text-slate-900 tracking-tighter text-4xl lg:text-5xl`,children:[`訂單與工單管理核心 `,(0,s.jsx)(`span`,{className:`text-indigo-600`,children:`.`})]}),(0,s.jsx)(l,{className:`text-slate-400 text-base max-w-2xl mt-4 font-medium leading-relaxed`,children:`整合全球訂單流入、工單拆解與實時生產追蹤。透過智慧演算法進行插單衝擊分析與工單合併優化，確保交期達成率與機台稼動率的最大化。`})]})}),(0,s.jsx)(i,{}),(0,s.jsx)(a,{}),(0,s.jsx)(o,{}),(0,s.jsx)(`style`,{children:`
+        .animate-fade-in { animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+
+        /* 針對不同色塊的微調 */
+        .ant-typography-h3 { margin-bottom: 0 !important; }
+      `})]})}export{u as default};
