@@ -45,3 +45,14 @@ export const MaterialReadiness = lazy(
 export const Exception = lazy(
   () => import('@/pages/execution/exception/Exception.tsx')
 )
+
+export const Delayed = lazy(
+  () => import('@/pages/execution/exception/delayed/Delayed.tsx')
+)
+export const Breakdown = lazy(
+  () => import('@/pages/execution/exception/breakdown/Breakdown.tsx')
+)
+export const MaterialShortage = lazy(
+  () =>
+    import('@/pages/execution/exception/material_shortage/MaterialShortage.tsx')
+)

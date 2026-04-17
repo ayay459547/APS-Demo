@@ -12,7 +12,10 @@ import {
   WorkOrderProgress,
   WIPFlow,
   MaterialReadiness,
-  Exception
+  Exception,
+  Delayed,
+  Breakdown,
+  MaterialShortage
 } from './execution.lazy.ts'
 
 export const executionMenuItem: MenuItem = {
@@ -51,9 +54,13 @@ export const executionMenuItem: MenuItem = {
       label: '異常調度中心', // 這是決策端 (Action)
       element: <Exception />,
       children: [
-        { id: 'delayed', label: '延誤預警中心' },
-        { id: 'breakdown', label: '設備故障報修' },
-        { id: 'material_shortage', label: '缺料中斷告警' }
+        { id: 'delayed', label: '延誤預警中心', element: <Delayed /> },
+        { id: 'breakdown', label: '設備故障報修', element: <Breakdown /> },
+        {
+          id: 'material_shortage',
+          label: '缺料中斷警告',
+          element: <MaterialShortage />
+        }
       ]
     }
   ]
