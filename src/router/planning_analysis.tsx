@@ -9,7 +9,9 @@ import {
   Analysis,
   MachineBottleneck,
   MaterialBottleneck,
-  Simulation
+  Simulation,
+  WhatIf,
+  Compare
 } from './planning_analysis.lazy.ts'
 
 export const planningAnalysisMenuItem: MenuItem = {
@@ -49,8 +51,8 @@ export const planningAnalysisMenuItem: MenuItem = {
       label: '模擬實驗室',
       element: <Simulation />,
       children: [
-        { id: 'whatif', label: '情境模擬' },
-        { id: 'compare', label: '方案優劣對比' }
+        { id: 'whatif', label: '情境模擬', element: <WhatIf /> },
+        { id: 'compare', label: '方案優劣對比', element: <Compare /> }
       ]
     }
   ]

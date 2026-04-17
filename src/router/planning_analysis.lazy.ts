@@ -34,3 +34,10 @@ export const MaterialBottleneck = lazy(
 export const Simulation = lazy(
   () => import('@/pages/planning_analysis/simulation/Simulation.tsx')
 )
+
+export const WhatIf = lazy(
+  () => import('@/pages/planning_analysis/simulation/whatif/WhatIf.tsx')
+)
+export const Compare = lazy(
+  () => import('@/pages/planning_analysis/simulation/compare/Compare.tsx')
+)
