@@ -580,15 +580,15 @@ export default function RoleManager() {
                   <div>
                     {perm.level === 'read-write' ? (
                       <Tag className='m-0 border-emerald-200 bg-emerald-50 text-emerald-600 font-bold flex items-center w-fit gap-1 text-[10px]'>
-                        <Edit3 size={10} /> 讀寫授權
+                        <Edit3 size={10} className='inline' /> 讀寫授權
                       </Tag>
                     ) : perm.level === 'read-only' ? (
                       <Tag className='m-0 border-blue-200 bg-blue-50 text-blue-600 font-bold flex items-center w-fit gap-1 text-[10px]'>
-                        <Eye size={10} /> 僅供檢視
+                        <Eye size={10} className='inline' /> 僅供檢視
                       </Tag>
                     ) : (
                       <Tag className='m-0 border-slate-200 bg-slate-100 text-slate-400 font-bold flex items-center w-fit gap-1 text-[10px]'>
-                        <Ban size={10} /> 無存取權
+                        <Ban size={10} className='inline' /> 無存取權
                       </Tag>
                     )}
                   </div>

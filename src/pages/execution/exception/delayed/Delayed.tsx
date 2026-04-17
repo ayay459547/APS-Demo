@@ -452,7 +452,7 @@ export default function DelayWarningCenter() {
                 meta.color
               )}
             >
-              <ReasonIcon size={12} /> {record.reason}
+              <ReasonIcon size={12} className='inline' /> {record.reason}
             </Tag>
             <span className='text-[10px] font-mono text-slate-500 pl-1'>
               @ {record.affectedStage}
@@ -760,7 +760,7 @@ export default function DelayWarningCenter() {
               className='rounded-2xl border-rose-200 bg-rose-50 mb-6'
             />
 
-            <h4 className='text-sm font-black text-slate-700 mb-3 flex items-center gap-2'>
+            <h4 className='text-sm font-black text-slate-700 my-4 flex items-center gap-2'>
               <Bot size={16} className='text-indigo-500' />
               系統運算建議方案 (Select a Solution)
             </h4>
