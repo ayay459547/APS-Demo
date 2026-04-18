@@ -406,7 +406,7 @@ export default function QualityInspection() {
 
   // --- Popover KPI 內容 ---
   const statsContent = (
-    <div className='w-full max-w-[480px] py-1'>
+    <div className='w-full max-w-120 py-1'>
       <div className='flex items-center gap-2 mb-4 border-b border-slate-100 pb-2.5'>
         <Microscope size={16} className='text-indigo-600' />
         <span className='font-bold text-slate-800'>
@@ -688,9 +688,9 @@ export default function QualityInspection() {
       }}
     >
       <div className='w-full min-h-screen bg-[#f8fafc] p-4 font-sans'>
-        <div className='mx-auto px-2 pt-2 pb-8 space-y-6 animate-fade-in relative max-w-[1600px]'>
+        <div className='mx-auto px-2 pt-2 pb-8 space-y-6 animate-fade-in relative max-w-400'>
           {loading && (
-            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-[110] flex items-center justify-center rounded-[28px] mt-[60px]'>
+            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-[28px] mt-[60px]'>
               <div className='flex flex-col items-center gap-3'>
                 <div className='w-10 h-10 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin' />
                 <span className='text-xs font-black text-indigo-600 tracking-widest uppercase'>
@@ -1338,7 +1338,7 @@ export default function QualityInspection() {
               background: transparent;
               margin-bottom: 0;
             }
-            
+
             /* 客製化 Radio Group 樣式 (HMI Checklist) */
             .custom-hmi-radio .ant-radio-button-wrapper {
               border-radius: 8px;
@@ -1367,12 +1367,12 @@ export default function QualityInspection() {
               display: none;
             }
             .custom-hmi-radio-large .ant-radio-button-wrapper-checked:first-child {
-              background-color: #10b981 !important; 
+              background-color: #10b981 !important;
               border-color: #10b981 !important;
               color: white !important;
             }
             .custom-hmi-radio-large .ant-radio-button-wrapper-checked:last-child {
-              background-color: #f43f5e !important; 
+              background-color: #f43f5e !important;
               border-color: #f43f5e !important;
               color: white !important;
             }

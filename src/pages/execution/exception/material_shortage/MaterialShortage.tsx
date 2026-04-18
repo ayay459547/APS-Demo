@@ -616,9 +616,9 @@ export default function App() {
       }}
     >
       <div className='w-full min-h-screen bg-[#f8fafc] p-4 font-sans'>
-        <div className='mx-auto px-2 pt-2 pb-8 space-y-6 animate-fade-in relative max-w-[1600px]'>
+        <div className='mx-auto px-2 pt-2 pb-8 space-y-6 animate-fade-in relative max-w-400'>
           {loading && (
-            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-[110] flex items-center justify-center rounded-[28px] mt-[60px]'>
+            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-[28px] mt-[60px]'>
               <div className='flex flex-col items-center gap-3'>
                 <div className='w-10 h-10 border-4 border-fuchsia-100 border-t-fuchsia-600 rounded-full animate-spin' />
                 <span className='text-xs font-black text-fuchsia-600 tracking-widest uppercase'>
@@ -631,7 +631,7 @@ export default function App() {
           {/* 玻璃透視頂部導航列 */}
           <div className='flex flex-wrap items-center justify-between px-1 gap-y-4 bg-white/50 py-2.5 rounded-2xl sticky top-0 z-20 backdrop-blur-md shadow-sm border border-white'>
             <div className='flex items-center gap-3 ml-2'>
-              <div className='bg-gradient-to-br from-fuchsia-500 to-purple-600 p-2 rounded-xl shadow-fuchsia-200 shadow-lg'>
+              <div className='bg-linear-to-br from-fuchsia-500 to-purple-600 p-2 rounded-xl shadow-fuchsia-200 shadow-lg'>
                 <PackageX size={20} className='text-white' />
               </div>
               <div className='flex items-center'>
@@ -752,7 +752,7 @@ export default function App() {
           )}
 
           <Card
-            className='shadow-xl shadow-slate-200/50 border-none rounded-[24px] overflow-hidden bg-white mt-4'
+            className='shadow-xl shadow-slate-200/50 border-none rounded-3xl overflow-hidden bg-white mt-4'
             styles={{ body: { padding: 0 } }}
           >
             <div className='bg-slate-50/50 p-5 border-b border-slate-100 flex items-center justify-between'>
@@ -767,7 +767,7 @@ export default function App() {
                 columns={columns}
                 dataSource={shortages}
                 loading={false}
-                scroll={{ x: 1050 }}
+                scroll={{ x: 1000 }}
                 rowKey='id'
                 pagination={{
                   pageSize: 10,

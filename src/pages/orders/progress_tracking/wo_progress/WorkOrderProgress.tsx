@@ -238,7 +238,7 @@ export default function App() {
 
   // --- Popover KPI ---
   const statsContent = (
-    <div className='w-full max-w-[480px] py-1'>
+    <div className='w-full max-w-120 py-1'>
       <div className='flex items-center gap-2 mb-4 border-b border-slate-100 pb-2.5'>
         <Activity size={16} className='text-indigo-600' />
         <span className='font-bold text-slate-800'>廠區製程即時指標</span>
@@ -770,7 +770,7 @@ export default function App() {
         <div className='mx-auto px-2 pt-2 pb-8 space-y-4 animate-fade-in relative'>
           {/* 全域 Loading 遮罩同步帶入 */}
           {loading && (
-            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-[110] flex items-center justify-center rounded-2xl'>
+            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-2xl'>
               <div className='flex flex-col items-center gap-3'>
                 <div className='w-10 h-10 border-4 border-blue-100 border-t-blue-500 rounded-full animate-spin' />
                 <span className='text-xs font-black text-blue-600 tracking-widest uppercase'>

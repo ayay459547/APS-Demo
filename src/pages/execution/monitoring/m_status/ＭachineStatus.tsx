@@ -346,7 +346,7 @@ export default function DelayWarningCenter() {
 
   // --- Popover KPI 內容 ---
   const statsContent = (
-    <div className='w-full max-w-[480px] py-1'>
+    <div className='w-full max-w-120 py-1'>
       <div className='flex items-center gap-2 mb-4 border-b border-slate-100 pb-2.5'>
         <BellRing size={16} className='text-rose-600' />
         <span className='font-bold text-slate-800'>全廠延誤預警監控</span>
@@ -470,7 +470,7 @@ export default function DelayWarningCenter() {
             </span>
           </div>
           <span
-            className='text-[11px] text-slate-500 truncate max-w-[150px]'
+            className='text-[11px] text-slate-500 truncate max-w-37.5'
             title={record.productName}
           >
             {record.productName}
@@ -613,9 +613,9 @@ export default function DelayWarningCenter() {
       }}
     >
       <div className='w-full min-h-screen bg-[#f8fafc] p-4 font-sans'>
-        <div className='mx-auto px-2 pt-2 pb-8 space-y-6 animate-fade-in relative max-w-[1600px]'>
+        <div className='mx-auto px-2 pt-2 pb-8 space-y-6 animate-fade-in relative max-w-400'>
           {loading && (
-            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-[110] flex items-center justify-center rounded-[28px] mt-[60px]'>
+            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-[28px] mt-[60px]'>
               <div className='flex flex-col items-center gap-3'>
                 <div className='w-10 h-10 border-4 border-rose-100 border-t-rose-600 rounded-full animate-spin' />
                 <span className='text-xs font-black text-rose-600 tracking-widest uppercase'>
@@ -628,7 +628,7 @@ export default function DelayWarningCenter() {
           {/* 玻璃透視頂部導航列 */}
           <div className='flex flex-wrap items-center justify-between px-1 gap-y-4 bg-white/50 py-2 rounded-xl sticky top-0 z-20 backdrop-blur-sm'>
             <div className='flex items-center gap-3'>
-              <div className='bg-gradient-to-br from-rose-500 to-orange-500 p-1.5 rounded-lg shadow-rose-200 shadow-lg'>
+              <div className='bg-linear-to-br from-rose-500 to-orange-500 p-1.5 rounded-lg shadow-rose-200 shadow-lg'>
                 <BellRing size={18} className='text-white' />
               </div>
               <div className='flex items-center'>
@@ -720,7 +720,7 @@ export default function DelayWarningCenter() {
                 columns={columns}
                 dataSource={warnings}
                 loading={false}
-                scroll={{ x: 1200 }}
+                scroll={{ x: 1000 }}
                 rowKey='id'
                 pagination={{
                   pageSize: 10,

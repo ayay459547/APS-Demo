@@ -647,7 +647,7 @@ export default function App() {
           {/* 玻璃透視頂部導航列 (Sticky Floating Header) */}
           <div className='flex flex-wrap items-center justify-between gap-y-4 bg-white/70 py-3 px-5 rounded-2xl sticky top-0 z-50 backdrop-blur-md shadow-sm border border-white mb-6 transition-all'>
             <div className='flex items-center gap-4'>
-              <div className='bg-gradient-to-br from-indigo-500 to-cyan-500 p-2.5 rounded-xl shadow-lg shadow-indigo-200/50 text-white shrink-0 hidden sm:block'>
+              <div className='bg-linear-to-br from-indigo-500 to-cyan-500 p-2.5 rounded-xl shadow-lg shadow-indigo-200/50 text-white shrink-0 hidden sm:block'>
                 <GitCompare size={24} />
               </div>
               <div className='flex flex-col'>
@@ -675,7 +675,7 @@ export default function App() {
           <div className='grid grid-cols-1 lg:grid-cols-12 gap-6'>
             {/* 左側：情境劇本列表區 (不懸浮，正常滾動) */}
             <div className='lg:col-span-4 flex flex-col gap-4'>
-              <div className='bg-white rounded-[24px] p-5 border border-slate-200/80 shadow-sm flex flex-col gap-3 h-[800px] overflow-y-auto custom-scrollbar'>
+              <div className='bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm flex flex-col gap-3 h-[800px] overflow-y-auto custom-scrollbar'>
                 <h3 className='font-black text-sm text-slate-700 uppercase tracking-widest border-b border-slate-100 pb-3 m-0 sticky top-0 bg-white z-10 flex items-center justify-between'>
                   <span className='flex items-center gap-2'>
                     <FileText size={16} className='text-indigo-400' />{' '}
@@ -782,7 +782,7 @@ export default function App() {
               {activeScenario ? (
                 <>
                   {/* 面板 1：動態變數配置台 */}
-                  <div className='bg-white rounded-[24px] border border-slate-200/80 shadow-sm overflow-hidden relative'>
+                  <div className='bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden relative'>
                     <div className='h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 w-full' />
 
                     <div className='p-6 sm:p-8'>
@@ -962,7 +962,7 @@ export default function App() {
 
                   {/* 面板 2：動態運算與分析結果 */}
                   {activeScenario.status === '模擬運算中' ? (
-                    <div className='bg-white/60 rounded-[24px] border border-slate-200/60 shadow-sm p-16 flex flex-col items-center justify-center min-h-[350px] backdrop-blur-sm'>
+                    <div className='bg-white/60 rounded-3xl border border-slate-200/60 shadow-sm p-16 flex flex-col items-center justify-center min-h-[350px] backdrop-blur-sm'>
                       <div className='relative mb-6'>
                         <div className='w-20 h-20 border-[5px] border-indigo-100 border-t-indigo-600 rounded-full animate-spin'></div>
                         <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow-sm'>
@@ -1004,7 +1004,7 @@ export default function App() {
 
                       {/* 影響清單 Table */}
                       <Card
-                        className='shadow-sm border border-slate-200/80 rounded-[24px] overflow-hidden bg-white'
+                        className='shadow-sm border border-slate-200/80 rounded-3xl overflow-hidden bg-white'
                         styles={{ body: { padding: 0 } }}
                       >
                         <div className='bg-gradient-to-r from-rose-50 to-white p-5 border-b border-rose-100/50 flex items-center justify-between'>
@@ -1037,7 +1037,7 @@ export default function App() {
                       </Card>
                     </div>
                   ) : (
-                    <div className='bg-slate-50/50 rounded-[24px] border border-dashed border-slate-300 p-12 flex flex-col items-center justify-center min-h-[350px] text-slate-400'>
+                    <div className='bg-slate-50/50 rounded-3xl border border-dashed border-slate-300 p-12 flex flex-col items-center justify-center min-h-[350px] text-slate-400'>
                       <div className='bg-white p-4 rounded-full shadow-sm mb-4'>
                         <FlaskConical size={40} className='text-slate-300' />
                       </div>
@@ -1051,7 +1051,7 @@ export default function App() {
                   )}
                 </>
               ) : (
-                <div className='bg-white rounded-[24px] border border-slate-200 shadow-sm p-12 flex flex-col items-center justify-center min-h-[500px] text-slate-400'>
+                <div className='bg-white rounded-3xl border border-slate-200 shadow-sm p-12 flex flex-col items-center justify-center min-h-[500px] text-slate-400'>
                   <span className='font-bold'>
                     請由左側選擇或建立一個情境劇本
                   </span>

@@ -205,7 +205,7 @@ const VisualOrderRush: React.FC = () => {
     <div className='flex h-full w-full bg-[#f8fafc] overflow-hidden animate-fade-in relative'>
       {/* 全螢幕 Loading 遮罩 */}
       {isSimulating && (
-        <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-[110] flex items-center justify-center animate-in fade-in duration-300'>
+        <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center animate-in fade-in duration-300'>
           <div className='flex flex-col items-center gap-3'>
             <div className='w-10 h-10 border-4 border-amber-100 border-t-amber-500 rounded-full animate-spin' />
             <span className='text-xs font-black text-amber-600 tracking-widest uppercase'>
@@ -286,7 +286,7 @@ const VisualOrderRush: React.FC = () => {
           <div className='max-w-[1400px] mx-auto !space-y-6'>
             {viewMode === 'calendar' ? (
               <Card
-                className='!rounded-[24px] border-none shadow-sm overflow-hidden p-0 bg-white'
+                className='!rounded-3xl border-none shadow-sm overflow-hidden p-0 bg-white'
                 styles={{ body: { padding: '8px' } }}
               >
                 <Calendar
@@ -527,7 +527,7 @@ const ProductionCard: React.FC<{
 }> = ({ order, onRush, loading }) => (
   <Card
     className={cn(
-      'rounded-[24px] transition-all duration-500 border-none shadow-sm hover:shadow-xl group relative overflow-hidden bg-white',
+      'rounded-3xl transition-all duration-500 border-none shadow-sm hover:shadow-xl group relative overflow-hidden bg-white',
       order.isRush && 'ring-2 ring-amber-500 ring-offset-2'
     )}
     styles={{ body: { padding: '24px' } }}

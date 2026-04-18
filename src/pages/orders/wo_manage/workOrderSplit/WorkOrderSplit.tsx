@@ -278,7 +278,7 @@ const WorkOrderSplit: React.FC = () => {
     <div className='flex h-full min-h-[600px] w-full bg-[#f8fafc] overflow-hidden animate-fade-in relative font-sans'>
       {/* 全畫面 Loading 遮罩 */}
       {loading && (
-        <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-[110] flex items-center justify-center animate-in fade-in duration-300'>
+        <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center animate-in fade-in duration-300'>
           <div className='flex flex-col items-center gap-3'>
             <div className='w-12 h-12 border-4 border-violet-100 border-t-violet-500 rounded-full animate-spin' />
             <span className='text-xs font-black text-violet-600 tracking-widest uppercase'>
@@ -635,7 +635,7 @@ const WorkOrderSplit: React.FC = () => {
                       className='animate-in fade-in slide-in-from-bottom-4 duration-300'
                     >
                       <Card
-                        className='rounded-[24px] border-none shadow-sm hover:shadow-md transition-shadow bg-white border-l-[6px] border-l-violet-500 overflow-hidden'
+                        className='rounded-3xl border-none shadow-sm hover:shadow-md transition-shadow bg-white border-l-[6px] border-l-violet-500 overflow-hidden'
                         styles={{ body: { padding: '20px 24px' } }}
                       >
                         {/* 頁首：Index, Title 與 垃圾桶 */}

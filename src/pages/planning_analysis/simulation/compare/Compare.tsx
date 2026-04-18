@@ -475,9 +475,9 @@ export default function ScenarioComparison() {
       <div className='w-full h-full bg-[#f8fafc] font-sans text-slate-800 overflow-x-hidden'>
         <div className='mx-auto px-4 pt-4 pb-12  animate-fade-in relative'>
           {/* 玻璃透視頂部導航列 (Sticky Floating Header) */}
-          <div className='flex flex-wrap items-center justify-between gap-y-4 bg-white/70 py-4 px-6 rounded-[24px] sticky top-0 z-50 backdrop-blur-xl shadow-lg shadow-slate-200/50 border border-white/80 mb-8 transition-all'>
+          <div className='flex flex-wrap items-center justify-between gap-y-4 bg-white/70 py-4 px-6 rounded-3xl sticky top-0 z-50 backdrop-blur-xl shadow-lg shadow-slate-200/50 border border-white/80 mb-8 transition-all'>
             <div className='flex items-center gap-4'>
-              <div className='bg-gradient-to-br from-blue-500 to-indigo-600 p-3 rounded-2xl shadow-lg shadow-blue-200/50 text-white shrink-0 hidden sm:block'>
+              <div className='bg-linear-to-br from-blue-500 to-indigo-600 p-3 rounded-2xl shadow-lg shadow-blue-200/50 text-white shrink-0 hidden sm:block'>
                 <Scale size={28} />
               </div>
               <div className='flex flex-col'>
@@ -515,7 +515,7 @@ export default function ScenarioComparison() {
           </div>
 
           {/* AI 智能建議橫幅 (Smart Recommendation Banner) */}
-          <div className='bg-gradient-to-r from-indigo-500 via-purple-500 to-fuchsia-500 rounded-[24px] p-[2px] shadow-xl shadow-indigo-200/50 mb-8 relative overflow-hidden group'>
+          <div className='bg-gradient-to-r from-indigo-500 via-purple-500 to-fuchsia-500 rounded-3xl p-[2px] shadow-xl shadow-indigo-200/50 mb-8 relative overflow-hidden group'>
             <div className='absolute inset-0 bg-white/10 blur-xl group-hover:bg-white/20 transition-all duration-700' />
             <div className='bg-white/95 backdrop-blur-xl rounded-[22px] p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10'>
               <div className='flex items-center gap-4'>

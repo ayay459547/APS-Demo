@@ -447,7 +447,7 @@ export default function MaterialBottleneck() {
                           className='border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors'
                         >
                           <td className='py-3 px-4'>
-                            <div className='font-bold text-slate-700 truncate max-w-[150px]'>
+                            <div className='font-bold text-slate-700 truncate max-w-37.5'>
                               {m.name}
                             </div>
                             <div className='text-[10px] text-slate-400 font-mono'>

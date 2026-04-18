@@ -434,7 +434,7 @@ export default function ProductionReporting() {
 
   // --- Popover KPI 內容 ---
   const statsContent = (
-    <div className='w-full max-w-[480px] py-1'>
+    <div className='w-full max-w-120 py-1'>
       <div className='flex items-center gap-2 mb-4 border-b border-slate-100 pb-2.5'>
         <Factory size={16} className='text-blue-600' />
         <span className='font-bold text-slate-800'>
@@ -789,9 +789,9 @@ export default function ProductionReporting() {
       }}
     >
       <div className='w-full min-h-screen bg-[#f8fafc] p-4 font-sans'>
-        <div className='mx-auto px-2 pt-2 pb-8 space-y-6 animate-fade-in relative max-w-[1600px]'>
+        <div className='mx-auto px-2 pt-2 pb-8 space-y-6 animate-fade-in relative max-w-400'>
           {loading && (
-            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-[110] flex items-center justify-center rounded-[28px] mt-[60px]'>
+            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-[28px] mt-[60px]'>
               <div className='flex flex-col items-center gap-3'>
                 <div className='w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin' />
                 <span className='text-xs font-black text-blue-600 tracking-widest uppercase'>

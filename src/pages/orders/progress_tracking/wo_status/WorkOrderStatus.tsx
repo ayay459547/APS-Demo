@@ -601,7 +601,7 @@ export default function WorkOrderStatus() {
         <div className='mx-auto px-2 pt-2 pb-8 space-y-4 animate-fade-in relative'>
           {/* 全域 Loading 遮罩同步帶入 */}
           {loading && (
-            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-[110] flex items-center justify-center rounded-2xl'>
+            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-2xl'>
               <div className='flex flex-col items-center gap-3'>
                 <div className='w-10 h-10 border-4 border-blue-100 border-t-blue-500 rounded-full animate-spin' />
                 <span className='text-xs font-black text-blue-600 tracking-widest uppercase'>

@@ -592,7 +592,7 @@ const WorkOrderMerge: React.FC = () => {
                         </p>
                       </div>
 
-                      <div className='bg-white/5 p-6 rounded-[24px] border border-white/10 space-y-6 shadow-inner'>
+                      <div className='bg-white/5 p-6 rounded-3xl border border-white/10 space-y-6 shadow-inner'>
                         <div className='flex justify-between items-end'>
                           <div className='text-left'>
                             <div className='text-[10px] text-slate-500 font-black uppercase tracking-widest mb-2'>

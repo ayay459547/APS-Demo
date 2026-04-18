@@ -29,7 +29,7 @@ const LineVisionCard: React.FC<{ data: LineData }> = ({ data }) => {
   return (
     <Card
       className={cn(
-        'h-full transition-all duration-500 shadow-sm !rounded-[24px] !border-l-[16px] overflow-hidden relative',
+        'h-full transition-all duration-500 shadow-sm !rounded-3xl !border-l-[16px] overflow-hidden relative',
         data.status === 'ALARM' && 'border-y-rose-200 border-r-rose-200',
         cfg.border
       )}

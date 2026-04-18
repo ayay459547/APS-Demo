@@ -589,9 +589,9 @@ export default function DataAnalyticsDashboard() {
       }}
     >
       <div className='w-full min-h-screen bg-[#f1f5f9] p-4 font-sans'>
-        <div className='mx-auto px-2 pt-2 pb-8 space-y-6 animate-fade-in relative max-w-[1600px]'>
+        <div className='mx-auto px-2 pt-2 pb-8 space-y-6 animate-fade-in relative max-w-400'>
           {loading && (
-            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-[110] flex items-center justify-center rounded-[28px] mt-[60px]'>
+            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-[28px] mt-[60px]'>
               <div className='flex flex-col items-center gap-3'>
                 <div className='w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin' />
                 <span className='text-xs font-black text-indigo-600 tracking-widest uppercase'>
@@ -604,7 +604,7 @@ export default function DataAnalyticsDashboard() {
           {/* 玻璃透視頂部導航列 */}
           <div className='flex flex-wrap items-center justify-between px-1 gap-y-4 bg-white/70 py-2.5 rounded-2xl sticky top-0 z-20 backdrop-blur-md shadow-sm border border-white'>
             <div className='flex items-center gap-3 ml-2'>
-              <div className='bg-gradient-to-br from-indigo-600 to-purple-600 p-2 rounded-xl shadow-indigo-200 shadow-lg'>
+              <div className='bg-linear-to-br from-indigo-600 to-purple-600 p-2 rounded-xl shadow-indigo-200 shadow-lg'>
                 <BarChart3 size={20} className='text-white' />
               </div>
               <div className='flex flex-col'>
@@ -708,7 +708,7 @@ export default function DataAnalyticsDashboard() {
           <div className='grid grid-cols-1 xl:grid-cols-3 gap-6'>
             {/* OEE 趨勢圖 (佔 2 欄) */}
             <Card
-              className='xl:col-span-2 rounded-[24px] border-none shadow-md bg-white hover:shadow-lg transition-shadow'
+              className='xl:col-span-2 rounded-3xl border-none shadow-md bg-white hover:shadow-lg transition-shadow'
               styles={{ body: { padding: '24px' } }}
             >
               <div className='flex items-center justify-between mb-6'>
@@ -734,7 +734,7 @@ export default function DataAnalyticsDashboard() {
 
             {/* 產線達成率 (佔 1 欄) */}
             <Card
-              className='col-span-1 rounded-[24px] border-none shadow-md bg-white hover:shadow-lg transition-shadow'
+              className='col-span-1 rounded-3xl border-none shadow-md bg-white hover:shadow-lg transition-shadow'
               styles={{ body: { padding: '24px' } }}
             >
               <div className='flex items-center justify-between mb-6'>
@@ -754,7 +754,7 @@ export default function DataAnalyticsDashboard() {
 
             {/* 不良原因柏拉圖 (佔 2 欄) */}
             <Card
-              className='xl:col-span-2 rounded-[24px] border-none shadow-md bg-white hover:shadow-lg transition-shadow'
+              className='xl:col-span-2 rounded-3xl border-none shadow-md bg-white hover:shadow-lg transition-shadow'
               styles={{ body: { padding: '24px' } }}
             >
               <div className='flex items-center justify-between mb-6'>
@@ -777,7 +777,7 @@ export default function DataAnalyticsDashboard() {
 
             {/* 異常機台關注清單 (佔 1 欄的縮略版本，引導至下方完整表格) */}
             <Card
-              className='col-span-1 rounded-[24px] border-none shadow-md bg-gradient-to-b from-rose-50 to-white hover:shadow-lg transition-shadow'
+              className='col-span-1 rounded-3xl border-none shadow-md bg-gradient-to-b from-rose-50 to-white hover:shadow-lg transition-shadow'
               styles={{
                 body: {
                   padding: '24px',
