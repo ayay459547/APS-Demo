@@ -906,7 +906,7 @@ export default function ChangeoverManagement() {
                   className='w-full h-20 rounded-2xl font-black text-2xl bg-emerald-600 hover:bg-emerald-500 border-none shadow-xl shadow-emerald-200 flex items-center justify-center gap-3'
                   onClick={() => handleStartChangeover(activeTask)}
                 >
-                  <Play size={28} className='fill-white' /> 開始換線作業 (Start
+                  <Play size={20} className='fill-white' /> 開始換線作業 (Start
                   Setup)
                 </Button>
                 <span className='text-xs font-bold text-slate-400 mt-4'>

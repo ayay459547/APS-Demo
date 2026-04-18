@@ -832,7 +832,7 @@ export default function OrderRush() {
             <div className='p-2'>
               <div className='flex items-center gap-4 mb-6 border-b border-slate-100 pb-5'>
                 <div className='w-14 h-14 bg-linear-to-br from-indigo-500 to-cyan-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-200/50'>
-                  <Wand2 size={28} />
+                  <Wand2 size={20} />
                 </div>
                 <div className='flex flex-col'>
                   <h3 className='text-xl font-black text-slate-800 m-0 tracking-tight'>
@@ -1100,7 +1100,7 @@ export default function OrderRush() {
             <div className='p-2 pt-2'>
               <div className='flex items-center gap-4 mb-6 border-b border-slate-100 pb-5'>
                 <div className='w-14 h-14 bg-linear-to-br from-amber-400 to-amber-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-amber-200'>
-                  <ArrowUpToLine size={28} />
+                  <ArrowUpToLine size={20} />
                 </div>
                 <div className='flex flex-col'>
                   <h3 className='text-xl font-black text-slate-800 m-0 tracking-tight'>

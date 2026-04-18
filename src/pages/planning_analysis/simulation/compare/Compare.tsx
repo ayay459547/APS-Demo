@@ -478,7 +478,7 @@ export default function ScenarioComparison() {
           <div className='flex flex-wrap items-center justify-between gap-y-4 bg-white/70 py-4 px-6 rounded-3xl sticky top-0 z-50 backdrop-blur-xl shadow-lg shadow-slate-200/50 border border-white/80 mb-8 transition-all'>
             <div className='flex items-center gap-4'>
               <div className='bg-linear-to-br from-blue-500 to-indigo-600 p-3 rounded-2xl shadow-lg shadow-blue-200/50 text-white shrink-0 hidden sm:block'>
-                <Scale size={28} />
+                <Scale size={20} />
               </div>
               <div className='flex flex-col'>
                 <h1 className='text-xl sm:text-2xl font-black tracking-tight text-slate-800 m-0'>
@@ -521,7 +521,7 @@ export default function ScenarioComparison() {
               <div className='flex items-center gap-4'>
                 <div className='bg-indigo-100 p-3 rounded-2xl flex shrink-0'>
                   <Sparkles
-                    size={28}
+                    size={20}
                     className='text-indigo-600 animate-pulse'
                   />
                 </div>
