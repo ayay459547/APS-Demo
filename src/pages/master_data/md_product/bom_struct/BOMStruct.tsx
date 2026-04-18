@@ -172,7 +172,7 @@ const StatCard: React.FC<{
 }) => (
   <div
     className={cn(
-      'bg-white rounded-xl p-3.5 border border-slate-100 shadow-sm flex items-center justify-between transition-all hover:shadow-md cursor-default min-w-[160px]',
+      'bg-white rounded-xl p-3.5 border border-slate-100 shadow-sm flex items-center justify-between transition-all hover:shadow-md cursor-default min-w-40',
       isAlert && 'ring-1 ring-rose-100 bg-rose-50/30 border-transparent'
     )}
   >
@@ -235,7 +235,7 @@ export default function BomManager() {
             setSelectedKeys(e.target.value ? [e.target.value] : [])
           }
           onPressEnter={() => confirm()}
-          className='!mb-3 rounded-lg h-9 border-slate-200'
+          className='mb-3! rounded-lg h-9 border-slate-200'
           prefix={<Search size={14} className='text-slate-400' />}
         />
         <div className='flex justify-between'>
@@ -604,7 +604,7 @@ export default function BomManager() {
         <div className='mx-auto px-2 pt-2 pb-8 space-y-4 animate-fade-in relative max-w-400'>
           {/* 全域 Loading 遮罩 */}
           {loading && (
-            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-[28px] mt-[60px]'>
+            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-[28px] mt-15'>
               <div className='flex flex-col items-center gap-3'>
                 <div className='w-10 h-10 border-4 border-blue-100 border-t-blue-500 rounded-full animate-spin' />
                 <span className='text-xs font-black text-blue-600 tracking-widest uppercase'>
@@ -691,7 +691,7 @@ export default function BomManager() {
           </div>
 
           <Card
-            className='shadow-xl shadow-slate-200/50 border-none rounded-[32px] overflow-hidden bg-white'
+            className='shadow-xl shadow-slate-200/50 border-none rounded-4xl overflow-hidden bg-white'
             styles={{ body: { padding: 0 } }}
           >
             {/* 批量操作浮動條 (當有選取時) */}
@@ -753,7 +753,7 @@ export default function BomManager() {
                 columns={columns}
                 dataSource={mockBomData}
                 loading={false}
-                scroll={{ x: 1200 }}
+                scroll={{ x: 1000 }}
                 pagination={{
                   pageSize: 15,
                   showSizeChanger: true,
@@ -763,7 +763,7 @@ export default function BomManager() {
                   // 移除強制指定的 index，讓 Antd 原生自動處理 Checkbox 與 展開 Icon 的並排佈局
                   defaultExpandAllRows: false // 300 筆資料建議預設收合，避免渲染過載
                 }}
-                className='aps-monitor-table custom-tree-table'
+                className='custom-tree-table'
               />
             </div>
           </Card>

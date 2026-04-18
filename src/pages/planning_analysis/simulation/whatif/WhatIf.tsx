@@ -1031,7 +1031,6 @@ export default function App() {
                             pagination={false}
                             rowKey='woNumber'
                             size='middle'
-                            className='aps-monitor-table'
                           />
                         </div>
                       </Card>
@@ -1675,20 +1674,6 @@ export default function App() {
             .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
             .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
             .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-            /* Table Style Override */
-            .aps-monitor-table .ant-table-thead > tr > th {
-              background: #ffffff !important;
-              color: #64748b !important;
-              font-weight: 700 !important;
-              border-bottom: 2px solid #f1f5f9 !important;
-              white-space: nowrap;
-              padding-top: 14px !important;
-              padding-bottom: 14px !important;
-            }
-            .aps-monitor-table .ant-table-tbody > tr:hover > td {
-              background: #fff1f2 !important; /* light rose hover for impact table */
-            }
 
             /* Modal Style */
             .custom-edit-modal .ant-modal-content {

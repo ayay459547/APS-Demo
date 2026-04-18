@@ -184,7 +184,7 @@ const StatCard: React.FC<{
 }) => (
   <div
     className={cn(
-      'bg-white rounded-xl p-3.5 border border-slate-100 shadow-sm flex items-center justify-between transition-all hover:shadow-md cursor-default min-w-[160px]',
+      'bg-white rounded-xl p-3.5 border border-slate-100 shadow-sm flex items-center justify-between transition-all hover:shadow-md cursor-default min-w-40',
       isAlert && 'ring-1 ring-rose-100 bg-rose-50/30 border-transparent'
     )}
   >
@@ -853,7 +853,7 @@ export default function App() {
           </div>
 
           <Card
-            className='shadow-xl shadow-slate-200/50 border-none rounded-[32px] overflow-hidden bg-white'
+            className='shadow-xl shadow-slate-200/50 border-none rounded-4xl overflow-hidden bg-white'
             styles={{ body: { padding: 0 } }}
           >
             <div className='bg-slate-50/50 p-5 border-b border-slate-100 flex items-center justify-between'>
@@ -879,13 +879,12 @@ export default function App() {
                   expandRowByClick: true,
                   columnWidth: 48
                 }}
-                scroll={{ x: 1300 }}
+                scroll={{ x: 1000 }}
                 pagination={{
                   pageSize: 10,
                   showSizeChanger: true,
                   className: 'mt-4 !px-4 pb-2'
                 }}
-                className='aps-monitor-table'
               />
             </div>
           </Card>
@@ -901,10 +900,6 @@ export default function App() {
             @keyframes fadeIn {
               from { opacity: 0; transform: translateY(10px); }
               to { opacity: 1; transform: translateY(0); }
-            }
-            /* 隱藏展開行的 hover 背景色以保持甘特圖乾淨 */
-            .aps-monitor-table .ant-table-expanded-row:hover > td {
-              background: #f8fafc !important;
             }
           `}</style>
         </div>

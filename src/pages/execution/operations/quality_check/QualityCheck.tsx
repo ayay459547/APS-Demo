@@ -160,7 +160,7 @@ const StatCard: React.FC<{
 }) => (
   <div
     className={cn(
-      'bg-white rounded-xl p-3.5 border border-slate-100 shadow-sm flex items-center justify-between transition-all hover:shadow-md cursor-default min-w-[160px]',
+      'bg-white rounded-xl p-3.5 border border-slate-100 shadow-sm flex items-center justify-between transition-all hover:shadow-md cursor-default min-w-40',
       isAlert && 'ring-1 ring-rose-100 bg-rose-50/30 border-transparent'
     )}
   >
@@ -359,7 +359,7 @@ export default function QualityInspection() {
             setSelectedKeys(e.target.value ? [e.target.value] : [])
           }
           onPressEnter={() => confirm()}
-          className='!mb-3 rounded-lg h-9 border-slate-200'
+          className='mb-3! rounded-lg h-9 border-slate-200'
           prefix={<Search size={14} className='text-slate-400' />}
         />
         <div className='flex justify-between'>
@@ -690,7 +690,7 @@ export default function QualityInspection() {
       <div className='w-full min-h-screen bg-[#f8fafc] p-4 font-sans'>
         <div className='mx-auto px-2 pt-2 pb-8 space-y-6 animate-fade-in relative max-w-400'>
           {loading && (
-            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-[28px] mt-[60px]'>
+            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-[28px] mt-15'>
               <div className='flex flex-col items-center gap-3'>
                 <div className='w-10 h-10 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin' />
                 <span className='text-xs font-black text-indigo-600 tracking-widest uppercase'>
@@ -772,7 +772,7 @@ export default function QualityInspection() {
           </div>
 
           <Card
-            className='shadow-xl shadow-slate-200/50 border-none rounded-[32px] overflow-hidden bg-white'
+            className='shadow-xl shadow-slate-200/50 border-none rounded-4xl overflow-hidden bg-white'
             styles={{ body: { padding: 0 } }}
           >
             <div className='bg-slate-50/50 p-5 border-b border-slate-100 flex items-center justify-between'>
@@ -793,7 +793,7 @@ export default function QualityInspection() {
                 columns={columns}
                 dataSource={tasks}
                 loading={false}
-                scroll={{ x: 1100 }}
+                scroll={{ x: 1000 }}
                 rowKey='id'
                 pagination={{
                   pageSize: 10,
@@ -801,7 +801,6 @@ export default function QualityInspection() {
                   pageSizeOptions: ['10', '20', '50'],
                   className: 'mt-4 !px-4 pb-2'
                 }}
-                className='aps-monitor-table'
               />
             </div>
           </Card>
@@ -1054,7 +1053,7 @@ export default function QualityInspection() {
                     <Radio.Group
                       optionType='button'
                       buttonStyle='solid'
-                      className='custom-hmi-radio !flex gap-2'
+                      className='custom-hmi-radio flex! gap-2'
                     >
                       <Radio
                         value='pass'
@@ -1081,11 +1080,11 @@ export default function QualityInspection() {
                       關鍵尺寸落於公差範圍內 (±0.05mm)
                     </span>
                   </div>
-                  <Form.Item name='item2' className='!mb-0'>
+                  <Form.Item name='item2' className='mb-0!'>
                     <Radio.Group
                       optionType='button'
                       buttonStyle='solid'
-                      className='custom-hmi-radio !flex gap-2'
+                      className='custom-hmi-radio flex! gap-2'
                     >
                       <Radio
                         value='pass'
@@ -1112,11 +1111,11 @@ export default function QualityInspection() {
                       通電測試正常，指示燈號與訊號正確
                     </span>
                   </div>
-                  <Form.Item name='item3' className='!mb-0'>
+                  <Form.Item name='item3' className='mb-0!'>
                     <Radio.Group
                       optionType='button'
                       buttonStyle='solid'
-                      className='custom-hmi-radio !flex gap-2'
+                      className='custom-hmi-radio flex! gap-2'
                     >
                       <Radio
                         value='pass'
@@ -1142,21 +1141,21 @@ export default function QualityInspection() {
                   <span className='font-black text-slate-800 text-lg'>
                     最終檢驗判定 (Final Result)
                   </span>
-                  <Form.Item name='result' className='!mb-0'>
+                  <Form.Item name='result' className='mb-0!'>
                     <Radio.Group
                       optionType='button'
                       buttonStyle='solid'
-                      className='custom-hmi-radio-large !flex gap-2'
+                      className='custom-hmi-radio-large flex! gap-2'
                     >
                       <Radio
                         value='pass'
-                        className='!w-32 !h-12 text-center font-black text-lg'
+                        className='w-32! h-12! text-center font-black text-lg'
                       >
                         合格 Pass
                       </Radio>
                       <Radio
                         value='fail'
-                        className='!w-32 !h-12 text-center font-black text-lg'
+                        className='w-32! h-12! text-center font-black text-lg'
                       >
                         退件 Fail
                       </Radio>
@@ -1197,7 +1196,7 @@ export default function QualityInspection() {
                 <Button
                   type='primary'
                   size='large'
-                  className='flex-[2] h-14 rounded-xl font-black text-lg bg-indigo-600 hover:bg-indigo-500 border-none shadow-lg shadow-indigo-200 flex items-center justify-center gap-2'
+                  className='flex-2 h-14 rounded-xl font-black text-lg bg-indigo-600 hover:bg-indigo-500 border-none shadow-lg shadow-indigo-200 flex items-center justify-center gap-2'
                   onClick={handleSaveInspection}
                 >
                   <ShieldCheck size={20} /> 提交檢驗報告 (Submit)

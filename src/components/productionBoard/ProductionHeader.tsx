@@ -71,7 +71,7 @@ const ProductionBoardHeader: React.FC = () => {
       {/* 巨大數字時鐘區塊 */}
       <div
         className={cn(
-          'w-fit flex items-center gap-4 p-2 px-6 mr-6 rounded-[32px] border transition-all shadow-sm backdrop-blur-md',
+          'w-fit flex items-center gap-4 p-2 px-6 mr-6 rounded-4xl border transition-all shadow-sm backdrop-blur-md',
           'bg-white/80 border-slate-200'
         )}
       >

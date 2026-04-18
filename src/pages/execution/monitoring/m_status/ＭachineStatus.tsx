@@ -169,7 +169,7 @@ const StatCard: React.FC<{
 }) => (
   <div
     className={cn(
-      'bg-white rounded-xl p-3.5 border border-slate-100 shadow-sm flex items-center justify-between transition-all hover:shadow-md cursor-default min-w-[160px]',
+      'bg-white rounded-xl p-3.5 border border-slate-100 shadow-sm flex items-center justify-between transition-all hover:shadow-md cursor-default min-w-40',
       isAlert && 'ring-1 ring-rose-100 bg-rose-50/30 border-transparent'
     )}
   >
@@ -302,7 +302,7 @@ export default function DelayWarningCenter() {
             setSelectedKeys(e.target.value ? [e.target.value] : [])
           }
           onPressEnter={() => confirm()}
-          className='!mb-3 rounded-lg h-9 border-slate-200'
+          className='mb-3! rounded-lg h-9 border-slate-200'
           prefix={<Search size={14} className='text-slate-400' />}
         />
         <div className='flex justify-between'>
@@ -615,7 +615,7 @@ export default function DelayWarningCenter() {
       <div className='w-full min-h-screen bg-[#f8fafc] p-4 font-sans'>
         <div className='mx-auto px-2 pt-2 pb-8 space-y-6 animate-fade-in relative max-w-400'>
           {loading && (
-            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-[28px] mt-[60px]'>
+            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-[28px] mt-15'>
               <div className='flex flex-col items-center gap-3'>
                 <div className='w-10 h-10 border-4 border-rose-100 border-t-rose-600 rounded-full animate-spin' />
                 <span className='text-xs font-black text-rose-600 tracking-widest uppercase'>
@@ -699,7 +699,7 @@ export default function DelayWarningCenter() {
           </div>
 
           <Card
-            className='shadow-xl shadow-slate-200/50 border-none rounded-[32px] overflow-hidden bg-white'
+            className='shadow-xl shadow-slate-200/50 border-none rounded-4xl overflow-hidden bg-white'
             styles={{ body: { padding: 0 } }}
           >
             <div className='bg-slate-50/50 p-5 border-b border-slate-100 flex items-center justify-between'>
@@ -728,7 +728,6 @@ export default function DelayWarningCenter() {
                   pageSizeOptions: ['10', '20', '50'],
                   className: 'mt-4 !px-4 pb-2'
                 }}
-                className='aps-monitor-table'
               />
             </div>
           </Card>

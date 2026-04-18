@@ -145,7 +145,7 @@ const StatCard: React.FC<StatCardProps> = ({
 }) => (
   <div
     className={cn(
-      'flex items-center justify-between p-3.5 rounded-xl transition-all hover:shadow-md cursor-default min-w-[160px]',
+      'flex items-center justify-between p-3.5 rounded-xl transition-all hover:shadow-md cursor-default min-w-40',
       alert
         ? 'bg-rose-50/30 ring-1 ring-rose-100 border border-transparent'
         : 'bg-white border border-slate-100 shadow-sm'
@@ -251,7 +251,7 @@ export default function WorkOrderStatus() {
             setSelectedKeys(e.target.value ? [e.target.value] : [])
           }
           onPressEnter={() => confirm()}
-          className='!mb-3 rounded-lg'
+          className='mb-3! rounded-lg'
         />
         <div className='flex justify-end gap-2'>
           <Button
@@ -314,7 +314,7 @@ export default function WorkOrderStatus() {
         <RangePicker
           value={selectedKeys[0]}
           onChange={dates => setSelectedKeys(dates ? [dates] : [])}
-          className='!mb-3 w-full rounded-lg'
+          className='mb-3! w-full rounded-lg'
           allowClear
         />
         <div className='flex justify-end gap-2'>
@@ -452,7 +452,7 @@ export default function WorkOrderStatus() {
       render: (name: string, r: WorkOrder) => (
         <div className='flex flex-col'>
           <span
-            className='text-slate-700 font-semibold truncate max-w-[200px]'
+            className='text-slate-700 font-semibold truncate max-w-50'
             title={name}
           >
             {name}
@@ -715,13 +715,12 @@ export default function WorkOrderStatus() {
                 columns={columns}
                 dataSource={mockData}
                 loading={false} // Loading 改由上方的全域遮罩接管，避免雙層 Loading 視覺衝突
-                scroll={{ x: 1200 }}
+                scroll={{ x: 1000 }}
                 pagination={{
                   pageSize: 10,
                   showSizeChanger: true,
                   className: 'mt-4 !px-4 pb-2'
                 }}
-                className='aps-monitor-table'
               />
             </div>
           </Card>

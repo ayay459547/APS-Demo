@@ -368,7 +368,7 @@ export default function App() {
             setSelectedKeys(e.target.value ? [e.target.value] : [])
           }
           onPressEnter={() => confirm()}
-          className='!mb-3 rounded-lg h-9 border-slate-200'
+          className='mb-3! rounded-lg h-9 border-slate-200'
           prefix={<Search size={14} className='text-slate-400' />}
         />
         <div className='flex justify-between'>
@@ -618,7 +618,7 @@ export default function App() {
       <div className='w-full min-h-screen bg-[#f8fafc] p-4 font-sans'>
         <div className='mx-auto px-2 pt-2 pb-8 space-y-6 animate-fade-in relative max-w-400'>
           {loading && (
-            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-[28px] mt-[60px]'>
+            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-[28px] mt-15'>
               <div className='flex flex-col items-center gap-3'>
                 <div className='w-10 h-10 border-4 border-fuchsia-100 border-t-fuchsia-600 rounded-full animate-spin' />
                 <span className='text-xs font-black text-fuchsia-600 tracking-widest uppercase'>
@@ -775,7 +775,6 @@ export default function App() {
                   pageSizeOptions: ['10', '20', '50'],
                   className: 'mt-4 !px-4 pb-2'
                 }}
-                className='aps-monitor-table'
               />
             </div>
           </Card>

@@ -235,7 +235,7 @@ const StatCard: React.FC<{
 }) => (
   <div
     className={cn(
-      'bg-white rounded-xl p-3.5 border border-slate-100 shadow-sm flex items-center justify-between transition-all hover:shadow-md cursor-default min-w-[160px]',
+      'bg-white rounded-xl p-3.5 border border-slate-100 shadow-sm flex items-center justify-between transition-all hover:shadow-md cursor-default min-w-40',
       isAlert && 'ring-1 ring-rose-100 bg-rose-50/30 border-transparent'
     )}
   >
@@ -433,7 +433,7 @@ export default function RoleManager() {
             setSelectedKeys(e.target.value ? [e.target.value] : [])
           }
           onPressEnter={() => confirm()}
-          className='!mb-3 rounded-lg h-9 border-slate-200'
+          className='mb-3! rounded-lg h-9 border-slate-200'
           prefix={<Search size={14} className='text-slate-400' />}
         />
         <div className='flex justify-between'>
@@ -765,7 +765,7 @@ export default function RoleManager() {
                           : '啟用角色確認'
                       }
                       description={
-                        <div className='text-sm max-w-[200px]'>
+                        <div className='text-sm max-w-50'>
                           確定要將 <b>{record.roleName}</b> 設為
                           {record.status === '啟用' ? '停用' : '啟用'}嗎？
                           {record.status === '啟用' && record.userCount > 0 && (
@@ -898,7 +898,7 @@ export default function RoleManager() {
       <div className='w-full min-h-screen bg-[#f8fafc] p-4 font-sans'>
         <div className='mx-auto px-2 pt-2 pb-8 space-y-4 animate-fade-in relative max-w-400'>
           {loading && (
-            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-[28px] mt-[60px]'>
+            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-[28px] mt-15'>
               <div className='flex flex-col items-center gap-3'>
                 <div className='w-10 h-10 border-4 border-indigo-100 border-t-indigo-500 rounded-full animate-spin' />
                 <span className='text-xs font-black text-indigo-600 tracking-widest uppercase'>
@@ -972,7 +972,7 @@ export default function RoleManager() {
           </div>
 
           <Card
-            className='shadow-xl shadow-slate-200/50 border-none rounded-[32px] overflow-hidden bg-white'
+            className='shadow-xl shadow-slate-200/50 border-none rounded-4xl overflow-hidden bg-white'
             styles={{ body: { padding: 0 } }}
           >
             {selectedRowKeys.length > 0 && (
@@ -1033,7 +1033,6 @@ export default function RoleManager() {
                   expandRowByClick: true,
                   columnWidth: 48
                 }}
-                className='aps-monitor-table'
               />
             </div>
           </Card>
@@ -1266,34 +1265,6 @@ export default function RoleManager() {
           </Modal>
 
           <style>{`
-            .aps-monitor-table .ant-table-thead > tr > th {
-              background: #ffffff !important;
-              color: #64748b !important;
-              font-weight: 700 !important;
-              border-bottom: 1px solid #f1f5f9 !important;
-              white-space: nowrap;
-              padding-top: 20px !important;
-            }
-            .aps-monitor-table .ant-table-tbody > tr:hover > td {
-              background: #f8fafc !important;
-            }
-
-            .aps-monitor-table .ant-table-row-expand-icon {
-              border: 1px solid #cbd5e1;
-              color: #64748b;
-              border-radius: 4px;
-              display: inline-flex;
-              align-items: center;
-              justify-content: center;
-              width: 18px;
-              height: 18px;
-              vertical-align: middle;
-            }
-            .aps-monitor-table .ant-table-row-expand-icon:hover {
-              border-color: #4f46e5;
-              color: #4f46e5;
-            }
-
             .custom-edit-modal .ant-modal-content {
               border-radius: 24px;
               padding: 24px;

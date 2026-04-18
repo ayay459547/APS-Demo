@@ -552,7 +552,7 @@ export default function ScenarioComparison() {
                 <div
                   key={plan.id}
                   className={cn(
-                    'flex flex-col rounded-[32px] border-2 transition-all duration-300 relative overflow-hidden bg-white group/card',
+                    'flex flex-col rounded-4xl border-2 transition-all duration-300 relative overflow-hidden bg-white group/card',
                     plan.isBaseline
                       ? 'border-slate-200/80 shadow-sm'
                       : `border-${plan.themeColor}-200 shadow-xl shadow-${plan.themeColor}-100/50 hover:-translate-y-1 hover:shadow-2xl hover:shadow-${plan.themeColor}-200/60`

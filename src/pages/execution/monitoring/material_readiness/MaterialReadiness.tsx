@@ -591,7 +591,7 @@ export default function DataAnalyticsDashboard() {
       <div className='w-full min-h-screen bg-[#f1f5f9] p-4 font-sans'>
         <div className='mx-auto px-2 pt-2 pb-8 space-y-6 animate-fade-in relative max-w-400'>
           {loading && (
-            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-[28px] mt-[60px]'>
+            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-[28px] mt-15'>
               <div className='flex flex-col items-center gap-3'>
                 <div className='w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin' />
                 <span className='text-xs font-black text-indigo-600 tracking-widest uppercase'>
@@ -866,14 +866,13 @@ export default function DataAnalyticsDashboard() {
                 columns={columns}
                 dataSource={underperforming}
                 loading={false}
-                scroll={{ x: 800 }}
+                scroll={{ x: 1000 }}
                 rowKey='id'
                 pagination={{
                   pageSize: 10,
                   showSizeChanger: false,
                   className: 'mt-4 pb-2'
                 }}
-                className='aps-monitor-table'
               />
             </div>
           </Modal>

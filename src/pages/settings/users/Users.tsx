@@ -241,7 +241,7 @@ const StatCard: React.FC<{
 }) => (
   <div
     className={cn(
-      'bg-white rounded-xl p-3.5 border border-slate-100 shadow-sm flex items-center justify-between transition-all hover:shadow-md cursor-default min-w-[160px]',
+      'bg-white rounded-xl p-3.5 border border-slate-100 shadow-sm flex items-center justify-between transition-all hover:shadow-md cursor-default min-w-40',
       isAlert && 'ring-1 ring-rose-100 bg-rose-50/30 border-transparent'
     )}
   >
@@ -423,7 +423,7 @@ export default function UserManager() {
             setSelectedKeys(e.target.value ? [e.target.value] : [])
           }
           onPressEnter={() => confirm()}
-          className='!mb-3 rounded-lg h-9 border-slate-200'
+          className='mb-3! rounded-lg h-9 border-slate-200'
           prefix={<Search size={14} className='text-slate-400' />}
         />
         <div className='flex justify-between'>
@@ -936,7 +936,7 @@ export default function UserManager() {
         <div className='mx-auto px-2 pt-2 pb-8 space-y-4 animate-fade-in relative max-w-400'>
           {/* 全域 Loading 遮罩 */}
           {loading && (
-            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-[28px] mt-[60px]'>
+            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-[28px] mt-15'>
               <div className='flex flex-col items-center gap-3'>
                 <div className='w-10 h-10 border-4 border-indigo-100 border-t-indigo-500 rounded-full animate-spin' />
                 <span className='text-xs font-black text-indigo-600 tracking-widest uppercase'>
@@ -1020,7 +1020,7 @@ export default function UserManager() {
           </div>
 
           <Card
-            className='shadow-xl shadow-slate-200/50 border-none rounded-[32px] overflow-hidden bg-white'
+            className='shadow-xl shadow-slate-200/50 border-none rounded-4xl overflow-hidden bg-white'
             styles={{ body: { padding: 0 } }}
           >
             {/* 批量操作浮動條 */}
@@ -1086,7 +1086,7 @@ export default function UserManager() {
                 columns={columns}
                 dataSource={userData}
                 loading={false}
-                scroll={{ x: 1200 }}
+                scroll={{ x: 1000 }}
                 pagination={{
                   pageSize: 10,
                   showSizeChanger: true,
@@ -1098,7 +1098,6 @@ export default function UserManager() {
                   expandRowByClick: true,
                   columnWidth: 48
                 }}
-                className='aps-monitor-table'
               />
             </div>
           </Card>
@@ -1571,35 +1570,6 @@ export default function UserManager() {
           </Modal>
 
           <style>{`
-            .aps-monitor-table .ant-table-thead > tr > th {
-              background: #ffffff !important;
-              color: #64748b !important;
-              font-weight: 700 !important;
-              border-bottom: 1px solid #f1f5f9 !important;
-              white-space: nowrap;
-              padding-top: 20px !important;
-            }
-            .aps-monitor-table .ant-table-tbody > tr:hover > td {
-              background: #f8fafc !important;
-            }
-
-            /* 調整展開圖標 */
-            .aps-monitor-table .ant-table-row-expand-icon {
-              border: 1px solid #cbd5e1;
-              color: #64748b;
-              border-radius: 4px;
-              display: inline-flex;
-              align-items: center;
-              justify-content: center;
-              width: 18px;
-              height: 18px;
-              vertical-align: middle;
-            }
-            .aps-monitor-table .ant-table-row-expand-icon:hover {
-              border-color: #4f46e5;
-              color: #4f46e5;
-            }
-
             /* 自定義 Modal 樣式 */
             .custom-edit-modal .ant-modal-content {
               border-radius: 24px;

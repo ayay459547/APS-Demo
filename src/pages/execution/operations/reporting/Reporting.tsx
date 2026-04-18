@@ -171,7 +171,7 @@ const StatCard: React.FC<{
 }) => (
   <div
     className={cn(
-      'bg-white rounded-xl p-3.5 border border-slate-100 shadow-sm flex items-center justify-between transition-all hover:shadow-md cursor-default min-w-[160px]',
+      'bg-white rounded-xl p-3.5 border border-slate-100 shadow-sm flex items-center justify-between transition-all hover:shadow-md cursor-default min-w-40',
       isAlert && 'ring-1 ring-rose-100 bg-rose-50/30 border-transparent'
     )}
   >
@@ -387,7 +387,7 @@ export default function ProductionReporting() {
             setSelectedKeys(e.target.value ? [e.target.value] : [])
           }
           onPressEnter={() => confirm()}
-          className='!mb-3 rounded-lg h-9 border-slate-200'
+          className='mb-3! rounded-lg h-9 border-slate-200'
           prefix={<Search size={14} className='text-slate-400' />}
         />
         <div className='flex justify-between'>
@@ -754,7 +754,7 @@ export default function ProductionReporting() {
               <Popconfirm
                 title='強制完工結案'
                 description={
-                  <div className='max-w-[200px] text-xs'>
+                  <div className='max-w-50 text-xs'>
                     注意：您即將結束此工序。若數量未達標，系統將記錄為短交完工。確定要結案嗎？
                   </div>
                 }
@@ -791,7 +791,7 @@ export default function ProductionReporting() {
       <div className='w-full min-h-screen bg-[#f8fafc] p-4 font-sans'>
         <div className='mx-auto px-2 pt-2 pb-8 space-y-6 animate-fade-in relative max-w-400'>
           {loading && (
-            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-[28px] mt-[60px]'>
+            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-[28px] mt-15'>
               <div className='flex flex-col items-center gap-3'>
                 <div className='w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin' />
                 <span className='text-xs font-black text-blue-600 tracking-widest uppercase'>
@@ -873,7 +873,7 @@ export default function ProductionReporting() {
           </div>
 
           <Card
-            className='shadow-xl shadow-slate-200/50 border-none rounded-[32px] overflow-hidden bg-white'
+            className='shadow-xl shadow-slate-200/50 border-none rounded-4xl overflow-hidden bg-white'
             styles={{ body: { padding: 0 } }}
           >
             <div className='bg-slate-50/50 p-5 border-b border-slate-100 flex items-center justify-between'>
@@ -894,7 +894,7 @@ export default function ProductionReporting() {
                 columns={columns}
                 dataSource={tasks}
                 loading={false}
-                scroll={{ x: 1300 }}
+                scroll={{ x: 1000 }}
                 rowKey='id'
                 pagination={{
                   pageSize: 10,
@@ -902,7 +902,6 @@ export default function ProductionReporting() {
                   pageSizeOptions: ['10', '20', '50'],
                   className: 'mt-4 !px-4 pb-2'
                 }}
-                className='aps-monitor-table'
               />
             </div>
           </Card>
@@ -942,7 +941,10 @@ export default function ProductionReporting() {
                   </span>
                 </span>
               </div>
-              <Divider type='vertical' className='h-12 border-slate-200' />
+              <Divider
+                orientation='vertical'
+                className='h-12 border-slate-200'
+              />
               <div className='flex flex-col items-center'>
                 <span className='text-xs font-bold text-emerald-600 mb-1'>
                   已報良品
@@ -951,7 +953,10 @@ export default function ProductionReporting() {
                   {reportingTask?.goodQty}
                 </span>
               </div>
-              <Divider type='vertical' className='h-12 border-slate-200' />
+              <Divider
+                orientation='vertical'
+                className='h-12 border-slate-200'
+              />
               <div className='flex flex-col items-end'>
                 <span className='text-xs font-bold text-rose-500 mb-1'>
                   已報不良
@@ -1086,7 +1091,7 @@ export default function ProductionReporting() {
                 <Button
                   type='primary'
                   size='large'
-                  className='flex-[2] h-14 rounded-xl font-black text-lg bg-blue-600 hover:bg-blue-500 border-none shadow-lg shadow-blue-200 flex items-center justify-center gap-2'
+                  className='flex-2 h-14 rounded-xl font-black text-lg bg-blue-600 hover:bg-blue-500 border-none shadow-lg shadow-blue-200 flex items-center justify-center gap-2'
                   onClick={handleSaveReport}
                 >
                   <ClipboardEdit size={20} /> 確認提交報工數據

@@ -607,7 +607,7 @@ const WorkOrderSplit: React.FC = () => {
                   type='dashed'
                   icon={<Plus size={16} />}
                   onClick={addSubOrder}
-                  className='mt-6 !h-12 !rounded-[20px] font-black transition-all bg-white border-2 border-slate-200 text-violet-600 hover:!border-violet-400 hover:!text-violet-500 shadow-sm'
+                  className='mt-6 h-12! !rounded-[20px] font-black transition-all bg-white border-2 border-slate-200 text-violet-600 hover:!border-violet-400 hover:!text-violet-500 shadow-sm'
                 >
                   新增拆分節點
                 </Button>

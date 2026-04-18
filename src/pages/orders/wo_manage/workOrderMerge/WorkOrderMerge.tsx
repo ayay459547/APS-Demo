@@ -566,7 +566,7 @@ const WorkOrderMerge: React.FC = () => {
                 {/* 合併後的目標工單 (一方) - 微調尺寸 */}
                 <div className='w-full xl:w-[380px] shrink-0 xl:sticky xl:top-24'>
                   <Card
-                    className='rounded-[32px] border-none shadow-2xl bg-slate-900 text-white overflow-hidden relative group'
+                    className='rounded-4xl border-none shadow-2xl bg-slate-900 text-white overflow-hidden relative group'
                     styles={{ body: { padding: '32px' } }}
                   >
                     <div className='absolute -bottom-10 -right-10 p-4 opacity-5 group-hover:scale-125 transition-transform duration-1000 pointer-events-none'>

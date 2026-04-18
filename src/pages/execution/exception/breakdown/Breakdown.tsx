@@ -362,7 +362,7 @@ export default function App() {
             setSelectedKeys(e.target.value ? [e.target.value] : [])
           }
           onPressEnter={() => confirm()}
-          className='!mb-3 rounded-lg h-9 border-slate-200'
+          className='mb-3! rounded-lg h-9 border-slate-200'
           prefix={<Search size={14} className='text-slate-400' />}
         />
         <div className='flex justify-between'>
@@ -687,7 +687,7 @@ export default function App() {
       <div className='w-full min-h-screen bg-[#f8fafc] p-4 font-sans'>
         <div className='mx-auto px-2 pt-2 pb-8 space-y-6 animate-fade-in relative max-w-400'>
           {loading && (
-            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-[28px] mt-[60px]'>
+            <div className='absolute inset-0 bg-white/60 backdrop-blur-sm z-110 flex items-center justify-center rounded-[28px] mt-15'>
               <div className='flex flex-col items-center gap-3'>
                 <div className='w-10 h-10 border-4 border-rose-100 border-t-rose-600 rounded-full animate-spin' />
                 <span className='text-xs font-black text-rose-600 tracking-widest uppercase'>
@@ -822,7 +822,6 @@ export default function App() {
                   pageSizeOptions: ['10', '20', '50'],
                   className: 'mt-4 !px-4 pb-2'
                 }}
-                className='aps-monitor-table'
               />
             </div>
           </Card>
@@ -1163,19 +1162,6 @@ export default function App() {
           </Modal>
 
           <style>{`
-            .aps-monitor-table .ant-table-thead > tr > th {
-              background: #ffffff !important;
-              color: #64748b !important;
-              font-weight: 700 !important;
-              border-bottom: 1px solid #f1f5f9 !important;
-              white-space: nowrap;
-              padding-top: 16px !important;
-              padding-bottom: 16px !important;
-            }
-            .aps-monitor-table .ant-table-tbody > tr:hover > td {
-              background: #f8fafc !important;
-            }
-
             /* 自定義 Modal 樣式 */
             .custom-hmi-modal .ant-modal-content {
               border-radius: 28px;
