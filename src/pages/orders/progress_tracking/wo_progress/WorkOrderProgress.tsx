@@ -402,7 +402,7 @@ export default function App() {
 
         <div className='bg-white border-y border-slate-200 shadow-sm overflow-x-auto flex custom-scrollbar relative'>
           {/* 左側凍結區 (Sticky) : 工序名稱 */}
-          <div className='w-[160px] shrink-0 border-r border-slate-200 bg-white z-20 sticky left-0 shadow-[4px_0_10px_-2px_rgba(0,0,0,0.05)]'>
+          <div className='w-40 shrink-0 border-r border-slate-200 bg-white z-20 sticky left-0 shadow-[4px_0_10px_-2px_rgba(0,0,0,0.05)]'>
             <div className='h-8 border-b border-slate-200 bg-slate-50 flex items-center justify-end pr-3'>
               <span className='text-[10px] font-bold text-slate-400'>
                 工序站點
@@ -610,7 +610,7 @@ export default function App() {
       width: 200,
       render: (text, record) => (
         <div className='flex flex-col'>
-          <span className='font-bold text-slate-700 text-sm truncate max-w-[160px]'>
+          <span className='font-bold text-slate-700 text-sm truncate max-w-40'>
             {text}
           </span>
           <span className='text-[10px] font-mono font-bold text-slate-400 tracking-tighter uppercase'>

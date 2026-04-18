@@ -865,7 +865,7 @@ export default function WorkOrderProgressView() {
             className='shadow-xl shadow-slate-200/50 border-none rounded-4xl overflow-hidden bg-transparent'
             styles={{ body: { padding: 0 } }}
           >
-            <div className='bg-white/80 p-5 border-b border-slate-100 flex items-center justify-between rounded-t-[32px]'>
+            <div className='bg-white/80 p-5 border-b border-slate-100 flex items-center justify-between rounded-t-4xl'>
               <div className='flex items-center gap-3 text-slate-500 text-[11px] font-black uppercase tracking-widest'>
                 <Package size={14} />
                 全廠生產工單庫 (Work Order Tracking)
@@ -904,7 +904,7 @@ export default function WorkOrderProgressView() {
             className='custom-hmi-modal'
             width={900}
           >
-            <div className='flex flex-col h-[600px]'>
+            <div className='flex flex-col h-150'>
               <div className='flex items-center gap-3 text-slate-800 border-b border-slate-100 pb-4 mb-6'>
                 <div className='bg-indigo-600 p-2.5 rounded-xl shadow-md shadow-indigo-200'>
                   <PieChart size={24} className='text-white' />
@@ -926,7 +926,7 @@ export default function WorkOrderProgressView() {
                     <Activity size={16} className='text-indigo-500' />{' '}
                     工單狀態分佈
                   </h4>
-                  <div className='flex-1 relative w-full min-h-[300px]'>
+                  <div className='flex-1 relative w-full min-h-75'>
                     <ReactECharts option={statusChartOption} />
                   </div>
                 </div>
@@ -937,7 +937,7 @@ export default function WorkOrderProgressView() {
                     <TrendingUp size={16} className='text-indigo-500' />{' '}
                     客戶別達成率排行
                   </h4>
-                  <div className='flex-1 relative w-full min-h-[300px]'>
+                  <div className='flex-1 relative w-full min-h-75'>
                     <ReactECharts option={customerChartOption} />
                   </div>
                 </div>
@@ -1125,7 +1125,7 @@ export default function WorkOrderProgressView() {
 
                             return {
                               title: (
-                                <div className='flex items-center justify-between w-[500px] mb-1'>
+                                <div className='flex items-center justify-between w-125 mb-1'>
                                   <span
                                     className={cn(
                                       'font-bold text-sm',
@@ -1148,7 +1148,7 @@ export default function WorkOrderProgressView() {
                                 </div>
                               ),
                               description: (
-                                <div className='flex flex-col gap-2 pb-6 pt-1 w-[500px]'>
+                                <div className='flex flex-col gap-2 pb-6 pt-1 w-125'>
                                   <div className='flex justify-between text-[11px] font-bold'>
                                     <span className='text-slate-400'>
                                       已通過:{' '}

@@ -594,7 +594,7 @@ export default function QualityInspection() {
             </div>
             {status === '不合格' && record.failReason && (
               <span
-                className='text-[10px] text-rose-500 font-bold truncate max-w-[120px]'
+                className='text-[10px] text-rose-500 font-bold truncate max-w-30'
                 title={record.failReason}
               >
                 {record.failReason}

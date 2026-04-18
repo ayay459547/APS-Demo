@@ -420,7 +420,7 @@ export default function DelayWarningCenter() {
           <div className='flex items-center gap-3'>
             <div
               className={cn(
-                'px-2 py-0.5 rounded-md text-[10px] font-black shadow-md shrink-0 w-[42px] text-center tracking-widest',
+                'px-2 py-0.5 rounded-md text-[10px] font-black shadow-md shrink-0 w-10.5 text-center tracking-widest',
                 badgeClass
               )}
             >
@@ -431,7 +431,7 @@ export default function DelayWarningCenter() {
                 {record.woId}
               </span>
               <span
-                className='text-[10px] text-slate-400 truncate max-w-[120px]'
+                className='text-[10px] text-slate-400 truncate max-w-30'
                 title={record.id}
               >
                 {record.id}
@@ -571,7 +571,7 @@ export default function DelayWarningCenter() {
         return (
           <div
             className={cn(
-              'inline-flex items-center justify-center px-2 py-1 rounded-md text-[10px] font-bold w-[56px]',
+              'inline-flex items-center justify-center px-2 py-1 rounded-md text-[10px] font-bold w-14',
               status === '未處理'
                 ? 'bg-slate-100 text-slate-500'
                 : 'bg-blue-50 text-blue-600 border border-blue-200'
@@ -743,7 +743,7 @@ export default function DelayWarningCenter() {
             mask={{ closable: !resolving }}
           >
             <div className='flex items-center gap-3 text-slate-800 border-b border-slate-100 pb-4 mb-4 mt-2'>
-              <div className='bg-gradient-to-r from-blue-600 to-indigo-600 p-2.5 rounded-xl shadow-md shadow-blue-200'>
+              <div className='bg-linear-to-r from-blue-600 to-indigo-600 p-2.5 rounded-xl shadow-md shadow-blue-200'>
                 <BrainCircuit size={24} className='text-white' />
               </div>
               <div className='flex flex-col'>

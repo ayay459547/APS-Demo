@@ -234,7 +234,7 @@ const DashboardContent = () => {
             </Button>
           </div>
           {/* Chart Container */}
-          <div className='flex-1 min-h-[280px] w-full relative'>
+          <div className='flex-1 min-h-70 w-full relative'>
             <div
               ref={chartRef}
               className='absolute inset-0 w-full h-full'
@@ -245,7 +245,7 @@ const DashboardContent = () => {
         {/* 右側 異常警報 */}
         <div className='flex flex-col gap-6'>
           <div className='relative bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex-1 overflow-hidden'>
-            <div className='absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-rose-500 to-red-600'></div>
+            <div className='absolute top-0 left-0 w-full h-1.5 bg-linear-to-r from-rose-500 to-red-600'></div>
 
             <div className='flex justify-between items-center mb-5 border-b border-slate-100 pb-4'>
               <h3 className='text-lg font-bold text-slate-800 flex items-center gap-2'>
@@ -306,7 +306,7 @@ const DashboardContent = () => {
               color='default'
               variant='filled'
               size='large'
-              className='mt-4 w-full !text-xs'
+              className='mt-4 w-full text-xs!'
             >
               前往警報中心處理
             </Button>

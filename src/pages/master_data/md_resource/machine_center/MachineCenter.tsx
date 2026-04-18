@@ -412,7 +412,7 @@ export default function EquipmentManager() {
               </div>
             </div>
           ) : (
-            <div className='flex flex-col items-center justify-center h-[120px] text-slate-400'>
+            <div className='flex flex-col items-center justify-center h-30 text-slate-400'>
               <PowerOff size={24} className='mb-2 opacity-50' />
               <span className='text-xs font-medium'>
                 機台閒置或保養中，無加工任務

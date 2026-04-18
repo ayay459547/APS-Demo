@@ -515,7 +515,7 @@ export default function ScenarioComparison() {
           </div>
 
           {/* AI 智能建議橫幅 (Smart Recommendation Banner) */}
-          <div className='bg-gradient-to-r from-indigo-500 via-purple-500 to-fuchsia-500 rounded-3xl p-[2px] shadow-xl shadow-indigo-200/50 mb-8 relative overflow-hidden group'>
+          <div className='bg-linear-to-r from-indigo-500 via-purple-500 to-fuchsia-500 rounded-3xl p-0.5 shadow-xl shadow-indigo-200/50 mb-8 relative overflow-hidden group'>
             <div className='absolute inset-0 bg-white/10 blur-xl group-hover:bg-white/20 transition-all duration-700' />
             <div className='bg-white/95 backdrop-blur-xl rounded-[22px] p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10'>
               <div className='flex items-center gap-4'>
@@ -526,7 +526,7 @@ export default function ScenarioComparison() {
                   />
                 </div>
                 <div className='flex flex-col'>
-                  <span className='font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 text-lg flex items-center gap-2 tracking-tight'>
+                  <span className='font-black text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-purple-600 text-lg flex items-center gap-2 tracking-tight'>
                     APS 智能決策引擎分析報告
                   </span>
                   <span className='text-sm font-bold text-slate-600 mt-1 leading-relaxed max-w-3xl'>
@@ -563,7 +563,7 @@ export default function ScenarioComparison() {
                     <div
                       className={cn(
                         'absolute top-0 inset-x-0 py-2 flex items-center justify-center gap-1.5 font-black text-xs text-white uppercase tracking-widest z-10',
-                        `bg-gradient-to-r from-${plan.badge.color}-500 to-${plan.badge.color}-400`
+                        `bg-linear-to-r from-${plan.badge.color}-500 to-${plan.badge.color}-400`
                       )}
                     >
                       {IconBadge && <IconBadge size={14} />}
@@ -583,7 +583,7 @@ export default function ScenarioComparison() {
 
                   <div
                     className={cn(
-                      'p-6 sm:p-8 flex-grow flex flex-col',
+                      'p-6 sm:p-8 grow flex flex-col',
                       plan.badge ? 'pt-14' : ''
                     )}
                   >
@@ -614,7 +614,7 @@ export default function ScenarioComparison() {
                           {plan.name}
                         </h2>
                       </div>
-                      <p className='text-xs font-bold text-slate-500 leading-relaxed m-0 min-h-[40px]'>
+                      <p className='text-xs font-bold text-slate-500 leading-relaxed m-0 min-h-10'>
                         {plan.description}
                       </p>
                     </div>
@@ -622,7 +622,7 @@ export default function ScenarioComparison() {
                     <Divider className='border-slate-100 my-0 mb-6' />
 
                     {/* KPIs Comparison */}
-                    <div className='flex flex-col flex-grow'>
+                    <div className='flex flex-col grow'>
                       <h3 className='text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4'>
                         效能指標預測 (KPI Projections)
                       </h3>

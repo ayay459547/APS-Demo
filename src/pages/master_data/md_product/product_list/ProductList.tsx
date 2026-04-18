@@ -440,13 +440,13 @@ export default function ProductList() {
       render: (text, record) => (
         <div className='flex flex-col py-1'>
           <span
-            className='font-bold text-slate-700 text-sm truncate max-w-[240px]'
+            className='font-bold text-slate-700 text-sm truncate max-w-60'
             title={text}
           >
             {text}
           </span>
           <span
-            className='text-[11px] font-medium text-slate-400 truncate max-w-[240px]'
+            className='text-[11px] font-medium text-slate-400 truncate max-w-60'
             title={record.specification}
           >
             {record.specification}

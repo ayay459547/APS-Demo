@@ -503,7 +503,7 @@ export default function WipTrackingView() {
               {record.woId}
             </span>
             <span
-              className='text-[10px] text-slate-400 truncate max-w-[180px]'
+              className='text-[10px] text-slate-400 truncate max-w-45'
               title={record.productName}
             >
               {record.partNumber} ({record.productName})
@@ -782,7 +782,7 @@ export default function WipTrackingView() {
             className='shadow-xl shadow-slate-200/50 border-none rounded-4xl overflow-hidden bg-transparent'
             styles={{ body: { padding: 0 } }}
           >
-            <div className='bg-white/80 p-5 border-b border-slate-100 flex items-center justify-between rounded-t-[32px]'>
+            <div className='bg-white/80 p-5 border-b border-slate-100 flex items-center justify-between rounded-t-4xl'>
               <div className='flex items-center gap-3 text-slate-500 text-[11px] font-black uppercase tracking-widest'>
                 <BoxSelect size={14} />
                 全廠在製品 (WIP) 即時定位清單
@@ -821,7 +821,7 @@ export default function WipTrackingView() {
             className='custom-hmi-modal top-6'
             width={900}
           >
-            <div className='flex flex-col h-[600px]'>
+            <div className='flex flex-col h-150'>
               <div className='flex items-center gap-3 text-slate-800 border-b border-slate-100 pb-4 mb-6'>
                 <div className='bg-indigo-600 p-2.5 rounded-xl shadow-md shadow-indigo-200'>
                   <PieChart size={24} className='text-white' />
@@ -843,7 +843,7 @@ export default function WipTrackingView() {
                     <Activity size={16} className='text-indigo-500' /> WIP
                     批次健康度
                   </h4>
-                  <div className='flex-1 relative w-full min-h-[300px]'>
+                  <div className='flex-1 relative w-full min-h-75'>
                     <ReactECharts option={statusChartOption} />
                   </div>
                 </div>
@@ -854,7 +854,7 @@ export default function WipTrackingView() {
                     <Layers size={16} className='text-indigo-500' />{' '}
                     站點積壓數量排行 (PCS)
                   </h4>
-                  <div className='flex-1 relative w-full min-h-[300px]'>
+                  <div className='flex-1 relative w-full min-h-75'>
                     <ReactECharts option={distributionChartOption} />
                   </div>
                 </div>
@@ -970,7 +970,7 @@ export default function WipTrackingView() {
                         生產履歷追溯 (Tracing)
                       </span>
 
-                      <div className='px-6 h-[250px] overflow-y-auto'>
+                      <div className='px-6 h-62.5 overflow-y-auto'>
                         <Steps
                           direction='vertical'
                           size='small'
@@ -978,7 +978,7 @@ export default function WipTrackingView() {
                           items={[
                             {
                               title: (
-                                <div className='flex items-center justify-between w-[450px]'>
+                                <div className='flex items-center justify-between w-112.5'>
                                   <span
                                     className={cn(
                                       'font-bold text-sm',
@@ -1041,7 +1041,7 @@ export default function WipTrackingView() {
                             },
                             {
                               title: (
-                                <div className='flex items-center justify-between w-[450px]'>
+                                <div className='flex items-center justify-between w-112.5'>
                                   <span className='font-bold text-sm text-slate-700'>
                                     前一站：SMT-LINE-01 (自動帶入)
                                   </span>
@@ -1070,7 +1070,7 @@ export default function WipTrackingView() {
                             },
                             {
                               title: (
-                                <div className='flex items-center justify-between w-[450px]'>
+                                <div className='flex items-center justify-between w-112.5'>
                                   <span className='font-bold text-sm text-slate-700'>
                                     發料入線 (Material Issued)
                                   </span>

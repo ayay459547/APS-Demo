@@ -446,7 +446,7 @@ export default function HRManager() {
         </div>
 
         {/* 右側：當前任務與班別 */}
-        <div className='w-[380px] bg-white border border-slate-200 p-4 rounded-xl shadow-sm'>
+        <div className='w-95 bg-white border border-slate-200 p-4 rounded-xl shadow-sm'>
           <div className='flex items-center justify-between border-b border-slate-100 pb-3 mb-3'>
             <div className='flex items-center gap-2'>
               <Briefcase size={16} className='text-blue-600' />
@@ -492,7 +492,7 @@ export default function HRManager() {
               </div>
             </div>
           ) : (
-            <div className='flex flex-col items-center justify-center h-[80px] text-slate-400'>
+            <div className='flex flex-col items-center justify-center h-20 text-slate-400'>
               <CalendarClock size={24} className='mb-2 opacity-50' />
               <span className='text-xs font-medium'>當前無排定班別或任務</span>
             </div>
@@ -593,7 +593,7 @@ export default function HRManager() {
         return (
           <div
             className={cn(
-              'inline-flex items-center justify-center px-2 py-1 rounded-md text-[11px] font-bold border w-[60px]',
+              'inline-flex items-center justify-center px-2 py-1 rounded-md text-[11px] font-bold border w-15',
               bgClass,
               colorClass
             )}

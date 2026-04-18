@@ -727,7 +727,7 @@ export default function DataAnalyticsDashboard() {
                   每小時自動快照
                 </Tag>
               </div>
-              <div className='w-full h-[320px]'>
+              <div className='w-full h-80'>
                 <ReactECharts option={oeeChartOption} />
               </div>
             </Card>
@@ -747,7 +747,7 @@ export default function DataAnalyticsDashboard() {
                   </h3>
                 </div>
               </div>
-              <div className='w-full h-[320px]'>
+              <div className='w-full h-80'>
                 <ReactECharts option={outputChartOption} />
               </div>
             </Card>
@@ -770,14 +770,14 @@ export default function DataAnalyticsDashboard() {
                   前兩大異常佔整體損失 69%
                 </div>
               </div>
-              <div className='w-full h-[320px]'>
+              <div className='w-full h-80'>
                 <ReactECharts option={defectChartOption} />
               </div>
             </Card>
 
             {/* 異常機台關注清單 (佔 1 欄的縮略版本，引導至下方完整表格) */}
             <Card
-              className='col-span-1 rounded-3xl border-none shadow-md bg-gradient-to-b from-rose-50 to-white hover:shadow-lg transition-shadow'
+              className='col-span-1 rounded-3xl border-none shadow-md bg-linear-to-b from-rose-50 to-white hover:shadow-lg transition-shadow'
               styles={{
                 body: {
                   padding: '24px',
@@ -812,7 +812,7 @@ export default function DataAnalyticsDashboard() {
                         <span className='font-bold text-slate-700'>
                           {machine.workCenter}
                         </span>
-                        <span className='text-[10px] text-rose-500 font-bold truncate max-w-[120px]'>
+                        <span className='text-[10px] text-rose-500 font-bold truncate max-w-30'>
                           {machine.primaryIssue}
                         </span>
                       </div>

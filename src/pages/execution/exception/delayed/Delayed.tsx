@@ -383,7 +383,7 @@ export default function DelayWarningCenter() {
                 {record.woId}
               </span>
               <span
-                className='text-[10px] text-slate-400 truncate max-w-[120px]'
+                className='text-[10px] text-slate-400 truncate max-w-30'
                 title={record.id}
               >
                 {record.id}
@@ -708,7 +708,7 @@ export default function DelayWarningCenter() {
             mask={{ closable: !resolving }}
           >
             <div className='flex items-center gap-3 text-slate-800 border-b border-slate-100 pb-4 mb-4 mt-2'>
-              <div className='bg-gradient-to-r from-blue-600 to-indigo-600 p-2.5 rounded-xl shadow-md shadow-blue-200'>
+              <div className='bg-linear-to-r from-blue-600 to-indigo-600 p-2.5 rounded-xl shadow-md shadow-blue-200'>
                 <BrainCircuit size={24} className='text-white' />
               </div>
               <div className='flex flex-col'>

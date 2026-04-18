@@ -456,7 +456,7 @@ const WorkOrderMerge: React.FC = () => {
               onClick={handleExecuteMerge}
               icon={<Save size={14} />}
               className={cn(
-                '!rounded-lg  !hover:!bg-emerald-500 !border-none !h-8 !px-6 !font-bold shadow-md hover:shadow-lg transition-all !text-xs',
+                'rounded-lg!  !hover:!bg-emerald-500 !border-none !h-8 !px-6 !font-bold shadow-md hover:shadow-lg transition-all !text-xs',
                 selectedOrders.length < 2 || loading
                   ? '!bg-slate-200 !text-slate-400'
                   : '!bg-emerald-600'
@@ -564,7 +564,7 @@ const WorkOrderMerge: React.FC = () => {
                 </div>
 
                 {/* 合併後的目標工單 (一方) - 微調尺寸 */}
-                <div className='w-full xl:w-[380px] shrink-0 xl:sticky xl:top-24'>
+                <div className='w-full xl:w-95 shrink-0 xl:sticky xl:top-24'>
                   <Card
                     className='rounded-4xl border-none shadow-2xl bg-slate-900 text-white overflow-hidden relative group'
                     styles={{ body: { padding: '32px' } }}

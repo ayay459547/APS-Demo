@@ -186,7 +186,7 @@ const VisualOrderRush: React.FC = () => {
                       : 'bg-slate-50 border-slate-100 text-slate-500 hover:bg-blue-50 hover:border-blue-200'
                 )}
               >
-                <span className='truncate max-w-[60px]'>{item.customer}</span>
+                <span className='truncate max-w-15'>{item.customer}</span>
                 {item.isRush && (
                   <div className='w-1.5 h-1.5 bg-amber-500 rounded-full' />
                 )}

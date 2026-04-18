@@ -666,7 +666,7 @@ export default function GanttChart() {
               { label: '製程分佈 (加工製程 → 機台)', value: 'PROCESS' },
               { label: '工單追蹤 (生產工單 → 製程)', value: 'WORK_ORDER' }
             ]}
-            className='w-full sm:w-[240px]'
+            className='w-full sm:w-60'
           />
           <div className='hidden sm:block h-6 w-px bg-slate-200 mx-1'></div>
           <Input
@@ -675,7 +675,7 @@ export default function GanttChart() {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             allowClear
-            className='w-full sm:w-[260px] rounded-lg'
+            className='w-full sm:w-65 rounded-lg'
           />
         </div>
 
@@ -783,7 +783,7 @@ export default function GanttChart() {
 
               {/* Grid Background */}
               <div
-                className='absolute top-[60px] bottom-0 z-0'
+                className='absolute top-15 bottom-0 z-0'
                 style={{
                   left: sidebarWidth,
                   width: totalTimeWidth,
@@ -793,7 +793,7 @@ export default function GanttChart() {
 
               {/* Virtualized Rows Container */}
               <div
-                className='absolute left-0 right-0 top-[60px] z-10'
+                className='absolute left-0 right-0 top-15 z-10'
                 style={{ height: totalContentHeight }}
               >
                 {visibleRows.length === 0 ? (
@@ -935,7 +935,7 @@ export default function GanttChart() {
                                       : task.subOrderId}
                                   </span>
                                 </div>
-                                <div className='truncate text-[9px] opacity-90 mt-[1px] tracking-tight font-mono'>
+                                <div className='truncate text-[9px] opacity-90 mt-px tracking-tight font-mono'>
                                   {formatTime(task.startTime)} -{' '}
                                   {formatTime(task.endTime)}
                                 </div>
@@ -962,7 +962,7 @@ export default function GanttChart() {
       {/* --- Global Tooltip --- */}
       {tooltip.visible && tooltip.data && (
         <div
-          className={`fixed z-50 bg-slate-900 text-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] border border-slate-700 p-4 sm:p-5 w-[300px] sm:w-[340px] pointer-events-none transform -translate-x-1/2 transition-opacity duration-150 ${tooltip.isTop ? '-translate-y-full' : 'translate-y-0'}`}
+          className={`fixed z-50 bg-slate-900 text-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] border border-slate-700 p-4 sm:p-5 w-75 sm:w-85 pointer-events-none transform -translate-x-1/2 transition-opacity duration-150 ${tooltip.isTop ? '-translate-y-full' : 'translate-y-0'}`}
           style={{
             left: tooltip.x,
             top: tooltip.y,
@@ -1083,8 +1083,8 @@ export default function GanttChart() {
           <div
             className={`absolute left-1/2 -translate-x-1/2 w-4 h-4 bg-slate-900 border-slate-700 transform rotate-45 ${
               tooltip.isTop
-                ? 'bottom-[-9px] border-b border-r'
-                : 'top-[-9px] border-t border-l'
+                ? 'bottom-2.25 border-b border-r'
+                : 'top-2.25 border-t border-l'
             }`}
           ></div>
         </div>

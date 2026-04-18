@@ -29,7 +29,7 @@ const LineVisionCard: React.FC<{ data: LineData }> = ({ data }) => {
   return (
     <Card
       className={cn(
-        'h-full transition-all duration-500 shadow-sm !rounded-3xl !border-l-[16px] overflow-hidden relative',
+        'h-full transition-all duration-500 shadow-sm rounded-3xl! border-l-16! overflow-hidden relative',
         data.status === 'ALARM' && 'border-y-rose-200 border-r-rose-200',
         cfg.border
       )}
@@ -58,7 +58,7 @@ const LineVisionCard: React.FC<{ data: LineData }> = ({ data }) => {
             </h2>
           </div>
 
-          <div className='flex items-center gap-2 mt-2 bg-slate-50 p-1.5 rounded-lg border border-slate-100 inline-flex w-full max-w-full overflow-hidden'>
+          <div className='flex items-center gap-2 mt-2 bg-slate-50 p-1.5 rounded-lg border border-slate-100 w-full max-w-full overflow-hidden'>
             <span className='text-indigo-600 font-mono text-xs font-bold uppercase shrink-0 bg-indigo-50 px-1.5 py-0.5 rounded'>
               {data.currentOrder}
             </span>
@@ -93,7 +93,7 @@ const LineVisionCard: React.FC<{ data: LineData }> = ({ data }) => {
       {data.alertMsg && (
         <div
           className={cn(
-            'px-3 py-2 !rounded-lg flex items-start gap-2 text-xs font-bold border relative z-10',
+            'px-3 py-2 rounded-lg! flex items-start gap-2 text-xs font-bold border relative z-10',
             data.status === 'ALARM'
               ? 'bg-rose-50 text-rose-700 border-rose-200'
               : 'bg-amber-50 text-amber-700 border-amber-200'
@@ -107,7 +107,7 @@ const LineVisionCard: React.FC<{ data: LineData }> = ({ data }) => {
       {/* 第二層：核心數據區 (四宮格) */}
       <div className='grid grid-cols-2 gap-3 relative z-10'>
         {/* 進度 */}
-        <div className='p-3.5 rounded-[16px] border bg-slate-50/50 border-slate-200 flex flex-col justify-center'>
+        <div className='p-3.5 rounded-2xl border bg-slate-50/50 border-slate-200 flex flex-col justify-center'>
           <span className='text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1'>
             <Activity size={12} /> 進度 (Act/Tgt)
           </span>
@@ -135,7 +135,7 @@ const LineVisionCard: React.FC<{ data: LineData }> = ({ data }) => {
         </div>
 
         {/* OEE */}
-        <div className='p-3.5 rounded-[16px] border bg-slate-50/50 border-slate-200 flex flex-col justify-center'>
+        <div className='p-3.5 rounded-2xl border bg-slate-50/50 border-slate-200 flex flex-col justify-center'>
           <span className='text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1'>
             <Timer size={12} /> 綜合效率 OEE
           </span>
@@ -204,7 +204,7 @@ const LineVisionCard: React.FC<{ data: LineData }> = ({ data }) => {
             </span>
           </div>
           <div
-            className='flex items-center gap-1 text-slate-400 max-w-[120px] truncate'
+            className='flex items-center gap-1 text-slate-400 max-w-30 truncate'
             title={data.nextOrder}
           >
             <ArrowRightCircle size={12} className='text-indigo-400 shrink-0' />

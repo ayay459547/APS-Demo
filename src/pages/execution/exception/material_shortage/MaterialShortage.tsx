@@ -705,7 +705,7 @@ export default function App() {
 
           {/* --- 已斷料停線 警告橫幅 (Sticky Banner) --- */}
           {activeShortages.length > 0 && (
-            <div className='bg-gradient-to-r from-rose-500 to-red-600 rounded-2xl p-[1.5px] shadow-lg shadow-rose-200/50 animate-fade-in -mt-2 relative z-10 overflow-hidden group'>
+            <div className='bg-linear-to-r from-rose-500 to-red-600 rounded-2xl p-[1.5px] shadow-lg shadow-rose-200/50 animate-fade-in -mt-2 relative z-10 overflow-hidden group'>
               <div className='absolute inset-0 bg-white/20 blur-md group-hover:bg-white/30 transition-all duration-500'></div>
               <div className='bg-white/95 backdrop-blur-md rounded-[14px] p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-20'>
                 <div className='flex items-center gap-3'>

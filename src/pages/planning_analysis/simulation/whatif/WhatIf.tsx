@@ -783,7 +783,7 @@ export default function App() {
                 <>
                   {/* 面板 1：動態變數配置台 */}
                   <div className='bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden relative'>
-                    <div className='h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 w-full' />
+                    <div className='h-1.5 bg-linear-to-r from-indigo-500 via-purple-500 to-cyan-400 w-full' />
 
                     <div className='p-6 sm:p-8'>
                       <div className='flex flex-wrap items-start justify-between gap-4 mb-6'>
@@ -914,7 +914,7 @@ export default function App() {
                                 >
                                   <IconComp size={18} />
                                 </div>
-                                <div className='flex flex-col flex-grow pr-6'>
+                                <div className='flex flex-col grow pr-6'>
                                   <div className='flex items-center gap-2 mb-1'>
                                     <span
                                       className={cn(
@@ -1007,7 +1007,7 @@ export default function App() {
                         className='shadow-sm border border-slate-200/80 rounded-3xl overflow-hidden bg-white'
                         styles={{ body: { padding: 0 } }}
                       >
-                        <div className='bg-gradient-to-r from-rose-50 to-white p-5 border-b border-rose-100/50 flex items-center justify-between'>
+                        <div className='bg-linear-to-r from-rose-50 to-white p-5 border-b border-rose-100/50 flex items-center justify-between'>
                           <div className='flex items-center gap-2.5 text-rose-600 text-sm font-black tracking-wide'>
                             <div className='bg-rose-100 p-1.5 rounded-lg'>
                               <CalendarDays size={18} />

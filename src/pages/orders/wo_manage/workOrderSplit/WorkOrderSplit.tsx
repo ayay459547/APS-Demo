@@ -463,7 +463,7 @@ const WorkOrderSplit: React.FC = () => {
                   type='primary'
                   size='small'
                   icon={<Sparkles size={14} />}
-                  className='!rounded-lg !h-8 !w-8 flex items-center justify-center shadow-none bg-violet-100 text-violet-600 hover:!bg-violet-200 border-none'
+                  className='rounded-lg! !h-8 !w-8 flex items-center justify-center shadow-none bg-violet-100 text-violet-600 hover:!bg-violet-200 border-none'
                 />
               </Popover>
 
@@ -492,7 +492,7 @@ const WorkOrderSplit: React.FC = () => {
                 onClick={handleExecuteSplit}
                 icon={<Save size={14} />}
                 className={cn(
-                  '!rounded-lg !hover:!bg-violet-500 !border-none !h-8 !px-5 !font-bold shadow-md hover:shadow-lg transition-all !text-xs disabled:shadow-none',
+                  'rounded-lg! !hover:!bg-violet-500 !border-none !h-8 !px-5 !font-bold shadow-md hover:shadow-lg transition-all !text-xs disabled:shadow-none',
                   subOrders.length === 0 || loading
                     ? '!bg-slate-300 !text-slate-500'
                     : '!bg-violet-600'

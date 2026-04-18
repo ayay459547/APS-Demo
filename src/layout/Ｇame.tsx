@@ -335,7 +335,7 @@ const DinoGame: React.FC<{
           </Text>
           <Title
             level={2}
-            className='!m-0 !font-black !tracking-tighter !text-slate-800 uppercase'
+            className='m-0! font-black! tracking-tighter! text-slate-800! uppercase'
           >
             Dino Core <span className='text-blue-600'>Engine</span>
           </Title>
@@ -354,7 +354,7 @@ const DinoGame: React.FC<{
       </div>
 
       {/* 畫布區域 */}
-      <Card className='relative border-none shadow-2xl shadow-blue-200/20 rounded-[40px] overflow-hidden bg-white aspect-[8/3] w-full'>
+      <Card className='relative border-none shadow-2xl shadow-blue-200/20 rounded-[40px] overflow-hidden bg-white aspect-8/3 w-full'>
         <canvas
           ref={canvasRef}
           width={CANVAS_WIDTH}
@@ -367,7 +367,7 @@ const DinoGame: React.FC<{
               type='primary'
               size='large'
               className={cn(
-                '!w-16 !h-16 rounded-2xl flex items-center justify-center mb-4 shadow-lg transition-colors',
+                'w-16! h-16! rounded-2xl flex items-center justify-center mb-4 shadow-lg transition-colors',
                 gameState === 'START' ? 'bg-blue-600' : 'bg-slate-800'
               )}
               onClick={() => setGameState('PLAYING')}
@@ -380,7 +380,7 @@ const DinoGame: React.FC<{
             </Button>
             <Title
               level={3}
-              className='!m-0 !font-black !tracking-tighter uppercase'
+              className='m-0! font-black! tracking-tighter! uppercase'
             >
               {gameState === 'START' ? 'System Ready' : 'Game Over'}
             </Title>
@@ -389,7 +389,7 @@ const DinoGame: React.FC<{
       </Card>
 
       {/* 底部數據面板 */}
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-4 min-h-[160px]'>
+      <div className='grid grid-cols-1 md:grid-cols-3 gap-4 min-h-40'>
         <Card
           size='small'
           className='rounded-2xl border-none shadow-sm bg-slate-50/80'
@@ -551,7 +551,7 @@ export default function Game() {
         }
       }}
     >
-      <div className='flex items-center justify-center p-6 bg-slate-50/50 min-h-[60px]'>
+      <div className='flex items-center justify-center p-6 bg-slate-50/50 min-h-15'>
         {/* 只有一個低調的 Copyright 按鈕 */}
         <Button
           type='text'

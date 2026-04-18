@@ -893,7 +893,7 @@ export default function ChangeoverManagement() {
                 </div>
               </div>
               {/* 背景裝飾 */}
-              <div className='absolute right-0 top-0 h-full w-1/2 bg-gradient-to-l from-blue-100/50 to-transparent z-0 pointer-events-none'></div>
+              <div className='absolute right-0 top-0 h-full w-1/2 bg-linear-to-l from-blue-100/50 to-transparent z-0 pointer-events-none'></div>
             </div>
 
             {/* HMI 操作按鈕區 */}
