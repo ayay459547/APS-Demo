@@ -862,9 +862,7 @@ export default function WorkOrderList() {
               </div>
               <div className='flex gap-4 flex-wrap'>
                 <p className='text-xs sm:text-sm font-bold text-slate-500 mt-1 m-0'>
-                  即時監控工單進度與良率，並進行{' '}
-                  <span className='text-indigo-500 mx-1'>分派、暫停、結案</span>{' '}
-                  等現場操作。
+                  生產現場工單執行管理
                 </p>
                 <Popover
                   content={statsContent}

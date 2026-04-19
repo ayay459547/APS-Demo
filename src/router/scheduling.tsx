@@ -4,6 +4,7 @@ import type { MenuItem } from './constants.tsx'
 import {
   Scheduling,
   SchedulingTask,
+  SchedulingRun,
   SchedulingSet,
   SchedulingRes
 } from './scheduling.lazy.ts'
@@ -19,7 +20,7 @@ export const schedulingMenuItem: MenuItem = {
       label: '排程作業執行',
       element: <SchedulingTask />,
       children: [
-        { id: 'sch_run', label: '執行生產排程' },
+        { id: 'sch_run', label: '執行生產排程', element: <SchedulingRun /> },
         { id: 'sch_gantt', label: '交互式甘特圖' },
         { id: 'sch_ai', label: 'AI 智能排程' }
       ]
