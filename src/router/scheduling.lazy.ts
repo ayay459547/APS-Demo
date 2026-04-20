@@ -13,6 +13,9 @@ export const SchedulingTask = lazy(
 export const SchedulingRun = lazy(
   () => import('@/pages/scheduling/sch_task/sch_run/SchedulingRun.tsx')
 )
+export const SchedulingGantt = lazy(
+  () => import('@/pages/scheduling/sch_task/sch_gantt/SchedulingGantt.tsx')
+)
 
 /**
  * 邏輯運算配置
