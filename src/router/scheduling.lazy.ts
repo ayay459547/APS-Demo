@@ -10,11 +10,15 @@ export const Scheduling = lazy(
 export const SchedulingTask = lazy(
   () => import('@/pages/scheduling/sch_task/SchedulingTask.tsx')
 )
+
 export const SchedulingRun = lazy(
   () => import('@/pages/scheduling/sch_task/sch_run/SchedulingRun.tsx')
 )
 export const SchedulingGantt = lazy(
   () => import('@/pages/scheduling/sch_task/sch_gantt/SchedulingGantt.tsx')
+)
+export const SchedulingAI = lazy(
+  () => import('@/pages/scheduling/sch_task/sch_ai/SchedulingAI.tsx')
 )
 
 /**

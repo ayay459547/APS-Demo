@@ -6,6 +6,7 @@ import {
   SchedulingTask,
   SchedulingRun,
   SchedulingGantt,
+  SchedulingAI,
   SchedulingSet,
   SchedulingRes
 } from './scheduling.lazy.ts'
@@ -27,7 +28,7 @@ export const schedulingMenuItem: MenuItem = {
           label: '交互式甘特圖',
           element: <SchedulingGantt />
         },
-        { id: 'sch_ai', label: 'AI 智能排程' }
+        { id: 'sch_ai', label: 'AI 智能排程', element: <SchedulingAI /> }
       ]
     },
     {
