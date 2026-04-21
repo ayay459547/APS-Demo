@@ -1290,7 +1290,7 @@ export default function App() {
         }
       }}
     >
-      <div className='w-full h-screen bg-[#f8fafc] flex flex-col overflow-hidden text-slate-800 p-3 sm:p-5 gap-3 sm:gap-4 relative'>
+      <div className='w-full h-full bg-[#f8fafc] flex flex-col overflow-hidden text-slate-800 p-3 sm:p-5 gap-3 sm:gap-4 relative'>
         {/* --- 懸浮頂層指揮塔 --- */}
         <header className='h-[72px] bg-white border border-slate-200 rounded-2xl px-6 flex items-center justify-between shrink-0 z-[60] shadow-sm'>
           <div className='flex items-center gap-8'>
@@ -1300,10 +1300,10 @@ export default function App() {
               </div>
               <div>
                 <h1 className='text-xl font-black tracking-tight text-slate-800 m-0 flex items-center gap-2'>
-                  APS Elite{' '}
                   <span className='text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600'>
-                    先進排程系統
+                    AI{' '}
                   </span>
+                  先進排程系統
                 </h1>
                 <p className='text-[10px] font-black text-slate-400 mt-0.5 uppercase tracking-widest'>
                   Smart Manufacturing Center
