@@ -28,9 +28,23 @@ export const SchedulingSet = lazy(
   () => import('@/pages/scheduling/sch_set/SchedulingSet.tsx')
 )
 
+export const SchedulingRules = lazy(
+  () => import('@/pages/scheduling/sch_set/sch_rules/SchedulingRules.tsx')
+)
+export const SchedulingParams = lazy(
+  () => import('@/pages/scheduling/sch_set/sch_params/SchedulingParams.tsx')
+)
+
 /**
  * 排程決斷中心
  */
 export const SchedulingRes = lazy(
   () => import('@/pages/scheduling/sch_res/SchedulingRes.tsx')
+)
+
+export const ResAnalysis = lazy(
+  () => import('@/pages/scheduling/sch_res/res_analysis/ResAnalysis.tsx')
+)
+export const ResHistory = lazy(
+  () => import('@/pages/scheduling/sch_res/res_history/ResHistory.tsx')
 )

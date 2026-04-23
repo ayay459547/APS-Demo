@@ -8,7 +8,11 @@ import {
   SchedulingGantt,
   SchedulingAI,
   SchedulingSet,
-  SchedulingRes
+  SchedulingRules,
+  SchedulingParams,
+  SchedulingRes,
+  ResAnalysis,
+  ResHistory
 } from './scheduling.lazy.ts'
 
 export const schedulingMenuItem: MenuItem = {
@@ -36,8 +40,16 @@ export const schedulingMenuItem: MenuItem = {
       label: '邏輯運算配置',
       element: <SchedulingSet />,
       children: [
-        { id: 'sch_rules', label: '排程規則定義' },
-        { id: 'sch_params', label: '生產參數配置' }
+        {
+          id: 'sch_rules',
+          label: '排程規則定義',
+          element: <SchedulingRules />
+        },
+        {
+          id: 'sch_params',
+          label: '生產參數配置',
+          element: <SchedulingParams />
+        }
       ]
     },
     {
@@ -45,8 +57,8 @@ export const schedulingMenuItem: MenuItem = {
       label: '排程決斷中心',
       element: <SchedulingRes />,
       children: [
-        { id: 'res_list', label: '排程結果分析' },
-        { id: 'res_ver', label: '多版本對比' }
+        { id: 'res_analysis', label: '排程結果分析', element: <ResAnalysis /> },
+        { id: 'res_history', label: '歷史排程分析', element: <ResHistory /> }
       ]
     }
   ]

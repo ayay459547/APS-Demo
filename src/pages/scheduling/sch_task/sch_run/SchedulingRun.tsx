@@ -68,7 +68,7 @@ interface TaskRow {
   priority: PriorityType
 }
 
-// --- 500筆巨量數據生成器 ---
+// --- 巨量數據生成器 ---
 const BASE_DATE = dayjs('2026-04-21 08:00')
 
 const CUSTOMERS = [
@@ -614,7 +614,7 @@ export default function ProductionTimeline() {
                   ? '演算法推演中...'
                   : isCalculated
                     ? '已生成時間派工表'
-                    : '執行智能排程 (500筆)'}
+                    : '執行智能排程'}
               </Button>
             </div>
           </div>
@@ -631,7 +631,7 @@ export default function ProductionTimeline() {
                   排程演算法執行中...
                 </h2>
                 <p className='text-xs font-bold text-slate-400 text-center mb-6'>
-                  正在為 500 筆工單分配最佳機台時間
+                  正在為工單分配最佳機台時間
                   <br />
                   並轉換為由上而下之時間序派工表。
                 </p>

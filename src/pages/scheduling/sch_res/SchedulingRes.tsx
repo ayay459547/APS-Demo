@@ -27,9 +27,9 @@ const SchedulingRes: React.FC = () => {
         <Row gutter={[24, 24]}>
           <Col xs={24} md={12}>
             <FeatureCard
-              id='res_list'
-              label={COMPONENT_MAP['res_list'].label}
-              to={COMPONENT_MAP['res_list'].url}
+              id='res_analysis'
+              label={COMPONENT_MAP['res_analysis'].label}
+              to={COMPONENT_MAP['res_analysis'].url}
               icon={FileSearch}
               description='量化排程績效，包含交期達成率預估與機台閒置分析報告。'
               tag='Insights'
@@ -38,9 +38,9 @@ const SchedulingRes: React.FC = () => {
           </Col>
           <Col xs={24} md={12}>
             <FeatureCard
-              id='res_ver'
-              label={COMPONENT_MAP['res_ver'].label}
-              to={COMPONENT_MAP['res_ver'].url}
+              id='res_history'
+              label={COMPONENT_MAP['res_history'].label}
+              to={COMPONENT_MAP['res_history'].url}
               icon={CopyCheck}
               description='保存多個排程情境，對比不同策略對產線造成的衝擊與成本變化。'
               tag='Versioning'
